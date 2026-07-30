@@ -22,7 +22,7 @@ CREATE TABLE activities (
 
 CREATE TABLE sleep (
     sleep_id INTEGER PRIMARY_KEY AUTOINCREMENT,
-    sleep_start_time TEXT --unix timestamp
-    sleep_end_time TEXT --unix timestamp
+    sleep_start_time TEXT NOT NULL --unix timestamp
+    sleep_end_time TEXT NOT NULL --unix timestamp
     mood INTEGER CHECK(mood BETWEEN 1 AND 10)
 );
