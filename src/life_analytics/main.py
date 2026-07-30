@@ -1,5 +1,8 @@
+from life_analytics.cli import app
+
+
 def main():
-    print("Hello from life-analytics!")
+    app()
 
 
 if __name__ == "__main__":
