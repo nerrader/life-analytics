@@ -33,12 +33,13 @@ def show_stats():
 def clear_all_data(
     skip_confirm: Annotated[
         bool, typer.Option("--skip", "-s", help="Skips the confirmation prompt.")
-    ],
+    ]
+    | None,
 ):
 
     clear_data_confirm = questionary.confirm(
         "Are you sure you want to clear all data from the database?"
-    ).skip_if(skip_confirm, True)
+    ).skip_if(skip_confirm == True, default=True)
 
     if clear_data_confirm:
         database.clear_database(const.LIFE_DATABASE_FILEPATH)
