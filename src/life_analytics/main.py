@@ -1,7 +1,7 @@
 from life_analytics.cli import app
 
 
-def main():
+def main() -> None:
     app()
 
 
