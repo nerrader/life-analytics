@@ -32,9 +32,8 @@ def show_stats() -> None:
 @app.command("clear")
 def clear_all_data(
     skip_confirm: Annotated[
-        bool, typer.Option("--skip", "-s", help="Skips the confirmation prompt.")
-    ]
-    | None,
+        bool | None, typer.Option("--skip", "-s", help="Skips the confirmation prompt.")
+    ] = None,
 ) -> None:
 
     clear_data_confirm = questionary.confirm(
