@@ -1,7 +1,5 @@
 CREATE TABLE IF NOT EXISTS daily_summaries (
     date TEXT PRIMARY KEY, --unix timestamp
-    outside_for_leisure_minutes INTEGER NOT NULL,
-    exercise_minutes INTEGER NOT NULL,
     mood INTEGER NOT NULL CHECK(mood BETWEEN 1 AND 10),
     productivity INTEGER NOT NULL CHECK(productivity BETWEEN 1 AND 10),
     stress INTEGER NOT NULL CHECK(stress BETWEEN 1 AND 10)

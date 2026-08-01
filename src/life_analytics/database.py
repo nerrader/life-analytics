@@ -28,8 +28,6 @@ def clear_database(database_path: Path) -> None:
 def add_daily_summary(
     database_path: Path,
     date: str,
-    outside_for_leisure_minutes: int,
-    exercise_minutes: int,
     mood: Rating,
     productivity: Rating,
     stress: Rating,
@@ -39,16 +37,12 @@ def add_daily_summary(
             """
 INSERT INTO daily_summaries 
     (date,
-    outside_for_leisure_minutes,
-    exercise_minutes,
     mood,
     productivity,
     stress) 
-    VALUES (?, ?, ?, ?, ?, ?)""",
+    VALUES (?, ?, ?, ?)""",
             (
                 date,
-                outside_for_leisure_minutes,
-                exercise_minutes,
                 mood,
                 productivity,
                 stress,
