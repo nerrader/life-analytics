@@ -48,3 +48,34 @@ INSERT INTO daily_summaries
                 stress,
             ),
         )
+
+
+def add_activity(
+    database_path: Path,
+    date: str,
+    activity: str,
+    activity_start: str,
+    activity_end: str,
+    difficulty: Rating,
+    enjoyability: Rating,
+) -> None:
+    with sqlite3.connect(database_path) as connection:
+        connection.execute(
+            """
+INSERT INTO activities 
+    (date,
+    activity,
+    activity_start,
+    activity_end,
+    difficulty,
+    enjoyability) 
+    VALUES (?, ?, ?, ?, ?, ?)""",
+            (
+                date,
+                activity,
+                activity_start,
+                activity_end,
+                difficulty,
+                enjoyability,
+            ),
+        )

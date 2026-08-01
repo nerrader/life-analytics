@@ -10,11 +10,11 @@ from life_analytics import database
 app = typer.Typer()
 
 
-def _get_current_datetime_isostring() -> str:
-    return datetime.now().isoformat()  # noqa: DTZ005
+def _get_current_date_isostring() -> str:
+    return datetime.now().date().isoformat()  # noqa: DTZ005
 
 
-def ask_rating_question(var_name: str) -> const.Rating:
+def _ask_rating_question(var_name: str) -> const.Rating:
     def validate_rating(value: str) -> bool | str:
         if value.isdigit() and 1 <= int(value) <= 10:
             return True
@@ -28,14 +28,22 @@ def ask_rating_question(var_name: str) -> const.Rating:
     return rating
 
 
+def _validate_datetime(value: str) -> bool | str:
+    try:
+        datetime.strptime(value, "%H:%M")  # noqa: DTZ007
+        return True
+    except ValueError:
+        return "Please enter a valid time in HH:MM format."
+
+
 @app.command("summary")
 def add_daily_summary() -> None:
     """Prompts for data, then inserts the daily summary in the database."""
-    date = _get_current_datetime_isostring()
+    date = _get_current_date_isostring()
 
-    mood = ask_rating_question("mood")
-    productivity = ask_rating_question("productivity")
-    stress = ask_rating_question("stress")
+    mood = _ask_rating_question("mood")
+    productivity = _ask_rating_question("productivity")
+    stress = _ask_rating_question("stress")
 
     database.add_daily_summary(
         const.LIFE_DATABASE_FILEPATH,
@@ -48,7 +56,37 @@ def add_daily_summary() -> None:
 
 @app.command("activity")
 def add_activity() -> None:
-    pass
+    date = _get_current_date_isostring()
+
+    activity = questionary.text(
+        "What activity did you do today?",
+        validate=lambda text: (
+            True if text.strip() else "Please enter a valid activity."
+        ),
+    ).ask()
+
+    activity_start = questionary.text(
+        "What time did you start the activity? (HH:MM, 24-hour format)",
+        validate=_validate_datetime,
+    ).ask()
+
+    activity_end = questionary.text(
+        "What time did you end the activity? (HH:MM, 24-hour format)",
+        validate=_validate_datetime,
+    ).ask()
+
+    difficulty = _ask_rating_question("difficulty")
+    enjoyability = _ask_rating_question("enjoyability")
+
+    database.add_activity(
+        const.LIFE_DATABASE_FILEPATH,
+        date,
+        activity,
+        activity_start,
+        activity_end,
+        difficulty,
+        enjoyability,
+    )
 
 
 @app.command("sleep")
