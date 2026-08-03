@@ -79,3 +79,25 @@ INSERT INTO activities
                 enjoyability,
             ),
         )
+
+
+def add_sleep(
+    database_path: Path,
+    sleep_start_datetime: str,
+    sleep_end_datetime: str,
+    sleep_quality: Rating,
+) -> None:
+    with sqlite3.connect(database_path) as connection:
+        connection.execute(
+            """
+INSERT INTO sleep 
+    (sleep_start_time,
+    sleep_end_time,
+    sleep_quality) 
+    VALUES (?, ?, ?)""",
+            (
+                sleep_start_datetime,
+                sleep_end_datetime,
+                sleep_quality,
+            ),
+        )

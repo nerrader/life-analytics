@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, time, timedelta
 from typing import Annotated
 
 import questionary
@@ -87,7 +87,43 @@ def add_activity() -> None:
 
 @app.command("sleep")
 def add_sleep() -> None:
-    pass
+    today_date = datetime.now()  # noqa: DTZ005
+    yesterday_date = today_date - timedelta(days=1)
+
+    start_sleep_time: time = datetime.strptime(  # noqa: DTZ007
+        questionary.text(
+            "What time did you go to sleep yesterday? (HH:MM, 24-hour format)",
+            validate=_validate_datetime,
+        ).ask(),
+        "%H:%M",
+    ).time()
+
+    start_sleep_datetime = yesterday_date.replace(
+        hour=start_sleep_time.hour,
+        minute=start_sleep_time.minute,
+    ).isoformat(timespec="minutes")
+
+    end_sleep_time: time = datetime.strptime(  # noqa: DTZ007
+        questionary.text(
+            "What time did you wake up today? (HH:MM, 24-hour format)",
+            validate=_validate_datetime,
+        ).ask(),
+        "%H:%M",
+    ).time()
+
+    end_sleep_datetime: str = today_date.replace(
+        hour=end_sleep_time.hour,
+        minute=end_sleep_time.minute,
+    ).isoformat(timespec="minutes")
+
+    sleep_quality = _ask_rating_question("sleep_quality")
+
+    database.add_sleep(
+        const.LIFE_DATABASE_FILEPATH,
+        start_sleep_datetime,
+        end_sleep_datetime,
+        sleep_quality,
+    )
 
 
 @app.command("stats")
