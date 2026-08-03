@@ -102,9 +102,13 @@ def clear_all_data(
     ] = None,
 ) -> None:
 
-    clear_data_confirm = questionary.confirm(
-        "Are you sure you want to clear all data from the database?"
-    ).skip_if(skip_confirm == True, default=True)
+    clear_data_confirm = (
+        questionary.confirm(
+            "Are you sure you want to clear all data from the database?"
+        )
+        .skip_if(skip_confirm is True, default=True)
+        .ask()
+    )
 
     if clear_data_confirm:
         database.clear_database(const.LIFE_DATABASE_FILEPATH)
