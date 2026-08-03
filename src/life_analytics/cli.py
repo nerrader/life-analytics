@@ -33,13 +33,29 @@ def _validate_datetime(value: str) -> bool | str:
 
 
 @app.command("summary")
-def add_daily_summary() -> None:
+def add_daily_summary(
+    mood: Annotated[
+        const.Rating | None,
+        typer.Option("--mood", "-m", help="Your mood today (1-10)."),
+    ] = None,
+    productivity: Annotated[
+        const.Rating | None,
+        typer.Option("--productivity", "-p", help="Your productivity today (1-10)."),
+    ] = None,
+    stress: Annotated[
+        const.Rating | None,
+        typer.Option("--stress", "-s", help="Your stress level today (1-10)."),
+    ] = None,
+) -> None:
     """Record a daily summary entry."""
     date = datetime.now().date().isoformat()  # noqa: DTZ005
 
-    mood = _ask_rating_question("mood")
-    productivity = _ask_rating_question("productivity")
-    stress = _ask_rating_question("stress")
+    if mood is None:
+        mood = _ask_rating_question("mood")
+    if productivity is None:
+        productivity = _ask_rating_question("productivity")
+    if stress is None:
+        stress = _ask_rating_question("stress")
 
     database.add_daily_summary(
         const.LIFE_DATABASE_FILEPATH,
@@ -51,29 +67,86 @@ def add_daily_summary() -> None:
 
 
 @app.command("activity")
-def add_activity() -> None:
+def add_activity(
+    activity_input: Annotated[
+        str | None, typer.Option("--activity", "-a", help="The activity you did today.")
+    ] = None,
+    activity_start_input: Annotated[
+        str | None,
+        typer.Option(
+            "--start",
+            "-st",
+            help="The time you started the activity (HH:MM, 24-hour format).",
+        ),
+    ] = None,
+    activity_end_input: Annotated[
+        str | None,
+        typer.Option(
+            "--end",
+            "-e",
+            help="The time you ended the activity (HH:MM, 24-hour format).",
+        ),
+    ] = None,
+    difficulty: Annotated[
+        const.Rating | None,
+        typer.Option(
+            "--difficulty", "-d", help="The difficulty of the activity (1-10)."
+        ),
+    ] = None,
+    enjoyability: Annotated[
+        const.Rating | None,
+        typer.Option(
+            "--enjoyability", "-en", help="The enjoyability of the activity (1-10)."
+        ),
+    ] = None,
+) -> None:
     """Record an activity entry."""
     date = datetime.now().date().isoformat()  # noqa: DTZ005
 
-    activity = questionary.text(
-        "What activity did you do today?",
-        validate=lambda text: (
-            True if text.strip() else "Please enter a valid activity."
-        ),
-    ).ask()
+    activity: str = (
+        questionary.text(
+            "What activity did you do today?",
+            validate=lambda text: (
+                True if text.strip() else "Please enter a valid activity."
+            ),
+        )
+        .skip_if(
+            activity_input is not None and bool(activity_input.strip()),
+            default=activity_input,
+        )
+        .ask()
+    )
 
-    activity_start = questionary.text(
-        "What time did you start the activity? (HH:MM, 24-hour format)",
-        validate=_validate_datetime,
-    ).ask()
+    activity_start: str = (
+        questionary.text(
+            "What time did you start the activity? (HH:MM, 24-hour format)",
+            validate=_validate_datetime,
+        )
+        .skip_if(
+            activity_start_input is not None
+            and _validate_datetime(activity_start_input) is True,
+            default=activity_start_input,
+        )
+        .ask()
+    )
 
-    activity_end = questionary.text(
-        "What time did you end the activity? (HH:MM, 24-hour format)",
-        validate=_validate_datetime,
-    ).ask()
+    activity_end: str = (
+        questionary.text(
+            "What time did you end the activity? (HH:MM, 24-hour format)",
+            validate=_validate_datetime,
+        )
+        .skip_if(
+            activity_end_input is not None
+            and _validate_datetime(activity_end_input) is True,
+            default=activity_end_input,
+        )
+        .ask()
+    )
 
-    difficulty = _ask_rating_question("difficulty")
-    enjoyability = _ask_rating_question("enjoyability")
+    if difficulty is None:
+        difficulty = _ask_rating_question("difficulty")
+    if enjoyability is None:
+        enjoyability = _ask_rating_question("enjoyability")
 
     database.add_activity(
         const.LIFE_DATABASE_FILEPATH,
@@ -87,7 +160,26 @@ def add_activity() -> None:
 
 
 @app.command("sleep")
-def add_sleep() -> None:
+def add_sleep(
+    start_sleep_input: Annotated[
+        str | None,
+        typer.Option(
+            "--start",
+            "-st",
+            help="The time you went to sleep yesterday (HH:MM, 24-hour format).",
+        ),
+    ] = None,
+    end_sleep_input: Annotated[
+        str | None,
+        typer.Option(
+            "--end", "-e", help="The time you woke up today (HH:MM, 24-hour format)."
+        ),
+    ] = None,
+    sleep_quality: Annotated[
+        const.Rating | None,
+        typer.Option("--quality", "-q", help="The quality of your sleep (1-10)."),
+    ] = None,
+) -> None:
     """Record a sleep entry."""
     today_date = datetime.now()  # noqa: DTZ005
     yesterday_date = today_date - timedelta(days=1)
@@ -96,7 +188,13 @@ def add_sleep() -> None:
         questionary.text(
             "What time did you go to sleep yesterday? (HH:MM, 24-hour format)",
             validate=_validate_datetime,
-        ).ask(),
+        )
+        .skip_if(
+            start_sleep_input is not None
+            and _validate_datetime(start_sleep_input) is True,
+            default=start_sleep_input,
+        )
+        .ask(),
         "%H:%M",
     ).time()
 
@@ -109,7 +207,12 @@ def add_sleep() -> None:
         questionary.text(
             "What time did you wake up today? (HH:MM, 24-hour format)",
             validate=_validate_datetime,
-        ).ask(),
+        )
+        .skip_if(
+            end_sleep_input is not None and _validate_datetime(end_sleep_input) is True,
+            default=end_sleep_input,
+        )
+        .ask(),
         "%H:%M",
     ).time()
 
@@ -118,7 +221,8 @@ def add_sleep() -> None:
         minute=end_sleep_time.minute,
     ).isoformat(timespec="minutes")
 
-    sleep_quality = _ask_rating_question("sleep_quality")
+    if sleep_quality is None:
+        sleep_quality = _ask_rating_question("sleep_quality")
 
     database.add_sleep(
         const.LIFE_DATABASE_FILEPATH,
