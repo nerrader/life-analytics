@@ -35,11 +35,11 @@ def add_daily_summary(
     with sqlite3.connect(database_path) as connection:
         connection.execute(
             """
-INSERT INTO daily_summaries 
+INSERT INTO daily_summaries
     (date,
     mood,
     productivity,
-    stress) 
+    stress)
     VALUES (?, ?, ?, ?)""",
             (
                 date,
@@ -62,13 +62,13 @@ def add_activity(
     with sqlite3.connect(database_path) as connection:
         connection.execute(
             """
-INSERT INTO activities 
+INSERT INTO activities
     (date,
     activity,
     activity_start,
     activity_end,
     difficulty,
-    enjoyability) 
+    enjoyability)
     VALUES (?, ?, ?, ?, ?, ?)""",
             (
                 date,
@@ -90,10 +90,10 @@ def add_sleep(
     with sqlite3.connect(database_path) as connection:
         connection.execute(
             """
-INSERT INTO sleep 
+INSERT INTO sleep
     (sleep_start_time,
     sleep_end_time,
-    sleep_quality) 
+    sleep_quality)
     VALUES (?, ?, ?)""",
             (
                 sleep_start_datetime,
