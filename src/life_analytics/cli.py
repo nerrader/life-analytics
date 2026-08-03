@@ -34,7 +34,7 @@ def _validate_datetime(value: str) -> bool | str:
 
 @app.command("summary")
 def add_daily_summary() -> None:
-    """Prompts for data, then inserts the daily summary in the database."""
+    """Record a daily summary entry."""
     date = datetime.now().date().isoformat()  # noqa: DTZ005
 
     mood = _ask_rating_question("mood")
@@ -52,6 +52,7 @@ def add_daily_summary() -> None:
 
 @app.command("activity")
 def add_activity() -> None:
+    """Record an activity entry."""
     date = datetime.now().date().isoformat()  # noqa: DTZ005
 
     activity = questionary.text(
@@ -87,6 +88,7 @@ def add_activity() -> None:
 
 @app.command("sleep")
 def add_sleep() -> None:
+    """Record a sleep entry."""
     today_date = datetime.now()  # noqa: DTZ005
     yesterday_date = today_date - timedelta(days=1)
 
@@ -128,7 +130,7 @@ def add_sleep() -> None:
 
 @app.command("stats")
 def show_stats() -> None:
-    pass
+    raise NotImplementedError("The 'stats' command is not yet implemented.")
 
 
 @app.command("clear")
@@ -137,6 +139,11 @@ def clear_all_data(
         bool | None, typer.Option("--skip", "-s", help="Skips the confirmation prompt.")
     ] = None,
 ) -> None:
+    """Removes all tracking data from the database.
+
+    Args:
+        skip_confirm (bool, Optional): If this flag is invoked, it skips the confirmation prompt.
+    """
 
     clear_data_confirm = (
         questionary.confirm(
