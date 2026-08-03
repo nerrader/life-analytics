@@ -10,10 +10,6 @@ from life_analytics import database
 app = typer.Typer()
 
 
-def _get_current_date_isostring() -> str:
-    return datetime.now().date().isoformat()  # noqa: DTZ005
-
-
 def _ask_rating_question(var_name: str) -> const.Rating:
     def validate_rating(value: str) -> bool | str:
         if value.isdigit() and 1 <= int(value) <= 10:
@@ -39,7 +35,7 @@ def _validate_datetime(value: str) -> bool | str:
 @app.command("summary")
 def add_daily_summary() -> None:
     """Prompts for data, then inserts the daily summary in the database."""
-    date = _get_current_date_isostring()
+    date = datetime.now().date().isoformat()  # noqa: DTZ005
 
     mood = _ask_rating_question("mood")
     productivity = _ask_rating_question("productivity")
@@ -56,7 +52,7 @@ def add_daily_summary() -> None:
 
 @app.command("activity")
 def add_activity() -> None:
-    date = _get_current_date_isostring()
+    date = datetime.now().date().isoformat()  # noqa: DTZ005
 
     activity = questionary.text(
         "What activity did you do today?",
