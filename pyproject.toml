@@ -34,7 +34,7 @@ dev = [
 life = "life_analytics.main:main"
 
 [tool.pyright]
-exclude = ["build", "dist", "**/node_modules", "**/__pycache__", "**/.*"]
+exclude = ["build", "dist", "**/node_modules", "**/__pycache__", "**/.*", ".venv"]
 typeCheckingMode = "standard"
 venvPath = "."
 venv = ".venv"
