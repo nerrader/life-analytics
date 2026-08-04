@@ -10,15 +10,16 @@ from life_analytics import database
 app = typer.Typer()
 
 
-def _ask_rating_question(var_name: str) -> const.Rating:
-    def validate_rating(value: str) -> bool | str:
-        if value.isdigit() and 1 <= int(value) <= 10:
-            return True
-        return "Please enter a value between 1 and 10."
+def _validate_rating(value: str) -> bool | str:
+    if value.isdigit() and 1 <= int(value) <= 10:
+        return True
+    return "Please enter a value between 1 and 10."
 
+
+def _ask_rating_question(var_name: str) -> const.Rating:
     rating = questionary.text(
         f"Where 5 is the average, Rate your {var_name} out of 10:",
-        validate=validate_rating,
+        validate=_validate_rating,
     ).ask()
 
     return rating
