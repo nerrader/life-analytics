@@ -16,11 +16,20 @@ def _validate_rating(value: str) -> bool | str:
     return "Please enter a value between 1 and 10."
 
 
-def _ask_rating_question(var_name: str) -> const.Rating:
-    rating = questionary.text(
-        f"Where 5 is the average, Rate your {var_name} out of 10:",
-        validate=_validate_rating,
-    ).ask()
+def _ask_rating_question(
+    prompt_var_name: str, skip_if_var: str | None = None
+) -> const.Rating:
+    rating = (
+        questionary.text(
+            f"Where 5 is the average, Rate your {prompt_var_name} out of 10:",
+            validate=_validate_rating,
+        )
+        .skip_if(
+            skip_if_var is not None and _validate_rating(skip_if_var) is True,
+            default=skip_if_var,
+        )
+        .ask()
+    )
 
     return rating
 
