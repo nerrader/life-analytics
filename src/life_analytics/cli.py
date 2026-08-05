@@ -11,6 +11,15 @@ app = typer.Typer()
 
 
 def _validate_rating(value: str) -> bool | str:
+    """To be passed into questionary validate keyword to validate rating questions.
+
+    Args:
+        value (str): The variable/value to be validated.
+
+    Returns:
+        bool | str: Returns True if the value is valid, otherwise returns a string with an error message.
+    """
+
     if value.isdigit() and 1 <= int(value) <= 10:
         return True
     return "Please enter a value between 1 and 10."
@@ -19,6 +28,15 @@ def _validate_rating(value: str) -> bool | str:
 def _ask_rating_question(
     prompt_var_name: str, skip_if_var: str | None = None
 ) -> const.Rating:
+    """The helper function to ask questions requiring rating in 1-10.
+
+    Args:
+        prompt_var_name (str): The name of the variable to be prompted for.
+        skip_if_var (str | None): The variable being used to check if the question should be skipped.
+
+    Returns:
+        str: The rating value between 1 and 10.
+    """
     rating = (
         questionary.text(
             f"Where 5 is the average, Rate your {prompt_var_name} out of 10:",
@@ -35,6 +53,14 @@ def _ask_rating_question(
 
 
 def _validate_datetime(value: str) -> bool | str:
+    """To be passed into questionary validate keyword to validate datetime questions.
+
+    Args:
+        value (str): The variable/value to be validated.
+
+    Returns:
+        bool | str: Returns True if the value is valid, otherwise returns a string with an error message.
+    """
     try:
         datetime.strptime(value, "%H:%M")  # noqa: DTZ007
         return True
@@ -43,6 +69,15 @@ def _validate_datetime(value: str) -> bool | str:
 
 
 def _ask_datetime_question(prompt_var_name: str, skip_if_var: str | None) -> str:
+    """The helper function to ask questions requiring datetime in HH:MM.
+
+    Args:
+        prompt_var_name (str): The name of the variable to be prompted for.
+        skip_if_var (str | None): The variable being used to check if the question should be skipped.
+
+    Returns:
+        str: The datetime value in HH:MM format.
+    """
     datetime_value = (
         questionary.text(
             f"Please enter the {prompt_var_name} in HH:MM format:",
