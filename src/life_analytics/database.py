@@ -20,6 +20,25 @@ class DailySummaryRecord:
     stress: int
 
 
+@dataclass(frozen=True)
+class ActivityRecord:
+    activity_id: int
+    date: str
+    activity: str
+    activity_start: str
+    activity_end: str
+    difficulty: int
+    enjoyability: int
+
+
+@dataclass(frozen=True)
+class SleepRecord:
+    sleep_id: int
+    sleep_start_time: str
+    sleep_end_time: str
+    sleep_quality: int
+
+
 def create_database(database_path: Path) -> None:
     with sqlite3.connect(database_path) as connection:
         connection.execute("PRAGMA foreign_keys = ON")
@@ -128,3 +147,39 @@ def fetch_daily_summaries_records(
         cursor = connection.cursor()
         cursor.execute(query, params)
         return [DailySummaryRecord(*row) for row in cursor.fetchall()]
+
+
+def fetch_activities_records(
+    database_path: Path, limit: int | None = None
+) -> list[ActivityRecord]:
+    query = "SELECT * FROM activities ORDER BY activity_id DESC"
+    params = []
+
+    if limit is not None:
+        query += "LIMIT (?)"
+        params.append(limit)
+
+    print(query)
+
+    with sqlite3.connect(database_path) as connection:
+        cursor = connection.cursor()
+        cursor.execute(query, params)
+        return [ActivityRecord(*row) for row in cursor.fetchall()]
+
+
+def fetch_sleep_records(
+    database_path: Path, limit: int | None = None
+) -> list[SleepRecord]:
+    query = "SELECT * FROM sleep ORDER BY sleep_id DESC"
+    params = []
+
+    if limit is not None:
+        query += "LIMIT (?)"
+        params.append(limit)
+
+    print(query)
+
+    with sqlite3.connect(database_path) as connection:
+        cursor = connection.cursor()
+        cursor.execute(query, params)
+        return [SleepRecord(*row) for row in cursor.fetchall()]
