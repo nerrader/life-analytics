@@ -1,4 +1,5 @@
 import sqlite3
+from dataclasses import dataclass
 from importlib.resources import files
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -9,6 +10,14 @@ if TYPE_CHECKING:
     from life_analytics.constants import Rating
 
 sql_dir: Traversable = files("life_analytics.sql")
+
+
+@dataclass(frozen=True)
+class DailySummaryRecord:
+    date: str
+    mood: int
+    productivity: int
+    stress: int
 
 
 def create_database(database_path: Path) -> None:
@@ -101,3 +110,21 @@ INSERT INTO sleep
                 sleep_quality,
             ),
         )
+
+
+def fetch_daily_summaries_records(
+    database_path: Path, limit: int | None = None
+) -> list[DailySummaryRecord]:
+    query = "SELECT * FROM daily_summaries ORDER BY date DESC"
+    params = []
+
+    if limit is not None:
+        query += "LIMIT (?)"
+        params.append(limit)
+
+    print(query)
+
+    with sqlite3.connect(database_path) as connection:
+        cursor = connection.cursor()
+        cursor.execute(query, params)
+        return [DailySummaryRecord(*row) for row in cursor.fetchall()]
