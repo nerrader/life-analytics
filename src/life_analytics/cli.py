@@ -59,11 +59,11 @@ def add_daily_summary(
         stress = _ask_rating_question("stress")
 
     database.add_daily_summary(
-        const.LIFE_DATABASE_FILEPATH,
-        date,
-        mood,
-        productivity,
-        stress,
+        database_path=const.LIFE_DATABASE_FILEPATH,
+        date=date,
+        mood=mood,
+        productivity=productivity,
+        stress=stress,
     )
 
 
@@ -150,13 +150,13 @@ def add_activity(
         enjoyability = _ask_rating_question("enjoyability")
 
     database.add_activity(
-        const.LIFE_DATABASE_FILEPATH,
-        date,
-        activity,
-        activity_start,
-        activity_end,
-        difficulty,
-        enjoyability,
+        database_path=const.LIFE_DATABASE_FILEPATH,
+        date=date,
+        activity=activity,
+        activity_start=activity_start,
+        activity_end=activity_end,
+        difficulty=difficulty,
+        enjoyability=enjoyability,
     )
 
 
@@ -199,7 +199,7 @@ def add_sleep(
         "%H:%M",
     ).time()
 
-    start_sleep_datetime = yesterday_date.replace(
+    sleep_start_datetime = yesterday_date.replace(
         hour=start_sleep_time.hour,
         minute=start_sleep_time.minute,
     ).isoformat(timespec="minutes")
@@ -217,7 +217,7 @@ def add_sleep(
         "%H:%M",
     ).time()
 
-    end_sleep_datetime: str = today_date.replace(
+    sleep_end_datetime: str = today_date.replace(
         hour=end_sleep_time.hour,
         minute=end_sleep_time.minute,
     ).isoformat(timespec="minutes")
@@ -226,10 +226,10 @@ def add_sleep(
         sleep_quality = _ask_rating_question("sleep_quality")
 
     database.add_sleep(
-        const.LIFE_DATABASE_FILEPATH,
-        start_sleep_datetime,
-        end_sleep_datetime,
-        sleep_quality,
+        database_path=const.LIFE_DATABASE_FILEPATH,
+        sleep_start_datetime=sleep_start_datetime,
+        sleep_end_datetime=sleep_end_datetime,
+        sleep_quality=sleep_quality,
     )
 
 
