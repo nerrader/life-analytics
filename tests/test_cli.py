@@ -7,9 +7,9 @@ def test_validate_datetime_with_valid_datetime() -> None:
 
 
 def test_validate_datetime_with_invalid_datetime() -> None:
-    isinstance(cli._validate_datetime("25:00"), str)
-    isinstance(cli._validate_datetime("24:60"), str)
-    isinstance(cli._validate_datetime("7 :59 "), str)
+    assert isinstance(cli._validate_datetime("25:00"), str)
+    assert isinstance(cli._validate_datetime("24:60"), str)
+    assert isinstance(cli._validate_datetime("7 :59 "), str)
 
 
 def test_validate_rating_with_valid_rating() -> None:
