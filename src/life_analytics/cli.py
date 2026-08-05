@@ -33,6 +33,22 @@ def _validate_datetime(value: str) -> bool | str:
         return "Please enter a valid time in HH:MM format."
 
 
+def _ask_datetime_question(prompt_var_name: str, skip_if_var: str | None) -> str:
+    datetime_value = (
+        questionary.text(
+            f"Please enter the {prompt_var_name} in HH:MM format:",
+            validate=_validate_datetime,
+        )
+        .skip_if(
+            skip_if_var is not None and _validate_datetime(skip_if_var) is True,
+            default=skip_if_var,
+        )
+        .ask()
+    )
+
+    return datetime_value
+
+
 @app.command("summary")
 def add_daily_summary(
     mood: Annotated[
@@ -118,31 +134,10 @@ def add_activity(
         .ask()
     )
 
-    activity_start: str = (
-        questionary.text(
-            "What time did you start the activity? (HH:MM, 24-hour format)",
-            validate=_validate_datetime,
-        )
-        .skip_if(
-            activity_start_input is not None
-            and _validate_datetime(activity_start_input) is True,
-            default=activity_start_input,
-        )
-        .ask()
+    activity_start: str = _ask_datetime_question(
+        "activity start time", activity_start_input
     )
-
-    activity_end: str = (
-        questionary.text(
-            "What time did you end the activity? (HH:MM, 24-hour format)",
-            validate=_validate_datetime,
-        )
-        .skip_if(
-            activity_end_input is not None
-            and _validate_datetime(activity_end_input) is True,
-            default=activity_end_input,
-        )
-        .ask()
-    )
+    activity_end: str = _ask_datetime_question("activity end time", activity_end_input)
 
     if difficulty is None:
         difficulty = _ask_rating_question("difficulty")
@@ -162,7 +157,7 @@ def add_activity(
 
 @app.command("sleep")
 def add_sleep(
-    start_sleep_input: Annotated[
+    sleep_start_input: Annotated[
         str | None,
         typer.Option(
             "--start",
@@ -170,7 +165,7 @@ def add_sleep(
             help="The time you went to sleep yesterday (HH:MM, 24-hour format).",
         ),
     ] = None,
-    end_sleep_input: Annotated[
+    sleep_end_input: Annotated[
         str | None,
         typer.Option(
             "--end", "-e", help="The time you woke up today (HH:MM, 24-hour format)."
@@ -186,16 +181,7 @@ def add_sleep(
     yesterday_date = today_date - timedelta(days=1)
 
     start_sleep_time: time = datetime.strptime(  # noqa: DTZ007
-        questionary.text(
-            "What time did you go to sleep yesterday? (HH:MM, 24-hour format)",
-            validate=_validate_datetime,
-        )
-        .skip_if(
-            start_sleep_input is not None
-            and _validate_datetime(start_sleep_input) is True,
-            default=start_sleep_input,
-        )
-        .ask(),
+        _ask_datetime_question("your sleep start time", sleep_start_input),
         "%H:%M",
     ).time()
 
@@ -205,15 +191,7 @@ def add_sleep(
     ).isoformat(timespec="minutes")
 
     end_sleep_time: time = datetime.strptime(  # noqa: DTZ007
-        questionary.text(
-            "What time did you wake up today? (HH:MM, 24-hour format)",
-            validate=_validate_datetime,
-        )
-        .skip_if(
-            end_sleep_input is not None and _validate_datetime(end_sleep_input) is True,
-            default=end_sleep_input,
-        )
-        .ask(),
+        _ask_datetime_question("your sleep end time", sleep_end_input),
         "%H:%M",
     ).time()
 
