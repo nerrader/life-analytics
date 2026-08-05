@@ -1,4 +1,5 @@
 from datetime import datetime, time, timedelta
+from pathlib import Path
 from typing import Annotated
 
 import questionary
@@ -8,6 +9,22 @@ from life_analytics import constants as const
 from life_analytics import database
 
 app = typer.Typer()
+
+
+@app.callback()
+def main(
+    context: typer.Context,
+    database_path: Annotated[
+        Path, typer.Option("--database-path", "-db", help="Path to the database file.")
+    ] = const.LIFE_DATABASE_FILEPATH,
+) -> None:
+    """Main entry point for the CLI."""
+    # making it a dictionary so we can put stuff in there
+    context.obj = {}
+    context.obj["database_path"] = database_path
+    if not database_path.exists():
+        database_path.parent.mkdir(parents=True, exist_ok=True)
+        database.create_database(database_path)
 
 
 def _validate_rating(value: str) -> bool | str:
@@ -95,6 +112,7 @@ def _ask_datetime_question(prompt_var_name: str, skip_if_var: str | None) -> str
 
 @app.command("summary")
 def add_daily_summary(
+    context: typer.Context,
     mood: Annotated[
         const.Rating | None,
         typer.Option("--mood", "-m", help="Your mood today (1-10)."),
@@ -109,6 +127,7 @@ def add_daily_summary(
     ] = None,
 ) -> None:
     """Record a daily summary entry."""
+    database_path = context.obj["database_path"]
     date = datetime.now().date().isoformat()  # noqa: DTZ005
 
     if mood is None:
@@ -119,7 +138,7 @@ def add_daily_summary(
         stress = _ask_rating_question("stress")
 
     database.add_daily_summary(
-        database_path=const.LIFE_DATABASE_FILEPATH,
+        database_path=database_path,
         date=date,
         mood=mood,
         productivity=productivity,
@@ -129,6 +148,7 @@ def add_daily_summary(
 
 @app.command("activity")
 def add_activity(
+    context: typer.Context,
     activity_input: Annotated[
         str | None, typer.Option("--activity", "-a", help="The activity you did today.")
     ] = None,
@@ -162,6 +182,7 @@ def add_activity(
     ] = None,
 ) -> None:
     """Record an activity entry."""
+    database_path = context.obj["database_path"]
     date = datetime.now().date().isoformat()  # noqa: DTZ005
 
     activity: str = (
@@ -189,7 +210,7 @@ def add_activity(
         enjoyability = _ask_rating_question("enjoyability")
 
     database.add_activity(
-        database_path=const.LIFE_DATABASE_FILEPATH,
+        database_path=database_path,
         date=date,
         activity=activity,
         activity_start=activity_start,
@@ -201,6 +222,7 @@ def add_activity(
 
 @app.command("sleep")
 def add_sleep(
+    context: typer.Context,
     sleep_start_input: Annotated[
         str | None,
         typer.Option(
@@ -221,6 +243,7 @@ def add_sleep(
     ] = None,
 ) -> None:
     """Record a sleep entry."""
+    database_path = context.obj["database_path"]
     today_date = datetime.now()  # noqa: DTZ005
     yesterday_date = today_date - timedelta(days=1)
 
@@ -248,7 +271,7 @@ def add_sleep(
         sleep_quality = _ask_rating_question("sleep_quality")
 
     database.add_sleep(
-        database_path=const.LIFE_DATABASE_FILEPATH,
+        database_path=database_path,
         sleep_start_datetime=sleep_start_datetime,
         sleep_end_datetime=sleep_end_datetime,
         sleep_quality=sleep_quality,
