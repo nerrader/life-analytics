@@ -5,7 +5,7 @@ from typing import Annotated
 import typer
 
 from life_analytics import constants as const
-from life_analytics import database, prompts, time_utils
+from life_analytics.logic import database, prompts, time_utils
 
 app = typer.Typer()
 
