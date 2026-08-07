@@ -65,7 +65,7 @@ def ask_datetime_question(prompt_var_name: str, skip_value: str | None = None) -
     Returns:
         str: The datetime value in HH:MM format.
     """
-    if isinstance(skip_value, str) and skip_value.strip:
+    if isinstance(skip_value, str) and _validate_datetime(skip_value):
         return skip_value
 
     datetime_value = questionary.text(
@@ -86,7 +86,7 @@ def ask_activity_name(prompt: str, skip_value: str | None = None) -> str:
     Returns:
         str: The datetime value in HH:MM format.
     """
-    if isinstance(skip_value, str) and skip_value.strip:
+    if isinstance(skip_value, str) and skip_value.strip():
         return skip_value
 
     activity_name = questionary.text(
