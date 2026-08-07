@@ -111,12 +111,9 @@ def add_daily_summary(
     database_path = context.obj["database_path"]
     date = datetime.now().date().isoformat()  # noqa: DTZ005
 
-    if mood is None:
-        mood = _ask_rating_question("mood")
-    if productivity is None:
-        productivity = _ask_rating_question("productivity")
-    if stress is None:
-        stress = _ask_rating_question("stress")
+    mood = mood or _ask_rating_question("mood")
+    productivity = productivity or _ask_rating_question("productivity")
+    stress = stress or _ask_rating_question("stress")
 
     database.add_daily_summary(
         database_path=database_path,
@@ -195,10 +192,8 @@ def add_activity(
     else:
         activity_end: str = _ask_datetime_question("activity end time")
 
-    if difficulty is None:
-        difficulty = _ask_rating_question("difficulty")
-    if enjoyability is None:
-        enjoyability = _ask_rating_question("enjoyability")
+    difficulty = difficulty or _ask_rating_question("difficulty")
+    enjoyability = enjoyability or _ask_rating_question("enjoyability")
 
     database.add_activity(
         database_path=database_path,
@@ -270,8 +265,7 @@ def add_sleep(
         minute=polished_end_sleep_time.minute,
     ).isoformat(timespec="minutes")
 
-    if sleep_quality is None:
-        sleep_quality = _ask_rating_question("sleep_quality")
+    sleep_quality = _ask_rating_question("sleep_quality")
 
     database.add_sleep(
         database_path=database_path,
