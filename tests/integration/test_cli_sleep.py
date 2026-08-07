@@ -1,6 +1,7 @@
 from typer.testing import CliRunner
 
-from life_analytics import cli, database
+from life_analytics import cli
+from life_analytics.logic import database
 
 
 def test_sleep_cli_command_creates_database_entry(tmp_path) -> None:

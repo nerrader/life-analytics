@@ -2,7 +2,7 @@ import sqlite3
 
 import pytest
 
-from life_analytics import database
+from life_analytics.logic import database
 
 
 def test_add_daily_summary_with_valid_data(tmp_path) -> None:

@@ -1,4 +1,4 @@
-from life_analytics import prompts
+from life_analytics.logic import prompts
 
 
 def test_validate_datetime_with_valid_datetime() -> None:

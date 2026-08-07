@@ -15,7 +15,7 @@ def main(
     context: typer.Context,
     database_path: Annotated[
         Path, typer.Option("--database-path", "-db", help="Path to the database file.")
-    ] = const.LIFE_DATABASE_FILEPATH,
+    ] = const.DEFAULT_DATABASE_PATH,
 ) -> None:
     """Main entry point for the CLI."""
     # this is so every command function can access the db path
@@ -179,6 +179,7 @@ def show_stats() -> None:
 
 @app.command("clear")
 def clear_all_data(
+    context: typer.Context,
     skip_confirm: Annotated[
         bool | None, typer.Option("--skip", "-s", help="Skips the confirmation prompt.")
     ] = None,
@@ -188,10 +189,11 @@ def clear_all_data(
     Args:
         skip_confirm (bool, Optional): If this flag is invoked, it skips the confirmation prompt.
     """
+    database_path = context.obj["database_path"]
 
     clear_data_confirm = prompts.ask_for_confirmation(
         "Are you sure you want to clear the database?", skip_confirm
     )
 
     if clear_data_confirm:
-        database.clear_database(const.LIFE_DATABASE_FILEPATH)
+        database.clear_database(database_path)
