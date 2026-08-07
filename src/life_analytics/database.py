@@ -40,6 +40,7 @@ class SleepRecord:
 
 
 def create_database(database_path: Path) -> None:
+    database_path.parent.mkdir(parents=True, exist_ok=True)
     with sqlite3.connect(database_path) as connection:
         connection.execute("PRAGMA foreign_keys = ON")
         connection.executescript((sql_dir / "schema.sql").read_text())

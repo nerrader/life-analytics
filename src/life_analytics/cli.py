@@ -19,11 +19,10 @@ def main(
     ] = const.LIFE_DATABASE_FILEPATH,
 ) -> None:
     """Main entry point for the CLI."""
-    # making it a dictionary so we can put stuff in there
-    context.obj = {}
-    context.obj["database_path"] = database_path
+    # this is so every command function can access the db path
+    context.obj = {"database_path": database_path}
+
     if not database_path.exists():
-        database_path.parent.mkdir(parents=True, exist_ok=True)
         database.create_database(database_path)
 
 
