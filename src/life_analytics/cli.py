@@ -145,21 +145,21 @@ def add_sleep(
 ) -> None:
     """Record a sleep entry."""
     database_path = context.obj["database_path"]
-    today_date = datetime.now()  # noqa: DTZ005
+    today_date = datetime.now().date()  # noqa: DTZ005
     yesterday_date = today_date - timedelta(days=1)
 
     start_sleep_time: str = prompts.ask_datetime_question(
         "your sleep start time", sleep_start_input
     )
     sleep_start_datetime = time_utils.combine_date_and_time(
-        start_sleep_time, yesterday_date
+        yesterday_date, start_sleep_time
     ).isoformat(timespec="minutes")
 
     end_sleep_time: str = prompts.ask_datetime_question(
         "your sleep end time", sleep_end_input
     )
     sleep_end_datetime = time_utils.combine_date_and_time(
-        end_sleep_time, today_date
+        today_date, end_sleep_time
     ).isoformat(timespec="minutes")
 
     sleep_quality = sleep_quality or prompts.ask_rating_question("sleep quality")

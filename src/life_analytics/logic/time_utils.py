@@ -1,14 +1,21 @@
-from datetime import datetime, time
+from datetime import date, datetime
+from datetime import time as dt_time
 
 
-def combine_date_and_time(time: str, date: datetime) -> datetime:
+def combine_date_and_time(date: date, time: str | dt_time) -> datetime:
     # change it to a time object
-    polished_time: time = datetime.strptime(  # noqa: DTZ007
-        time, "%H:%M"
-    ).time()
+    if isinstance(time, str):
+        time_object: dt_time = datetime.strptime(  # noqa: DTZ007
+            time, "%H:%M"
+        ).time()
+    else:
+        time_object: dt_time = time
 
     # so we can use it to replace the hour and minute of the generated yesterdays date
-    return date.replace(
-        hour=polished_time.hour,
-        minute=polished_time.minute,
+    return datetime(  # noqa: DTZ001
+        year=date.year,
+        month=date.month,
+        day=date.day,
+        hour=time_object.hour,
+        minute=time_object.minute,
     )
