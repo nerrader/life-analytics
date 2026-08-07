@@ -42,29 +42,19 @@ def _validate_rating(value: str) -> bool | str:
     return "Please enter a value between 1 and 10."
 
 
-def _ask_rating_question(
-    prompt_var_name: str, skip_if_var: str | None = None
-) -> const.Rating:
+def _ask_rating_question(prompt_var_name: str) -> const.Rating:
     """The helper function to ask questions requiring rating in 1-10.
 
     Args:
         prompt_var_name (str): The name of the variable to be prompted for.
-        skip_if_var (str | None): The variable being used to check if the question should be skipped.
 
     Returns:
         str: The rating value between 1 and 10.
     """
-    rating = (
-        questionary.text(
-            f"Where 5 is the average, Rate your {prompt_var_name} out of 10:",
-            validate=_validate_rating,
-        )
-        .skip_if(
-            skip_if_var is not None and _validate_rating(skip_if_var) is True,
-            default=skip_if_var,
-        )
-        .ask()
-    )
+    rating = questionary.text(
+        f"Where 5 is the average, Rate your {prompt_var_name} out of 10:",
+        validate=_validate_rating,
+    ).ask()
 
     return rating
 
@@ -85,27 +75,19 @@ def _validate_datetime(value: str) -> bool | str:
         return "Please enter a valid time in HH:MM format."
 
 
-def _ask_datetime_question(prompt_var_name: str, skip_if_var: str | None) -> str:
+def _ask_datetime_question(prompt_var_name: str) -> str:
     """The helper function to ask questions requiring datetime in HH:MM.
 
     Args:
         prompt_var_name (str): The name of the variable to be prompted for.
-        skip_if_var (str | None): The variable being used to check if the question should be skipped.
 
     Returns:
         str: The datetime value in HH:MM format.
     """
-    datetime_value = (
-        questionary.text(
-            f"Please enter the {prompt_var_name} in HH:MM format:",
-            validate=_validate_datetime,
-        )
-        .skip_if(
-            skip_if_var is not None and _validate_datetime(skip_if_var) is True,
-            default=skip_if_var,
-        )
-        .ask()
-    )
+    datetime_value = questionary.text(
+        f"Please enter the {prompt_var_name} in HH:MM format:",
+        validate=_validate_datetime,
+    ).ask()
 
     return datetime_value
 
@@ -185,24 +167,34 @@ def add_activity(
     database_path = context.obj["database_path"]
     date = datetime.now().date().isoformat()  # noqa: DTZ005
 
-    activity: str = (
-        questionary.text(
+    if activity_input is not None and activity_input.strip():
+        activity = activity_input
+
+    else:
+        activity: str = questionary.text(
             "What activity did you do today?",
             validate=lambda text: (
                 True if text.strip() else "Please enter a valid activity."
             ),
-        )
-        .skip_if(
-            activity_input is not None and bool(activity_input.strip()),
-            default=activity_input,
-        )
-        .ask()
-    )
+        ).ask()
 
-    activity_start: str = _ask_datetime_question(
-        "activity start time", activity_start_input
-    )
-    activity_end: str = _ask_datetime_question("activity end time", activity_end_input)
+    # i do this instead of questionarys skip if because it doesnt work in tests
+    if (
+        activity_start_input is not None
+        and _validate_datetime(activity_start_input) is True
+    ):
+        activity_start = activity_start_input
+    else:
+        activity_start: str = _ask_datetime_question("activity start time")
+
+    # i do this instead of questionarys skip if because it doesnt work in tests
+    if (
+        activity_end_input is not None
+        and _validate_datetime(activity_end_input) is True
+    ):
+        activity_end = activity_end_input
+    else:
+        activity_end: str = _ask_datetime_question("activity end time")
 
     if difficulty is None:
         difficulty = _ask_rating_question("difficulty")
@@ -247,24 +239,36 @@ def add_sleep(
     today_date = datetime.now()  # noqa: DTZ005
     yesterday_date = today_date - timedelta(days=1)
 
-    start_sleep_time: time = datetime.strptime(  # noqa: DTZ007
-        _ask_datetime_question("your sleep start time", sleep_start_input),
-        "%H:%M",
+    # i do this instead of questionarys skip if because it doesnt work in tests
+    if sleep_start_input is not None and _validate_datetime(sleep_start_input) is True:
+        start_sleep_time = sleep_start_input
+    else:
+        start_sleep_time: str = _ask_datetime_question("your sleep start time")
+
+    # change it to a time object
+    polished_start_sleep_time: time = datetime.strptime(  # noqa: DTZ007
+        start_sleep_time, "%H:%M"
     ).time()
 
+    # so we can use it to replace the hour and minute of the generated yesterdays date
     sleep_start_datetime = yesterday_date.replace(
-        hour=start_sleep_time.hour,
-        minute=start_sleep_time.minute,
+        hour=polished_start_sleep_time.hour,
+        minute=polished_start_sleep_time.minute,
     ).isoformat(timespec="minutes")
 
-    end_sleep_time: time = datetime.strptime(  # noqa: DTZ007
-        _ask_datetime_question("your sleep end time", sleep_end_input),
-        "%H:%M",
-    ).time()
+    # i do this instead of questionarys skip if because it doesnt work in tests
+    if sleep_end_input is not None and _validate_datetime(sleep_end_input) is True:
+        end_sleep_time = sleep_end_input
+    else:
+        end_sleep_time: str = _ask_datetime_question("your sleep end time")
 
+    # change it to a time object
+    polished_end_sleep_time: time = datetime.strptime(end_sleep_time, "%H:%M").time()  # noqa: DTZ007
+
+    # so we can use it to replace the hour and minute of the generated yesterdays date
     sleep_end_datetime: str = today_date.replace(
-        hour=end_sleep_time.hour,
-        minute=end_sleep_time.minute,
+        hour=polished_end_sleep_time.hour,
+        minute=polished_end_sleep_time.minute,
     ).isoformat(timespec="minutes")
 
     if sleep_quality is None:
