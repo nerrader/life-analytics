@@ -1,5 +1,6 @@
 import sqlite3
-from dataclasses import dataclass
+
+# from dataclasses import dataclass
 from importlib.resources import files
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -12,31 +13,31 @@ if TYPE_CHECKING:
 sql_dir: Traversable = files("life_analytics.sql")
 
 
-@dataclass(frozen=True)
-class DailySummaryRecord:
-    date: str
-    mood: int
-    productivity: int
-    stress: int
-
-
-@dataclass(frozen=True)
-class ActivityRecord:
-    activity_id: int
-    date: str
-    activity: str
-    activity_start: str
-    activity_end: str
-    difficulty: int
-    enjoyability: int
-
-
-@dataclass(frozen=True)
-class SleepRecord:
-    sleep_id: int
-    sleep_start_time: str
-    sleep_end_time: str
-    sleep_quality: int
+# @dataclass(frozen=True)
+# class DailySummaryRecord:
+#     date: str
+#     mood: int
+#     productivity: int
+#     stress: int
+#
+#
+# @dataclass(frozen=True)
+# class ActivityRecord:
+#     activity_id: int
+#     date: str
+#     activity: str
+#     activity_start: str
+#     activity_end: str
+#     difficulty: int
+#     enjoyability: int
+#
+#
+# @dataclass(frozen=True)
+# class SleepRecord:
+#     sleep_id: int
+#     sleep_start_time: str
+#     sleep_end_time: str
+#     sleep_quality: int
 
 
 def create_database(database_path: Path) -> None:
@@ -134,7 +135,7 @@ INSERT INTO sleep
 
 def fetch_daily_summaries_records(
     database_path: Path, limit: int | None = None
-) -> list[DailySummaryRecord]:
+) -> list[tuple]:
     query = "SELECT * FROM daily_summaries ORDER BY date DESC"
     params = []
 
@@ -142,17 +143,16 @@ def fetch_daily_summaries_records(
         query += "LIMIT (?)"
         params.append(limit)
 
-    print(query)
-
     with sqlite3.connect(database_path) as connection:
         cursor = connection.cursor()
         cursor.execute(query, params)
-        return [DailySummaryRecord(*row) for row in cursor.fetchall()]
+        return cursor.fetchall()
 
 
 def fetch_activities_records(
     database_path: Path, limit: int | None = None
-) -> list[ActivityRecord]:
+) -> list[tuple]:
+
     query = "SELECT * FROM activities ORDER BY activity_id DESC"
     params = []
 
@@ -160,17 +160,13 @@ def fetch_activities_records(
         query += "LIMIT (?)"
         params.append(limit)
 
-    print(query)
-
     with sqlite3.connect(database_path) as connection:
         cursor = connection.cursor()
         cursor.execute(query, params)
-        return [ActivityRecord(*row) for row in cursor.fetchall()]
+        return cursor.fetchall()
 
 
-def fetch_sleep_records(
-    database_path: Path, limit: int | None = None
-) -> list[SleepRecord]:
+def fetch_sleep_records(database_path: Path, limit: int | None = None) -> list[tuple]:
     query = "SELECT * FROM sleep ORDER BY sleep_id DESC"
     params = []
 
@@ -178,9 +174,7 @@ def fetch_sleep_records(
         query += "LIMIT (?)"
         params.append(limit)
 
-    print(query)
-
     with sqlite3.connect(database_path) as connection:
         cursor = connection.cursor()
         cursor.execute(query, params)
-        return [SleepRecord(*row) for row in cursor.fetchall()]
+        return cursor.fetchall()
