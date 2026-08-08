@@ -3,11 +3,16 @@ from pathlib import Path
 from typing import Annotated
 
 import typer
+from rich.console import Console
 
 from life_analytics import constants as const
-from life_analytics.logic import database, prompts, time_utils
+from life_analytics.logic import database, prompts, tables, time_utils
 
 app = typer.Typer()
+
+console = Console()
+
+VALID_TABLE_TYPES: tuple = ("summary", "activity", "sleep")
 
 
 @app.callback()
@@ -173,8 +178,43 @@ def add_sleep(
 
 
 @app.command("stats")
-def show_stats() -> None:
-    raise NotImplementedError("The 'stats' command is not yet implemented.")
+def show_stats(
+    context: typer.Context,
+    table_types: Annotated[
+        list[str] | None,
+        typer.Option("--table", "-t", help="The table to list"),
+    ] = None,
+) -> None:
+    database_path = context.obj["database_path"]
+    if table_types is None:
+        table_types = ["summary", "activity", "sleep"]
+    else:
+        if any(table_type not in VALID_TABLE_TYPES for table_type in table_types):
+            raise typer.BadParameter("Invalid table types.")
+
+    for table_type in table_types:
+        if table_type == "summary":
+            generated_table = tables.create_table(
+                database.fetch_daily_summaries_records(database_path),
+                tables.SUMMARY_COLUMNS,
+            )
+
+        elif table_type == "activity":
+            generated_table = tables.create_table(
+                database.fetch_activities_records(database_path),
+                tables.ACTIVITY_COLUMNS,
+            )
+
+        else:
+            generated_table = tables.create_table(
+                database.fetch_sleep_records(database_path), tables.SLEEP_COLUMNS
+            )
+
+        if generated_table is None:
+            print(f"There is no data inside the {table_type} table.")
+            continue
+
+        console.print(generated_table)
 
 
 @app.command("clear")
