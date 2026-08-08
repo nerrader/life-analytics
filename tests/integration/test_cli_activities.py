@@ -31,10 +31,19 @@ def test_activities_cli_command_creates_database_entry(tmp_path) -> None:
     assert result.exit_code == 0
 
     data = database.fetch_activities_records(temp_db_path)
-    test_activity: database.ActivityRecord = data[0]
+    (
+        _,
+        test_date,
+        test_activity_name,
+        test_activity_start_time,
+        test_activity_end_time,
+        test_activity_difficulty,
+        test_activity_enjoyability,
+    ) = data[0]
 
-    assert test_activity.activity == "integration testing"
-    assert test_activity.activity_start == "20:24"
-    assert test_activity.activity_end == "20:24"
-    assert test_activity.difficulty == 10
-    assert test_activity.enjoyability == 10
+    assert test_date
+    assert test_activity_name == "integration testing"
+    assert test_activity_start_time == "20:24"
+    assert test_activity_end_time == "20:24"
+    assert test_activity_difficulty == 10
+    assert test_activity_enjoyability == 10

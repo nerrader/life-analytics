@@ -27,9 +27,9 @@ def test_daily_summary_cli_command_creates_database_entry(tmp_path) -> None:
     assert result.exit_code == 0
 
     data = database.fetch_daily_summaries_records(temp_db_path)
-    test_summary: database.DailySummaryRecord = data[0]
+    test_date, test_mood, test_productivity, test_stress = data[0]
 
-    assert test_summary.date
-    assert test_summary.mood == 10
-    assert test_summary.productivity == 10
-    assert test_summary.stress == 10
+    assert test_date
+    assert test_mood == 10
+    assert test_productivity == 10
+    assert test_stress == 10
