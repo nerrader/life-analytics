@@ -1,6 +1,4 @@
 import sqlite3
-
-# from dataclasses import dataclass
 from importlib.resources import files
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -13,36 +11,11 @@ if TYPE_CHECKING:
 sql_dir: Traversable = files("life_analytics.sql")
 
 
-# @dataclass(frozen=True)
-# class DailySummaryRecord:
-#     date: str
-#     mood: int
-#     productivity: int
-#     stress: int
-#
-#
-# @dataclass(frozen=True)
-# class ActivityRecord:
-#     activity_id: int
-#     date: str
-#     activity: str
-#     activity_start: str
-#     activity_end: str
-#     difficulty: int
-#     enjoyability: int
-#
-#
-# @dataclass(frozen=True)
-# class SleepRecord:
-#     sleep_id: int
-#     sleep_start_time: str
-#     sleep_end_time: str
-#     sleep_quality: int
-
-
 def create_database(database_path: Path) -> None:
     database_path.parent.mkdir(parents=True, exist_ok=True)
+
     with sqlite3.connect(database_path) as connection:
+        # enable foreign keys
         connection.execute("PRAGMA foreign_keys = ON")
         connection.executescript((sql_dir / "schema.sql").read_text())
 
@@ -138,6 +111,15 @@ def _update_record(
     primary_key: str | int,
     fields: dict[str, Any],
 ) -> None:
+    """The helper method for all update record methods.
+
+    Args:
+        primary_key: The primary key to use to identify which record to update.
+        fields: The fields of the record to update.
+
+    Raises:
+        ValueError: If there are no valid fields to update, raise this error.
+    """
     validated_fields = {field: value for field, value in fields.items() if value}
     if not validated_fields:
         raise ValueError("There are no valid fields to update.")
@@ -155,27 +137,21 @@ def _update_record(
 def update_daily_summary_record(
     database_path: Path, date: str, fields: dict[str, Any]
 ) -> None:
-    """This updates a record in the daily_summaries table based on the date (primary key).
-
-    Args:
-        date: The date of the daily summary record you want to update.
-        fields: The fields that you want to update in the record.
-
-    Raises:
-        ValueError: If there are no valid fields to update.
-    """
+    """This updates a record in the daily_summaries table based on the date (primary key)."""
     _update_record(database_path, "daily_summaries", "date", date, fields)
 
 
 def update_activity_record(
     database_path: Path, activity_id: int, fields: dict[str, Any]
 ) -> None:
+    """This updates a record in the activities table based on the activity_id (primary key)."""
     _update_record(database_path, "activities", "activity_id", activity_id, fields)
 
 
 def update_sleep_record(
     database_path: Path, sleep_id: int, fields: dict[str, Any]
 ) -> None:
+    """This updates a record in the sleep table based on the sleep_id (primary key)."""
     _update_record(database_path, "sleep", "sleep_id", sleep_id, fields)
 
 
