@@ -159,12 +159,12 @@ def update_sleep_record(
 
 def fetch_daily_summaries_records(
     database_path: Path, limit: int | None = None
-) -> list[tuple[str, ...]]:
+) -> list[tuple[str, int, int, int]]:
     query = "SELECT * FROM daily_summaries ORDER BY date DESC"
     params = []
 
     if limit is not None:
-        query += "LIMIT (?)"
+        query += " LIMIT (?)"
         params.append(limit)
 
     with sqlite3.connect(database_path) as connection:
@@ -175,13 +175,13 @@ def fetch_daily_summaries_records(
 
 def fetch_activities_records(
     database_path: Path, limit: int | None = None
-) -> list[tuple[str, ...]]:
+) -> list[tuple[int, str, str, str, str, int, int]]:
 
     query = "SELECT * FROM activities ORDER BY activity_id DESC"
     params = []
 
     if limit is not None:
-        query += "LIMIT (?)"
+        query += " LIMIT (?)"
         params.append(limit)
 
     with sqlite3.connect(database_path) as connection:
@@ -192,12 +192,12 @@ def fetch_activities_records(
 
 def fetch_sleep_records(
     database_path: Path, limit: int | None = None
-) -> list[tuple[str, ...]]:
+) -> list[tuple[int, str, str, int]]:
     query = "SELECT * FROM sleep ORDER BY sleep_id DESC"
     params = []
 
     if limit is not None:
-        query += "LIMIT (?)"
+        query += " LIMIT (?)"
         params.append(limit)
 
     with sqlite3.connect(database_path) as connection:

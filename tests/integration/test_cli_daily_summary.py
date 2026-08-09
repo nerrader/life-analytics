@@ -1,10 +1,12 @@
+from pathlib import Path
+
 from typer.testing import CliRunner
 
 from life_analytics import cli
 from life_analytics.logic import database
 
 
-def test_daily_summary_cli_command_creates_database_entry(tmp_path) -> None:
+def test_daily_summary_cli_command_creates_database_entry(tmp_path: Path) -> None:
     temp_db_path = tmp_path / "test.db"
 
     database.create_database(temp_db_path)
