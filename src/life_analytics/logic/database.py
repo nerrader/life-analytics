@@ -3,7 +3,7 @@ import sqlite3
 # from dataclasses import dataclass
 from importlib.resources import files
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from importlib.resources.abc import Traversable
@@ -131,9 +131,28 @@ def add_sleep(
         )
 
 
-def update_daily_summary_record(
-    database_path: Path, date: str, fields: dict[str, Rating]
+def _update_record(
+    database_path: Path,
+    table_name: str,
+    primary_key_column: str,
+    primary_key: str | int,
+    fields: dict[str, Any],
 ):
+    validated_fields = {field: value for field, value in fields.items() if value}
+    if not validated_fields:
+        raise ValueError("There are no valid fields to update.")
+
+    update_statements = ", ".join(f"{field} = ?" for field in validated_fields)
+
+    query: str = (
+        f"UPDATE {table_name} SET {update_statements} WHERE {primary_key_column} = ?"
+    )
+
+    with sqlite3.connect(database_path) as connection:
+        connection.execute(query, (*validated_fields.values(), primary_key))
+
+
+def update_daily_summary_record(database_path: Path, date: str, fields: dict[str, Any]):
     """This updates a record in the daily_summaries table based on the date (primary key).
 
     Args:
@@ -143,24 +162,17 @@ def update_daily_summary_record(
     Raises:
         ValueError: If there are no valid fields to update.
     """
-    validated_fields = {field: value for field, value in fields.items() if value}
-    if not validated_fields:
-        raise ValueError("There are no valid fields to update.")
-
-    update_statements = ", ".join(f"{field} = ?" for field in fields)
-
-    query: str = f"UPDATE daily_summaries SET {update_statements} WHERE date = ?"
-
-    with sqlite3.connect(database_path) as connection:
-        connection.execute(query, (*validated_fields.values(), date))
+    _update_record(database_path, "daily_summaries", "date", date, fields)
 
 
-def update_activity_record(activity_id, fields: dict[str, Rating | str]):
-    raise NotImplementedError("update_activity_record() has not been implemented.")
+def update_activity_record(
+    database_path: Path, activity_id: int, fields: dict[str, Any]
+):
+    _update_record(database_path, "activities", "activity_id", activity_id, fields)
 
 
-def update_sleep_record(sleep_id, fields: dict[str, Rating | str]):
-    raise NotImplementedError("update_sleep_record() has not been implemented.")
+def update_sleep_record(database_path: Path, sleep_id: int, fields: dict[str, Any]):
+    _update_record(database_path, "sleep", "sleep_id", sleep_id, fields)
 
 
 def fetch_daily_summaries_records(

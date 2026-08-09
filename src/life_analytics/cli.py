@@ -47,7 +47,7 @@ def add_daily_summary(
         typer.Option(
             "--edit",
             "-e",
-            help="The summary date that you want to update in YYYY-MM-DD format.",
+            help="The record's date that you want updated in YYYY-MM-DD format.",
         ),
     ] = None,
     mood: Annotated[
@@ -65,11 +65,6 @@ def add_daily_summary(
 ) -> None:
     """Record a daily summary entry."""
     database_path = context.obj["database_path"]
-    date = datetime.now().date().isoformat()  # noqa: DTZ005
-
-    mood = mood or prompts.ask_rating_question("mood")
-    productivity = productivity or prompts.ask_rating_question("productivity")
-    stress = stress or prompts.ask_rating_question("stress")
 
     if edit:
         try:
@@ -85,6 +80,12 @@ def add_daily_summary(
             print("You passed in invalid values.")
         return
 
+    date = datetime.now().date().isoformat()  # noqa: DTZ005
+
+    mood = mood or prompts.ask_rating_question("mood")
+    productivity = productivity or prompts.ask_rating_question("productivity")
+    stress = stress or prompts.ask_rating_question("stress")
+
     database.add_daily_summary(
         database_path=database_path,
         date=date,
@@ -97,6 +98,12 @@ def add_daily_summary(
 @app.command("activity")
 def add_activity(
     context: typer.Context,
+    edit: Annotated[
+        int | None,
+        typer.Option(
+            "--edit", "-e", help="The record's Activity ID that you want to update."
+        ),
+    ] = None,
     activity_input: Annotated[
         str | None, typer.Option("--activity", "-a", help="The activity you did today.")
     ] = None,
@@ -104,7 +111,7 @@ def add_activity(
         str | None,
         typer.Option(
             "--start",
-            "-st",
+            "-as",  # stands for activity-start
             help="The time you started the activity (HH:MM, 24-hour format).",
         ),
     ] = None,
@@ -112,7 +119,7 @@ def add_activity(
         str | None,
         typer.Option(
             "--end",
-            "-e",
+            "-ae",  # stands for activity-end
             help="The time you ended the activity (HH:MM, 24-hour format).",
         ),
     ] = None,
@@ -131,6 +138,28 @@ def add_activity(
 ) -> None:
     """Record an activity entry."""
     database_path = context.obj["database_path"]
+
+    if edit:
+        try:
+            database.update_activity_record(
+                database_path,
+                edit,
+                {
+                    "activity": activity_input,
+                    "activity_start": activity_start_input,
+                    "activity_end": activity_end_input,
+                    "difficulty": difficulty,
+                    "enjoyability": enjoyability,
+                },
+            )
+        except ValueError as error:
+            print(error)
+
+        except sqlite3.IntegrityError:
+            print("You passed in invalid values.")
+
+        return
+
     date = datetime.now().date().isoformat()  # noqa: DTZ005
 
     activity = prompts.ask_activity_name("What did you do today?", activity_input)
@@ -160,18 +189,26 @@ def add_activity(
 @app.command("sleep")
 def add_sleep(
     context: typer.Context,
+    edit: Annotated[
+        int | None,
+        typer.Option(
+            "--edit",
+            "-e",
+            help="The record's Sleep ID that you want to be updated.",
+        ),
+    ] = None,
     sleep_start_input: Annotated[
         str | None,
         typer.Option(
             "--start",
-            "-st",
+            "-ss",
             help="The time you went to sleep yesterday (HH:MM, 24-hour format).",
         ),
     ] = None,
     sleep_end_input: Annotated[
         str | None,
         typer.Option(
-            "--end", "-e", help="The time you woke up today (HH:MM, 24-hour format)."
+            "--end", "-se", help="The time you woke up today (HH:MM, 24-hour format)."
         ),
     ] = None,
     sleep_quality: Annotated[
@@ -181,8 +218,36 @@ def add_sleep(
 ) -> None:
     """Record a sleep entry."""
     database_path = context.obj["database_path"]
+
     today_date = datetime.now().date()  # noqa: DTZ005
     yesterday_date = today_date - timedelta(days=1)
+
+    if edit:
+        try:
+            database.update_sleep_record(
+                database_path,
+                edit,
+                {
+                    "sleep_start_time": time_utils.combine_date_and_time(
+                        yesterday_date, sleep_start_input
+                    )
+                    if sleep_start_input
+                    else None,
+                    "sleep_end_time": time_utils.combine_date_and_time(
+                        today_date, sleep_end_input
+                    )
+                    if sleep_end_input
+                    else None,
+                    "sleep_quality": sleep_quality,
+                },
+            )
+        except ValueError as error:
+            print(error)
+
+        except sqlite3.IntegrityError:
+            print("You passed in invalid values.")
+
+        return
 
     start_sleep_time: str = prompts.ask_datetime_question(
         "your sleep start time", sleep_start_input
