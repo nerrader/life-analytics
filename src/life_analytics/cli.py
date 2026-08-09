@@ -82,9 +82,13 @@ def add_daily_summary(
 
     date = datetime.now().date().isoformat()  # noqa: DTZ005
 
-    mood = mood or prompts.ask_rating_question("mood")
-    productivity = productivity or prompts.ask_rating_question("productivity")
-    stress = stress or prompts.ask_rating_question("stress")
+    mood = mood or prompts.ask_rating_question("How was your mood today? (1-10)")
+    productivity = productivity or prompts.ask_rating_question(
+        "How was your productivity today? (1-10)"
+    )
+    stress = stress or prompts.ask_rating_question(
+        "How stressed were you today (1-10)?"
+    )
 
     database.add_daily_summary(
         database_path=database_path,
@@ -165,15 +169,19 @@ def add_activity(
     activity = prompts.ask_activity_name("What did you do today?", activity_input)
 
     activity_start = prompts.ask_datetime_question(
-        "activity start time", activity_start_input
+        "When did your activity start? (HH:MM)", activity_start_input
     )
 
     activity_end: str = prompts.ask_datetime_question(
-        "activity end time", activity_end_input
+        "When did your activity end? (HH:MM)", activity_end_input
     )
 
-    difficulty = difficulty or prompts.ask_rating_question("difficulty")
-    enjoyability = enjoyability or prompts.ask_rating_question("enjoyability")
+    difficulty = difficulty or prompts.ask_rating_question(
+        "How difficult was this activity? (1-10)"
+    )
+    enjoyability = enjoyability or prompts.ask_rating_question(
+        "How much did you enjoy this activity? (1-10)"
+    )
 
     database.add_activity(
         database_path=database_path,
@@ -250,20 +258,22 @@ def add_sleep(
         return
 
     start_sleep_time: str = prompts.ask_datetime_question(
-        "your sleep start time", sleep_start_input
+        "When did you start sleeping? (HH:MM)", sleep_start_input
     )
     sleep_start_datetime = time_utils.combine_date_and_time(
         yesterday_date, start_sleep_time
     ).isoformat(timespec="minutes")
 
     end_sleep_time: str = prompts.ask_datetime_question(
-        "your sleep end time", sleep_end_input
+        "When did you wake up? (HH:MM)", sleep_end_input
     )
     sleep_end_datetime = time_utils.combine_date_and_time(
         today_date, end_sleep_time
     ).isoformat(timespec="minutes")
 
-    sleep_quality = sleep_quality or prompts.ask_rating_question("sleep quality")
+    sleep_quality = sleep_quality or prompts.ask_rating_question(
+        "How was your sleep quality? (1-10)"
+    )
 
     database.add_sleep(
         database_path=database_path,

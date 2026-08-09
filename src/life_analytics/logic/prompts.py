@@ -22,7 +22,7 @@ def _validate_rating(value: str) -> Literal[True] | str:
     return "Please enter a value between 1 and 10."
 
 
-def ask_rating_question(prompt_var_name: str) -> Rating:
+def ask_rating_question(prompt: str) -> Rating:
     """The helper function to ask questions requiring rating in 1-10.
 
     Args:
@@ -32,7 +32,7 @@ def ask_rating_question(prompt_var_name: str) -> Rating:
         Rating: The rating value between 1 and 10.
     """
     rating: Rating | None = questionary.text(
-        f"Where 5 is the average, Rate your {prompt_var_name} out of 10:",
+        prompt,
         validate=_validate_rating,
     ).ask()
 
@@ -58,7 +58,7 @@ def _validate_datetime(value: str) -> Literal[True] | str:
         return "Please enter a valid time in HH:MM format."
 
 
-def ask_datetime_question(prompt_var_name: str, skip_value: str | None = None) -> str:
+def ask_datetime_question(prompt: str, skip_value: str | None = None) -> str:
     """The helper function to ask questions requiring datetime in HH:MM.
 
     Args:
@@ -72,7 +72,7 @@ def ask_datetime_question(prompt_var_name: str, skip_value: str | None = None) -
         return skip_value
 
     datetime_value: str | None = questionary.text(
-        f"Please enter the {prompt_var_name} in HH:MM format:",
+        prompt,
         validate=_validate_datetime,
     ).ask()
 
