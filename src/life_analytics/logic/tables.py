@@ -1,7 +1,9 @@
+from typing import Final
+
 from rich.table import Table
 
-SUMMARY_COLUMNS: tuple = ("Date", "Mood", "Productivity", "Stress")
-ACTIVITY_COLUMNS: tuple = (
+SUMMARY_COLUMNS: Final[tuple] = ("Date", "Mood", "Productivity", "Stress")
+ACTIVITY_COLUMNS: Final[tuple] = (
     "Activity ID",
     "Date",
     "Activity",
@@ -10,7 +12,7 @@ ACTIVITY_COLUMNS: tuple = (
     "Difficulty",
     "Enjoyability",
 )
-SLEEP_COLUMNS: tuple = (
+SLEEP_COLUMNS: Final[tuple] = (
     "Sleep ID",
     "Sleep Start Time",
     "Sleep End Time",

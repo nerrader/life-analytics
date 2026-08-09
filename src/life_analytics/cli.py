@@ -1,7 +1,7 @@
 import sqlite3
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Final
 
 import typer
 from rich.console import Console
@@ -14,7 +14,7 @@ app = typer.Typer()
 
 console = Console()
 
-VALID_TABLE_TYPES: tuple = ("summary", "activity", "sleep")
+VALID_TABLE_TYPES: Final[tuple] = ("summary", "activity", "sleep")
 
 
 @app.callback(invoke_without_command=True)
