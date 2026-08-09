@@ -6,6 +6,7 @@ import typer
 from rich.console import Console
 
 from life_analytics import constants as const
+from life_analytics.__init__ import __version__
 from life_analytics.logic import database, prompts, tables, time_utils
 
 app = typer.Typer()
@@ -15,16 +16,23 @@ console = Console()
 VALID_TABLE_TYPES: tuple = ("summary", "activity", "sleep")
 
 
-@app.callback()
+@app.callback(invoke_without_command=True)
 def main(
     context: typer.Context,
     database_path: Annotated[
         Path, typer.Option("--database-path", "-db", help="Path to the database file.")
     ] = const.DEFAULT_DATABASE_PATH,
+    version: Annotated[
+        bool, typer.Option("--version", "-v", help="Displays the version")
+    ] = False,
 ) -> None:
     """Main entry point for the CLI."""
     # this is so every command function can access the db path
     context.obj = {"database_path": database_path}
+
+    if version:
+        print(__version__)
+        return
 
     if not database_path.exists():
         database.create_database(database_path)
