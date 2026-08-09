@@ -4,7 +4,7 @@ from rich.table import Table
 from life_analytics.logic import tables
 
 
-def test_create_table_columns_and_rows():
+def test_create_table_columns_and_rows() -> None:
     table = tables.create_table(
         [("Alice", 10), ("Bob", 20)],
         ["Name", "Score"],
