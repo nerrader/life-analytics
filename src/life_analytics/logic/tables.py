@@ -2,8 +2,8 @@ from typing import Final
 
 from rich.table import Table
 
-SUMMARY_COLUMNS: Final[tuple] = ("Date", "Mood", "Productivity", "Stress")
-ACTIVITY_COLUMNS: Final[tuple] = (
+SUMMARY_COLUMNS: Final[tuple[str, ...]] = ("Date", "Mood", "Productivity", "Stress")
+ACTIVITY_COLUMNS: Final[tuple[str, ...]] = (
     "Activity ID",
     "Date",
     "Activity",
@@ -12,7 +12,7 @@ ACTIVITY_COLUMNS: Final[tuple] = (
     "Difficulty",
     "Enjoyability",
 )
-SLEEP_COLUMNS: Final[tuple] = (
+SLEEP_COLUMNS: Final[tuple[str, ...]] = (
     "Sleep ID",
     "Sleep Start Time",
     "Sleep End Time",
@@ -24,7 +24,9 @@ def to_db_column_name(column_name: str) -> str:
     return column_name.lower().replace(" ", "_")
 
 
-def create_table(data: list[tuple], columns: list[str] | tuple) -> Table | None:
+def create_table(
+    data: list[tuple[str, ...]], columns: list[str] | tuple[str, ...]
+) -> Table | None:
     if not data:
         return None
 

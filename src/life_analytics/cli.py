@@ -14,7 +14,7 @@ app = typer.Typer()
 
 console = Console()
 
-VALID_TABLE_TYPES: Final[tuple] = ("summary", "activity", "sleep")
+VALID_TABLE_TYPES: Final[tuple[str, ...]] = ("summary", "activity", "sleep")
 
 
 @app.callback(invoke_without_command=True)

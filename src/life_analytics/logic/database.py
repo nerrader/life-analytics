@@ -137,7 +137,7 @@ def _update_record(
     primary_key_column: str,
     primary_key: str | int,
     fields: dict[str, Any],
-):
+) -> None:
     validated_fields = {field: value for field, value in fields.items() if value}
     if not validated_fields:
         raise ValueError("There are no valid fields to update.")
@@ -152,7 +152,9 @@ def _update_record(
         connection.execute(query, (*validated_fields.values(), primary_key))
 
 
-def update_daily_summary_record(database_path: Path, date: str, fields: dict[str, Any]):
+def update_daily_summary_record(
+    database_path: Path, date: str, fields: dict[str, Any]
+) -> None:
     """This updates a record in the daily_summaries table based on the date (primary key).
 
     Args:
@@ -167,17 +169,19 @@ def update_daily_summary_record(database_path: Path, date: str, fields: dict[str
 
 def update_activity_record(
     database_path: Path, activity_id: int, fields: dict[str, Any]
-):
+) -> None:
     _update_record(database_path, "activities", "activity_id", activity_id, fields)
 
 
-def update_sleep_record(database_path: Path, sleep_id: int, fields: dict[str, Any]):
+def update_sleep_record(
+    database_path: Path, sleep_id: int, fields: dict[str, Any]
+) -> None:
     _update_record(database_path, "sleep", "sleep_id", sleep_id, fields)
 
 
 def fetch_daily_summaries_records(
     database_path: Path, limit: int | None = None
-) -> list[tuple]:
+) -> list[tuple[str, ...]]:
     query = "SELECT * FROM daily_summaries ORDER BY date DESC"
     params = []
 
@@ -193,7 +197,7 @@ def fetch_daily_summaries_records(
 
 def fetch_activities_records(
     database_path: Path, limit: int | None = None
-) -> list[tuple]:
+) -> list[tuple[str, ...]]:
 
     query = "SELECT * FROM activities ORDER BY activity_id DESC"
     params = []
@@ -208,7 +212,9 @@ def fetch_activities_records(
         return cursor.fetchall()
 
 
-def fetch_sleep_records(database_path: Path, limit: int | None = None) -> list[tuple]:
+def fetch_sleep_records(
+    database_path: Path, limit: int | None = None
+) -> list[tuple[str, ...]]:
     query = "SELECT * FROM sleep ORDER BY sleep_id DESC"
     params = []
 

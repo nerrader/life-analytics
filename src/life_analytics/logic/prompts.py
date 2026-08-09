@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 import questionary
 
@@ -7,7 +7,7 @@ if TYPE_CHECKING:
     from life_analytics.constants import Rating
 
 
-def _validate_rating(value: str) -> bool | str:
+def _validate_rating(value: str) -> Literal[True] | str:
     """To be passed into questionary validate keyword to validate rating questions.
 
     Args:
@@ -31,15 +31,18 @@ def ask_rating_question(prompt_var_name: str) -> Rating:
     Returns:
         Rating: The rating value between 1 and 10.
     """
-    rating = questionary.text(
+    rating: Rating | None = questionary.text(
         f"Where 5 is the average, Rate your {prompt_var_name} out of 10:",
         validate=_validate_rating,
     ).ask()
 
+    if rating is None:
+        raise RuntimeError("User skipped the rating question prompt.")
+
     return rating
 
 
-def _validate_datetime(value: str) -> bool | str:
+def _validate_datetime(value: str) -> Literal[True] | str:
     """To be passed into questionary validate keyword to validate datetime questions.
 
     Args:
@@ -68,10 +71,13 @@ def ask_datetime_question(prompt_var_name: str, skip_value: str | None = None) -
     if isinstance(skip_value, str) and _validate_datetime(skip_value):
         return skip_value
 
-    datetime_value = questionary.text(
+    datetime_value: str | None = questionary.text(
         f"Please enter the {prompt_var_name} in HH:MM format:",
         validate=_validate_datetime,
     ).ask()
+
+    if datetime_value is None:
+        raise RuntimeError("User cancelled the datetime question prompt.")
 
     return datetime_value
 
@@ -89,17 +95,20 @@ def ask_activity_name(prompt: str, skip_value: str | None = None) -> str:
     if isinstance(skip_value, str) and skip_value.strip():
         return skip_value
 
-    activity_name = questionary.text(
+    activity_name: str | None = questionary.text(
         prompt,
         validate=lambda text: (
             True if text.strip() else "Please enter a valid activity."
         ),
     ).ask()
 
+    if activity_name is None:
+        raise RuntimeError("User cancelled the activity name question prompt.")
+
     return activity_name
 
 
-def ask_for_confirmation(prompt: str, skip_value: bool | None = None):
+def ask_for_confirmation(prompt: str, skip_value: bool | None = None) -> bool:
     if skip_value:
         return True
-    return questionary.confirm(prompt, default=False).ask()
+    return questionary.confirm(prompt, default=False).ask() or False
