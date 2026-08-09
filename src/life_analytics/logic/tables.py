@@ -21,6 +21,14 @@ SLEEP_COLUMNS: Final[tuple[str, ...]] = (
 
 
 def to_db_column_name(column_name: str) -> str:
+    """Converts the capitalized, preferred names to the column names used by the databases.
+
+    Args:
+        column_name: The regular column name to convert.
+
+    Returns:
+        (str): The database column equivalent.
+    """
     return column_name.lower().replace(" ", "_")
 
 
