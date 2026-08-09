@@ -6,8 +6,8 @@ from typing import Annotated, Final
 import typer
 from rich.console import Console
 
+from life_analytics import __version__
 from life_analytics import constants as const
-from life_analytics.__init__ import __version__
 from life_analytics.logic import database, prompts, tables, time_utils
 
 app = typer.Typer()
