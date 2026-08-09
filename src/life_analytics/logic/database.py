@@ -93,6 +93,8 @@ def add_sleep(
     with sqlite3.connect(database_path) as connection:
         connection.execute(
             """
+    INSERT INTO sleep
+    (sleep_start_time,
     sleep_end_time,
     sleep_quality)
     VALUES (?, ?, ?)""",
