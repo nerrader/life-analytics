@@ -3,6 +3,7 @@ from rich.table import Table
 SUMMARY_COLUMNS: tuple = ("Date", "Mood", "Productivity", "Stress")
 ACTIVITY_COLUMNS: tuple = (
     "Activity ID",
+    "Date",
     "Activity",
     "Activity Start",
     "Activity End",
