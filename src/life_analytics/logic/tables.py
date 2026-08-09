@@ -17,6 +17,10 @@ SLEEP_COLUMNS: tuple = (
 )
 
 
+def to_db_column_name(column_name: str) -> str:
+    return column_name.lower().replace(" ", "_")
+
+
 def create_table(data: list[tuple], columns: list[str] | tuple) -> Table | None:
     if not data:
         return None
