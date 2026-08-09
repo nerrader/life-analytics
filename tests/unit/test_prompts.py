@@ -1,4 +1,11 @@
+from typing import TYPE_CHECKING
+
+import pytest
+
 from life_analytics.logic import prompts
+
+if TYPE_CHECKING:
+    from pytest_mock import MockerFixture
 
 
 def test_validate_datetime_with_valid_datetime() -> None:
@@ -22,3 +29,75 @@ def test_validate_rating_with_invalid_rating() -> None:
     assert isinstance(prompts._validate_rating("11"), str)
     assert isinstance(prompts._validate_rating("-1"), str)
     assert isinstance(prompts._validate_rating("0"), str)
+
+
+def test_rating_prompt_cancelled_raises_runtime_error(mocker: MockerFixture) -> None:
+    mock_rating_prompt = mocker.patch("questionary.text")
+
+    # simulate a keyboard interrupt
+    mock_rating_prompt.return_value.ask.return_value = None
+
+    with pytest.raises(RuntimeError):
+        prompts.ask_rating_question(
+            "If my code is correct, this should raise a RuntimeError"
+        )
+
+
+def test_rating_prompt_returns_correct_value(mocker: MockerFixture) -> None:
+    mock_rating_prompt = mocker.patch("questionary.text")
+    mock_rating_prompt.return_value.ask.return_value = 10
+
+    assert (
+        prompts.ask_rating_question("If my code is correct, this should return 10.")
+        == 10
+    )
+
+
+def test_datetime_prompt_cancelled_raises_runtime_error(mocker: MockerFixture) -> None:
+    mock_rating_prompt = mocker.patch("questionary.text")
+
+    # simulate a keyboard interrupt
+    mock_rating_prompt.return_value.ask.return_value = None
+
+    with pytest.raises(RuntimeError):
+        prompts.ask_datetime_question(
+            "If my code is correct, this should raise a RuntimeError"
+        )
+
+
+def test_datetime_prompt_returns_correct_value(mocker: MockerFixture) -> None:
+    mock_rating_prompt = mocker.patch("questionary.text")
+    mock_rating_prompt.return_value.ask.return_value = "19:49"
+
+    assert (
+        prompts.ask_datetime_question("If my code is correct, this should return 19:49")
+        == "19:49"
+    )
+
+
+def test_activity_name_prompt_cancelled_raises_runtime_error(
+    mocker: MockerFixture,
+) -> None:
+    mock_rating_prompt = mocker.patch("questionary.text")
+
+    # simulate a keyboard interrupt
+    mock_rating_prompt.return_value.ask.return_value = None
+
+    with pytest.raises(RuntimeError):
+        prompts.ask_activity_name(
+            "If my code is correct, this should raise a RuntimeError"
+        )
+
+
+def test_activity_name_prompt_returns_correct_value(mocker: MockerFixture) -> None:
+    mock_rating_prompt = mocker.patch("questionary.text")
+    mock_rating_prompt.return_value.ask.return_value = "Lunch"
+
+    assert (
+        prompts.ask_activity_name("If my code is correct, this should return Lunch")
+        == "Lunch"
+    )
+
+
+def test_ask_for_confirmation_skip_value() -> None:
+    assert prompts.ask_for_confirmation("Continue?", True) is True
