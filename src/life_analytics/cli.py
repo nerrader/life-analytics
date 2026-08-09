@@ -1,3 +1,4 @@
+import sqlite3
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Annotated
@@ -41,6 +42,14 @@ def main(
 @app.command("summary")
 def add_daily_summary(
     context: typer.Context,
+    edit: Annotated[
+        str | None,
+        typer.Option(
+            "--edit",
+            "-e",
+            help="The summary date that you want to update in YYYY-MM-DD format.",
+        ),
+    ] = None,
     mood: Annotated[
         const.Rating | None,
         typer.Option("--mood", "-m", help="Your mood today (1-10)."),
@@ -61,6 +70,20 @@ def add_daily_summary(
     mood = mood or prompts.ask_rating_question("mood")
     productivity = productivity or prompts.ask_rating_question("productivity")
     stress = stress or prompts.ask_rating_question("stress")
+
+    if edit:
+        try:
+            database.update_daily_summary_record(
+                database_path,
+                edit,
+                {"mood": mood, "productivity": productivity, "stress": stress},
+            )
+        except ValueError as error:
+            print(error)
+
+        except sqlite3.IntegrityError:
+            print("You passed in invalid values.")
+        return
 
     database.add_daily_summary(
         database_path=database_path,

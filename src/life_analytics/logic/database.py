@@ -120,8 +120,6 @@ def add_sleep(
     with sqlite3.connect(database_path) as connection:
         connection.execute(
             """
-INSERT INTO sleep
-    (sleep_start_time,
     sleep_end_time,
     sleep_quality)
     VALUES (?, ?, ?)""",
@@ -131,6 +129,38 @@ INSERT INTO sleep
                 sleep_quality,
             ),
         )
+
+
+def update_daily_summary_record(
+    database_path: Path, date: str, fields: dict[str, Rating]
+):
+    """This updates a record in the daily_summaries table based on the date (primary key).
+
+    Args:
+        date: The date of the daily summary record you want to update.
+        fields: The fields that you want to update in the record.
+
+    Raises:
+        ValueError: If there are no valid fields to update.
+    """
+    validated_fields = {field: value for field, value in fields.items() if value}
+    if not validated_fields:
+        raise ValueError("There are no valid fields to update.")
+
+    update_statements = ", ".join(f"{field} = ?" for field in fields)
+
+    query: str = f"UPDATE daily_summaries SET {update_statements} WHERE date = ?"
+
+    with sqlite3.connect(database_path) as connection:
+        connection.execute(query, (*validated_fields.values(), date))
+
+
+def update_activity_record(activity_id, fields: dict[str, Rating | str]):
+    raise NotImplementedError("update_activity_record() has not been implemented.")
+
+
+def update_sleep_record(sleep_id, fields: dict[str, Rating | str]):
+    raise NotImplementedError("update_sleep_record() has not been implemented.")
 
 
 def fetch_daily_summaries_records(
