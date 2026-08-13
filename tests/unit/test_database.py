@@ -8,14 +8,16 @@ from life_analytics.logic import database
 
 def test_add_daily_summary_with_valid_data(tmp_path: Path) -> None:
     database.create_database(tmp_path / "test.db")
-    database.add_daily_summary(tmp_path / "test.db", "2026-04-08", 10, 10, 10)
+    database.add_daily_summary(tmp_path / "test.db", "2026-04-08", 5, 5, 5)
 
     with sqlite3.connect(tmp_path / "test.db") as connection:
         cursor = connection.cursor()
-        cursor.execute("SELECT date, productivity, mood, stress FROM daily_summaries")
+        cursor.execute(
+            "SELECT summary_date, productivity, mood, stress FROM daily_summaries"
+        )
         test_row = cursor.fetchone()
 
-    assert test_row == ("2026-04-08", 10, 10, 10)
+    assert test_row == ("2026-04-08", 5, 5, 5)
 
 
 def test_add_daily_summary_with_invalid_data(tmp_path: Path) -> None:
@@ -24,23 +26,23 @@ def test_add_daily_summary_with_invalid_data(tmp_path: Path) -> None:
     # this is literally supposed to be invalid data for testing
     # which is why we have type: ignore[arg-type]
     with pytest.raises(sqlite3.IntegrityError):
-        database.add_daily_summary(tmp_path / "test.db", "2026-20-20", -500, 11, 0)  # type: ignore[arg-type]
+        database.add_daily_summary(tmp_path / "test.db", "2026-20-20", -500, 11, 0)
 
 
 def test_add_activity_with_valid_data(tmp_path: Path) -> None:
     database.create_database(tmp_path / "test.db")
     database.add_activity(
-        tmp_path / "test.db", "2026-20-20", "testing", "17:34", "20:08", 10, 10
+        tmp_path / "test.db", "2026-20-20", "testing", "17:34", "20:08", 5, 5
     )
 
     with sqlite3.connect(tmp_path / "test.db") as connection:
         cursor = connection.cursor()
         cursor.execute(
-            "SELECT activity_id, date, activity, activity_start, activity_end, difficulty, enjoyability FROM activities"
+            "SELECT activity_id, activity_date, activity, activity_start, activity_end, difficulty, enjoyability FROM activities"
         )
         test_row = cursor.fetchone()
 
-    assert test_row == (1, "2026-20-20", "testing", "17:34", "20:08", 10, 10)
+    assert test_row == (1, "2026-20-20", "testing", "17:34", "20:08", 5, 5)
 
 
 def test_add_activity_with_invalid_data(tmp_path: Path) -> None:
@@ -53,16 +55,16 @@ def test_add_activity_with_invalid_data(tmp_path: Path) -> None:
             tmp_path / "test.db",
             "2026-20-20",
             -500,  # type: ignore[arg-type]
-            100,  # type: ignore[arg-type]
+            50,  # type: ignore[arg-type]
             "99:99",
-            0,  # type: ignore[arg-type]
-            0,  # type: ignore[arg-type]
+            0,
+            0,
         )
 
 
 def test_add_sleep_with_valid_data(tmp_path: Path) -> None:
     database.create_database(tmp_path / "test.db")
-    database.add_sleep(tmp_path / "test.db", "2026-04-08T17:37", "2026-04-09T06:56", 10)
+    database.add_sleep(tmp_path / "test.db", "2026-04-08T17:37", "2026-04-09T06:56", 5)
 
     with sqlite3.connect(tmp_path / "test.db") as connection:
         cursor = connection.cursor()
@@ -71,7 +73,7 @@ def test_add_sleep_with_valid_data(tmp_path: Path) -> None:
         )
         test_row = cursor.fetchone()
 
-    assert test_row == (1, "2026-04-08T17:37", "2026-04-09T06:56", 10)
+    assert test_row == (1, "2026-04-08T17:37", "2026-04-09T06:56", 5)
 
 
 def test_add_sleep_with_invalid_data(tmp_path: Path) -> None:
@@ -80,4 +82,4 @@ def test_add_sleep_with_invalid_data(tmp_path: Path) -> None:
     # this is literally supposed to be invalid data for testing
     # which is why we have type: ignore[arg-type]
     with pytest.raises(sqlite3.IntegrityError):
-        database.add_sleep(tmp_path / "test.db", "2026-20-01", 10, 11)  # type: ignore[arg-type]
+        database.add_sleep(tmp_path / "test.db", "2026-20-01", 5, 11)  # type: ignore[arg-type]

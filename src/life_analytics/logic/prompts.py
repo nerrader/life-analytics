@@ -1,10 +1,7 @@
 from datetime import datetime
-from typing import TYPE_CHECKING, Literal
+from typing import Literal
 
 import questionary
-
-if TYPE_CHECKING:
-    from life_analytics.constants import Rating
 
 
 def _validate_rating(value: str) -> Literal[True] | str:
@@ -17,21 +14,26 @@ def _validate_rating(value: str) -> Literal[True] | str:
         bool | str: Returns True if the value is valid, otherwise returns a string with an error message.
     """
 
-    if value.isdigit() and 1 <= int(value) <= 10:
+    try:
+        rating = float(value)
+    except ValueError:
+        return "Please enter a value between 1 and 5."
+
+    if 1 <= rating <= 5:
         return True
-    return "Please enter a value between 1 and 10."
+    return "Please enter a value between 1 and 5."
 
 
-def ask_rating_question(prompt: str) -> Rating:
-    """The helper function to ask questions requiring rating in 1-10.
+def ask_rating_question(prompt: str) -> float:
+    """The helper function to ask questions requiring rating in 1-5.
 
     Args:
         prompt_var_name (str): The name of the variable to be prompted for.
 
     Returns:
-        Rating: The rating value between 1 and 10.
+        float: The rating value between 1 and 10.
     """
-    rating: Rating | None = questionary.text(
+    rating: float | None = questionary.text(
         prompt,
         validate=_validate_rating,
     ).ask()

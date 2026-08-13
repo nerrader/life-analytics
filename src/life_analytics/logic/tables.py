@@ -1,5 +1,5 @@
 from collections.abc import Sequence
-from typing import Final
+from typing import Any, Final
 
 from rich.table import Table
 
@@ -34,7 +34,7 @@ def to_db_column_name(column_name: str) -> str:
 
 
 def create_table(
-    data: Sequence[tuple[str | int, ...]], columns: list[str] | tuple[str, ...]
+    data: Sequence[Any], columns: list[str] | tuple[str, ...]
 ) -> Table | None:
     if not data:
         return None

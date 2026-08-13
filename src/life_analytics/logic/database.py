@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from importlib.resources.abc import Traversable
 
-    from life_analytics.constants import Rating
 
 sql_dir: Traversable = files("life_analytics.sql")
 
@@ -31,15 +30,15 @@ def clear_database(database_path: Path) -> None:
 def add_daily_summary(
     database_path: Path,
     date: str,
-    mood: Rating,
-    productivity: Rating,
-    stress: Rating,
+    mood: float,
+    productivity: float,
+    stress: float,
 ) -> None:
     with sqlite3.connect(database_path) as connection:
         connection.execute(
             """
 INSERT INTO daily_summaries
-    (date,
+    (summary_date,
     mood,
     productivity,
     stress)
@@ -59,14 +58,14 @@ def add_activity(
     activity: str,
     activity_start: str,
     activity_end: str,
-    difficulty: Rating,
-    enjoyability: Rating,
+    difficulty: float,
+    enjoyability: float,
 ) -> None:
     with sqlite3.connect(database_path) as connection:
         connection.execute(
             """
 INSERT INTO activities
-    (date,
+    (activity_date,
     activity,
     activity_start,
     activity_end,
@@ -88,7 +87,7 @@ def add_sleep(
     database_path: Path,
     sleep_start_datetime: str,
     sleep_end_datetime: str,
-    sleep_quality: Rating,
+    sleep_quality: float,
 ) -> None:
     with sqlite3.connect(database_path) as connection:
         connection.execute(
@@ -159,8 +158,8 @@ def update_sleep_record(
 
 def fetch_daily_summaries_records(
     database_path: Path, limit: int | None = None
-) -> list[tuple[str, int, int, int]]:
-    query = "SELECT * FROM daily_summaries ORDER BY date DESC"
+) -> list[tuple[str, int, float, float]]:
+    query = "SELECT * FROM daily_summaries ORDER BY summary_date DESC"
     params = []
 
     if limit is not None:
@@ -175,7 +174,7 @@ def fetch_daily_summaries_records(
 
 def fetch_activities_records(
     database_path: Path, limit: int | None = None
-) -> list[tuple[int, str, str, str, str, int, int]]:
+) -> list[tuple[int, str, str, str, str, float, float]]:
 
     query = "SELECT * FROM activities ORDER BY activity_id DESC"
     params = []
@@ -192,7 +191,7 @@ def fetch_activities_records(
 
 def fetch_sleep_records(
     database_path: Path, limit: int | None = None
-) -> list[tuple[int, str, str, int]]:
+) -> list[tuple[int, str, str, float]]:
     query = "SELECT * FROM sleep ORDER BY sleep_id DESC"
     params = []
 

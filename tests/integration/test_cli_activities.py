@@ -25,9 +25,9 @@ def test_activities_cli_command_creates_database_entry(tmp_path: Path) -> None:
             "--end",
             "20:24",
             "--difficulty",
-            "10",
+            "5",
             "--enjoyability",
-            "10",
+            "5",
         ],
     )
     assert result.exit_code == 0
@@ -47,5 +47,5 @@ def test_activities_cli_command_creates_database_entry(tmp_path: Path) -> None:
     assert test_activity_name == "integration testing"
     assert test_activity_start_time == "20:24"
     assert test_activity_end_time == "20:24"
-    assert test_activity_difficulty == 10
-    assert test_activity_enjoyability == 10
+    assert test_activity_difficulty == 5
+    assert test_activity_enjoyability == 5

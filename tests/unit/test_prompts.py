@@ -20,9 +20,11 @@ def test_validate_datetime_with_invalid_datetime() -> None:
 
 
 def test_validate_rating_with_valid_rating() -> None:
-    assert prompts._validate_rating("10") is True
+    assert prompts._validate_rating("3") is True
+    assert prompts._validate_rating("1.5") is True
+    assert prompts._validate_rating("4.234758") is True
     assert prompts._validate_rating("1") is True
-    assert prompts._validate_rating("4") is True
+    assert prompts._validate_rating("5") is True
 
 
 def test_validate_rating_with_invalid_rating() -> None:
@@ -45,11 +47,10 @@ def test_rating_prompt_cancelled_raises_runtime_error(mocker: MockerFixture) -> 
 
 def test_rating_prompt_returns_correct_value(mocker: MockerFixture) -> None:
     mock_rating_prompt = mocker.patch("questionary.text")
-    mock_rating_prompt.return_value.ask.return_value = 10
+    mock_rating_prompt.return_value.ask.return_value = 5
 
     assert (
-        prompts.ask_rating_question("If my code is correct, this should return 10.")
-        == 10
+        prompts.ask_rating_question("If my code is correct, this should return 5.") == 5
     )
 
 

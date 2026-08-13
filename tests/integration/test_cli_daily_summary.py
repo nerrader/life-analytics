@@ -19,11 +19,11 @@ def test_daily_summary_cli_command_creates_database_entry(tmp_path: Path) -> Non
             str(temp_db_path),
             "summary",
             "--mood",
-            "10",
+            "5",
             "--productivity",
-            "10",
+            "5",
             "--stress",
-            "10",
+            "5",
         ],
     )
     assert result.exit_code == 0
@@ -32,6 +32,6 @@ def test_daily_summary_cli_command_creates_database_entry(tmp_path: Path) -> Non
     test_date, test_mood, test_productivity, test_stress = data[0]
 
     assert test_date
-    assert test_mood == 10
-    assert test_productivity == 10
-    assert test_stress == 10
+    assert test_mood == 5
+    assert test_productivity == 5
+    assert test_stress == 5

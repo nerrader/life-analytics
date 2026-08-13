@@ -51,16 +51,16 @@ def add_daily_summary(
         ),
     ] = None,
     mood: Annotated[
-        const.Rating | None,
-        typer.Option("--mood", "-m", help="Your mood today (1-10)."),
+        float | None,
+        typer.Option("--mood", "-m", help="Your mood today (1-5)."),
     ] = None,
     productivity: Annotated[
-        const.Rating | None,
-        typer.Option("--productivity", "-p", help="Your productivity today (1-10)."),
+        float | None,
+        typer.Option("--productivity", "-p", help="Your productivity today (1-5)."),
     ] = None,
     stress: Annotated[
-        const.Rating | None,
-        typer.Option("--stress", "-s", help="Your stress level today (1-10)."),
+        float | None,
+        typer.Option("--stress", "-s", help="Your stress level today (1-5)."),
     ] = None,
 ) -> None:
     """Record a daily summary entry."""
@@ -82,13 +82,11 @@ def add_daily_summary(
 
     date = datetime.now().date().isoformat()  # noqa: DTZ005
 
-    mood = mood or prompts.ask_rating_question("How was your mood today? (1-10)")
+    mood = mood or prompts.ask_rating_question("How was your mood today? (1-5)")
     productivity = productivity or prompts.ask_rating_question(
-        "How was your productivity today? (1-10)"
+        "How was your productivity today? (1-5)"
     )
-    stress = stress or prompts.ask_rating_question(
-        "How stressed were you today (1-10)?"
-    )
+    stress = stress or prompts.ask_rating_question("How stressed were you today (1-5)?")
 
     database.add_daily_summary(
         database_path=database_path,
@@ -128,15 +126,15 @@ def add_activity(
         ),
     ] = None,
     difficulty: Annotated[
-        const.Rating | None,
+        float | None,
         typer.Option(
-            "--difficulty", "-d", help="The difficulty of the activity (1-10)."
+            "--difficulty", "-d", help="The difficulty of the activity (1-5)."
         ),
     ] = None,
     enjoyability: Annotated[
-        const.Rating | None,
+        float | None,
         typer.Option(
-            "--enjoyability", "-en", help="The enjoyability of the activity (1-10)."
+            "--enjoyability", "-en", help="The enjoyability of the activity (1-5)."
         ),
     ] = None,
 ) -> None:
@@ -177,10 +175,10 @@ def add_activity(
     )
 
     difficulty = difficulty or prompts.ask_rating_question(
-        "How difficult was this activity? (1-10)"
+        "How difficult was this activity? (1-5)"
     )
     enjoyability = enjoyability or prompts.ask_rating_question(
-        "How much did you enjoy this activity? (1-10)"
+        "How much did you enjoy this activity? (1-5)"
     )
 
     database.add_activity(
@@ -220,8 +218,8 @@ def add_sleep(
         ),
     ] = None,
     sleep_quality: Annotated[
-        const.Rating | None,
-        typer.Option("--quality", "-q", help="The quality of your sleep (1-10)."),
+        float | None,
+        typer.Option("--quality", "-q", help="The quality of your sleep (1-5)."),
     ] = None,
 ) -> None:
     """Record a sleep entry."""
@@ -272,7 +270,7 @@ def add_sleep(
     ).isoformat(timespec="minutes")
 
     sleep_quality = sleep_quality or prompts.ask_rating_question(
-        "How was your sleep quality? (1-10)"
+        "How was your sleep quality? (1-5)"
     )
 
     database.add_sleep(

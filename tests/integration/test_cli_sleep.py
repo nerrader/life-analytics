@@ -23,7 +23,7 @@ def test_sleep_cli_command_creates_database_entry(tmp_path: Path) -> None:
             "--end",
             "06:00",
             "--quality",
-            "10",
+            "5",
         ],
     )
     assert result.exit_code == 0
@@ -34,4 +34,4 @@ def test_sleep_cli_command_creates_database_entry(tmp_path: Path) -> None:
     # time in the sleep database in stored in YYYY-MM-DDTHH:MM which is why im using onnly the time here
     assert "21:00" in test_sleep_start
     assert "6:00" in test_sleep_end
-    assert test_sleep_quality == 10
+    assert test_sleep_quality == 5
