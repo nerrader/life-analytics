@@ -24,7 +24,7 @@ def test_activities_cli_command_creates_database_entry(tmp_path: Path) -> None:
             "20:24",
             "--end",
             "20:24",
-            "--difficulty",
+            "--effort",
             "5",
             "--enjoyability",
             "5",

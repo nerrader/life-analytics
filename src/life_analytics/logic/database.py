@@ -58,7 +58,7 @@ def add_activity(
     activity: str,
     activity_start: str,
     activity_end: str,
-    difficulty: float,
+    effort: float,
     enjoyability: float,
 ) -> None:
     with sqlite3.connect(database_path) as connection:
@@ -69,7 +69,7 @@ INSERT INTO activities
     activity,
     activity_start,
     activity_end,
-    difficulty,
+    effort,
     enjoyability)
     VALUES (?, ?, ?, ?, ?, ?)""",
             (
@@ -77,7 +77,7 @@ INSERT INTO activities
                 activity,
                 activity_start,
                 activity_end,
-                difficulty,
+                effort,
                 enjoyability,
             ),
         )

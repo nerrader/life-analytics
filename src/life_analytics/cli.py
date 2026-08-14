@@ -125,11 +125,9 @@ def add_activity(
             help="The time you ended the activity (HH:MM, 24-hour format).",
         ),
     ] = None,
-    difficulty: Annotated[
+    effort: Annotated[
         float | None,
-        typer.Option(
-            "--difficulty", "-d", help="The difficulty of the activity (1-5)."
-        ),
+        typer.Option("--effort", "-ef", help="The difficulty of the activity (1-5)."),
     ] = None,
     enjoyability: Annotated[
         float | None,
@@ -150,7 +148,7 @@ def add_activity(
                     "activity": activity_input,
                     "activity_start": activity_start_input,
                     "activity_end": activity_end_input,
-                    "difficulty": difficulty,
+                    "effort": effort,
                     "enjoyability": enjoyability,
                 },
             )
@@ -174,8 +172,8 @@ def add_activity(
         "When did your activity end? (HH:MM)", activity_end_input
     )
 
-    difficulty = difficulty or prompts.ask_rating_question(
-        "How difficult was this activity? (1-5)"
+    effort = effort or prompts.ask_rating_question(
+        "How much effort did you think this activity required? (1-5)"
     )
     enjoyability = enjoyability or prompts.ask_rating_question(
         "How much did you enjoy this activity? (1-5)"
@@ -187,7 +185,7 @@ def add_activity(
         activity=activity,
         activity_start=activity_start,
         activity_end=activity_end,
-        difficulty=difficulty,
+        effort=effort,
         enjoyability=enjoyability,
     )
 

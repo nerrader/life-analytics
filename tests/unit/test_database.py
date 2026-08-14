@@ -38,7 +38,7 @@ def test_add_activity_with_valid_data(tmp_path: Path) -> None:
     with sqlite3.connect(tmp_path / "test.db") as connection:
         cursor = connection.cursor()
         cursor.execute(
-            "SELECT activity_id, activity_date, activity, activity_start, activity_end, difficulty, enjoyability FROM activities"
+            "SELECT activity_id, activity_date, activity, activity_start, activity_end, effort, enjoyability FROM activities"
         )
         test_row = cursor.fetchone()
 
