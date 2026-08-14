@@ -1,7 +1,9 @@
 from datetime import datetime
-from typing import Literal
+from typing import Literal, cast
 
 import questionary
+
+from life_analytics import constants as const
 
 
 def _validate_rating(value: str) -> Literal[True] | str:
@@ -84,30 +86,54 @@ def ask_datetime_question(prompt: str, skip_value: str | None = None) -> str:
     return datetime_value
 
 
-def ask_activity_name(prompt: str, skip_value: str | None = None) -> str:
-    """The helper function to ask questions requiring datetime in HH:MM.
+def ask_activity_category(
+    prompt: str, skip_value: str | None = None
+) -> const.ActivityCategory:
+    """The helper function to ask questions about the category of an activity.
 
     Args:
         prompt (str): The questionary prompt.
         skip_value (str | None): If the provided value is valid, skip this question.
 
     Returns:
-        str: The datetime value in HH:MM format.
+        str: The category of the activity
     """
-    if isinstance(skip_value, str) and skip_value.strip():
-        return skip_value
+    if skip_value in const.VALID_ACTIVITY_CATEGORIES:
+        return cast(const.ActivityCategory, skip_value)
 
-    activity_name: str | None = questionary.text(
+    activity_category: const.ActivityCategory | None = questionary.text(
         prompt,
         validate=lambda text: (
-            True if text.strip() else "Please enter a valid activity."
+            True
+            if text in const.VALID_ACTIVITY_CATEGORIES
+            else "Please enter a valid activity category."
         ),
     ).ask()
 
-    if activity_name is None:
-        raise RuntimeError("User cancelled the activity name question prompt.")
+    if activity_category is None:
+        raise RuntimeError("The activity category prompt is cancelled.")
 
-    return activity_name
+    return activity_category
+
+
+def ask_activity_description(prompt: str, skip_value: str | None = None) -> str | None:
+    """The helper function to ask questions about the description of an activity.
+
+    Args:
+        prompt (str): The questionary prompt.
+        skip_value (str | None): If the provided value is valid, skip this question.
+
+    Returns:
+        str | None: The description of an activity.
+    """
+    if skip_value:
+        return skip_value
+
+    activity_description: str | None = questionary.text(
+        prompt,
+    ).ask()
+
+    return activity_description
 
 
 def ask_for_confirmation(prompt: str, skip_value: bool | None = None) -> bool:

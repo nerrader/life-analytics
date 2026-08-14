@@ -85,18 +85,18 @@ def test_activity_name_prompt_cancelled_raises_runtime_error(
     mock_rating_prompt.return_value.ask.return_value = None
 
     with pytest.raises(RuntimeError):
-        prompts.ask_activity_name(
+        prompts.ask_activity_category(
             "If my code is correct, this should raise a RuntimeError"
         )
 
 
 def test_activity_name_prompt_returns_correct_value(mocker: MockerFixture) -> None:
     mock_rating_prompt = mocker.patch("questionary.text")
-    mock_rating_prompt.return_value.ask.return_value = "Lunch"
+    mock_rating_prompt.return_value.ask.return_value = "MAINT"
 
     assert (
-        prompts.ask_activity_name("If my code is correct, this should return Lunch")
-        == "Lunch"
+        prompts.ask_activity_category("If my code is correct, this should return MAINT")
+        == "MAINT"
     )
 
 

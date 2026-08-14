@@ -8,7 +8,9 @@ CREATE TABLE IF NOT EXISTS daily_summaries (
 CREATE TABLE IF NOT EXISTS activities (
     activity_id INTEGER PRIMARY KEY AUTOINCREMENT,
     activity_date TEXT NOT NULL,
-    activity TEXT NOT NULL,
+    activity_category TEXT NOT NULL
+    CHECK (activity_category IN ('DEV', 'MAINT', 'SOCIAL', 'IDLE', 'SCHOOL')),
+    activity_description TEXT, -- the only nullable value
     activity_start TEXT NOT NULL, --iso string
     activity_end TEXT NOT NULL, --iso string
     effort INTEGER NOT NULL CHECK (effort BETWEEN 1 AND 5),

@@ -3,11 +3,17 @@ from typing import Any, Final
 
 from rich.table import Table
 
-SUMMARY_COLUMNS: Final[tuple[str, ...]] = ("Date", "Mood", "Productivity", "Stress")
+SUMMARY_COLUMNS: Final[tuple[str, ...]] = (
+    "Summary Date",
+    "Mood",
+    "Productivity",
+    "Stress",
+)
 ACTIVITY_COLUMNS: Final[tuple[str, ...]] = (
     "Activity ID",
-    "Date",
-    "Activity",
+    "Acitivity Date",
+    "Activity Category",
+    "Acitivity Description",
     "Activity Start",
     "Activity End",
     "Difficulty",

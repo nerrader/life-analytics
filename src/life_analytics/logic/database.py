@@ -1,7 +1,9 @@
 import sqlite3
 from importlib.resources import files
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
+
+from life_analytics import constants as const
 
 if TYPE_CHECKING:
     from importlib.resources.abc import Traversable
@@ -55,7 +57,8 @@ INSERT INTO daily_summaries
 def add_activity(
     database_path: Path,
     date: str,
-    activity: str,
+    activity_category: const.ActivityCategory,
+    activity_description: str | None,
     activity_start: str,
     activity_end: str,
     effort: float,
@@ -66,15 +69,17 @@ def add_activity(
             """
 INSERT INTO activities
     (activity_date,
-    activity,
+    activity_category,
+    activity_description,
     activity_start,
     activity_end,
     effort,
     enjoyability)
-    VALUES (?, ?, ?, ?, ?, ?)""",
+    VALUES (?, ?, ?, ?, ?, ?, ?)""",
             (
                 date,
-                activity,
+                activity_category,
+                activity_description,
                 activity_start,
                 activity_end,
                 effort,
@@ -107,7 +112,7 @@ def add_sleep(
 
 def _update_record(
     database_path: Path,
-    table_name: str,
+    table_name: Literal["daily_summaries", "activities", "sleep"],
     primary_key_column: str,
     primary_key: str | int,
     fields: dict[str, Any],
@@ -174,7 +179,7 @@ def fetch_daily_summaries_records(
 
 def fetch_activities_records(
     database_path: Path, limit: int | None = None
-) -> list[tuple[int, str, str, str, str, float, float]]:
+) -> list[tuple[int, str, const.ActivityCategory, str, str, str, float, float]]:
 
     query = "SELECT * FROM activities ORDER BY activity_id DESC"
     params = []

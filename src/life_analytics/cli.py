@@ -106,8 +106,13 @@ def add_activity(
             "--edit", "-e", help="The record's Activity ID that you want to update."
         ),
     ] = None,
-    activity_input: Annotated[
-        str | None, typer.Option("--activity", "-a", help="The activity you did today.")
+    activity_category_input: Annotated[
+        str | None,
+        typer.Option("--category", "-ac", help="The activity you did today."),
+    ] = None,
+    activity_description_input: Annotated[
+        str | None,
+        typer.Option("--description", "-ad", help="The activity you did today."),
     ] = None,
     activity_start_input: Annotated[
         str | None,
@@ -145,7 +150,8 @@ def add_activity(
                 database_path,
                 edit,
                 {
-                    "activity": activity_input,
+                    "activity_category_input": activity_category_input,
+                    "activity_description": activity_description_input,
                     "activity_start": activity_start_input,
                     "activity_end": activity_end_input,
                     "effort": effort,
@@ -162,7 +168,14 @@ def add_activity(
 
     date = datetime.now().date().isoformat()  # noqa: DTZ005
 
-    activity = prompts.ask_activity_name("What did you do today?", activity_input)
+    activity_category: const.ActivityCategory = prompts.ask_activity_category(
+        "What category would this activity fit into?", activity_category_input
+    )
+
+    activity_description: str | None = prompts.ask_activity_description(
+        "What would be a good description for this activity? (optional):",
+        activity_description_input,
+    )
 
     activity_start = prompts.ask_datetime_question(
         "When did your activity start? (HH:MM)", activity_start_input
@@ -182,7 +195,8 @@ def add_activity(
     database.add_activity(
         database_path=database_path,
         date=date,
-        activity=activity,
+        activity_description=activity_description,
+        activity_category=activity_category,
         activity_start=activity_start,
         activity_end=activity_end,
         effort=effort,

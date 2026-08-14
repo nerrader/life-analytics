@@ -18,7 +18,9 @@ def test_activities_cli_command_creates_database_entry(tmp_path: Path) -> None:
             "-db",
             str(temp_db_path),
             "activity",
-            "--activity",
+            "--category",
+            "DEV",
+            "--description",
             "integration testing",
             "--start",
             "20:24",
@@ -36,7 +38,8 @@ def test_activities_cli_command_creates_database_entry(tmp_path: Path) -> None:
     (
         _,
         test_date,
-        test_activity_name,
+        test_activity_category,
+        test_activity_description,
         test_activity_start_time,
         test_activity_end_time,
         test_activity_difficulty,
@@ -44,7 +47,8 @@ def test_activities_cli_command_creates_database_entry(tmp_path: Path) -> None:
     ) = data[0]
 
     assert test_date
-    assert test_activity_name == "integration testing"
+    assert test_activity_category == "DEV"
+    assert test_activity_description == "integration testing"
     assert test_activity_start_time == "20:24"
     assert test_activity_end_time == "20:24"
     assert test_activity_difficulty == 5
