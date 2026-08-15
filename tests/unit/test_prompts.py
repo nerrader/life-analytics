@@ -76,7 +76,19 @@ def test_datetime_prompt_returns_correct_value(mocker: MockerFixture) -> None:
     )
 
 
-def test_activity_name_prompt_cancelled_raises_runtime_error(
+def test_activity_category_prompt_skips_if_skip_value_is_valid(
+    mocker: MockerFixture,
+) -> None:
+    mock_activity_category_prompt = mocker.patch("questionary.text")
+
+    mock_activity_category_prompt.assert_not_called()
+    assert (
+        prompts.ask_activity_category("This question should be skipped.", "MAINT")
+        == "MAINT"
+    )
+
+
+def test_activity_category_prompt_cancelled_raises_runtime_error(
     mocker: MockerFixture,
 ) -> None:
     mock_rating_prompt = mocker.patch("questionary.text")
@@ -90,7 +102,7 @@ def test_activity_name_prompt_cancelled_raises_runtime_error(
         )
 
 
-def test_activity_name_prompt_returns_correct_value(mocker: MockerFixture) -> None:
+def test_activity_category_prompt_returns_correct_value(mocker: MockerFixture) -> None:
     mock_rating_prompt = mocker.patch("questionary.text")
     mock_rating_prompt.return_value.ask.return_value = "MAINT"
 
@@ -98,6 +110,10 @@ def test_activity_name_prompt_returns_correct_value(mocker: MockerFixture) -> No
         prompts.ask_activity_category("If my code is correct, this should return MAINT")
         == "MAINT"
     )
+
+
+# we will not test ask_activity_description()
+# since theres literally nothing worthwhile to test
 
 
 def test_ask_for_confirmation_skip_value() -> None:
