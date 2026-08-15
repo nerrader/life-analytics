@@ -10,7 +10,7 @@ name = "life-analytics"
 dynamic = ["version"]
 description = "A tracker to analyze my life"
 readme = "README.md"
-requires-python = ">=3.14"
+requires-python = ">=3.11"
 authors = [{ "name" = "nerrader", email = "nerrader@proton.me" }]
 dependencies = [
   "platformdirs>=4.11.0",
