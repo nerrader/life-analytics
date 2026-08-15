@@ -1,13 +1,10 @@
 import sqlite3
 from importlib.resources import files
+from importlib.resources.abc import Traversable
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Literal
+from typing import Any, Literal, cast
 
 from life_analytics import constants as const
-
-if TYPE_CHECKING:
-    from importlib.resources.abc import Traversable
-
 
 sql_dir: Traversable = files("life_analytics.sql")
 
@@ -217,3 +214,12 @@ def fetch_sleep_records(
         cursor = connection.cursor()
         cursor.execute(query, params)
         return cursor.fetchall()
+
+
+def fetch_sleep_record(
+    database_path: Path, sleep_id: int
+) -> tuple[int, str, str, float] | None:
+    with sqlite3.connect(database_path) as connection:
+        cursor = connection.cursor()
+        cursor.execute("SELECT * FROM sleep WHERE sleep_id = ?", (sleep_id,))
+        return cast(tuple[int, str, str, float], cursor.fetchone())

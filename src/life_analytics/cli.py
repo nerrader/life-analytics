@@ -268,20 +268,26 @@ def add_sleep(
 
     today_date = datetime.now().date()  # noqa: DTZ005
     yesterday_date = today_date - timedelta(days=1)
-
     if edit:
         try:
+            edit_sleep_record = database.fetch_sleep_record(database_path, edit)
+            if edit_sleep_record is None:
+                raise ValueError(f"Sleep record with ID {edit} does not exist.")
+
+            sleep_start_date = datetime.strptime(edit_sleep_record[1], "%Y-%m-%d")
+            sleep_end_date = datetime.strptime(edit_sleep_record[2], "%Y-%m-%d")
+
             database.update_sleep_record(
                 database_path,
                 edit,
                 {
                     "sleep_start_time": time_utils.combine_date_and_time(
-                        yesterday_date, sleep_start_input
+                        sleep_start_date, sleep_start_input
                     )
                     if sleep_start_input and time_utils.validate_time(sleep_start_input)
                     else None,
                     "sleep_end_time": time_utils.combine_date_and_time(
-                        today_date, sleep_end_input
+                        sleep_end_date, sleep_end_input
                     )
                     if sleep_end_input and time_utils.validate_time(sleep_end_input)
                     else None,
