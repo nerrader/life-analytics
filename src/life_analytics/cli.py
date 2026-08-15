@@ -74,10 +74,13 @@ def add_daily_summary(
                 {"mood": mood, "productivity": productivity, "stress": stress},
             )
         except ValueError as error:
-            print(error)
+            console.print(f"ERROR: {error}", style="red")
+            return
 
         except sqlite3.IntegrityError:
-            print("You passed in invalid values.")
+            console.print(
+                "ERROR: Failed to update record: Invalid values were passed to the database."
+            )
         return
 
     date = datetime.now().date().isoformat()  # noqa: DTZ005
@@ -88,13 +91,22 @@ def add_daily_summary(
     )
     stress = stress or prompts.ask_rating_question("How stressed were you today (1-5)?")
 
-    database.add_daily_summary(
-        database_path=database_path,
-        date=date,
-        mood=mood,
-        productivity=productivity,
-        stress=stress,
-    )
+    try:
+        database.add_daily_summary(
+            database_path=database_path,
+            date=date,
+            mood=mood,
+            productivity=productivity,
+            stress=stress,
+        )
+    except sqlite3.IntegrityError:
+        console.print(
+            """ERROR: Invalid values were provided.
+
+This is usually caused by your flag's values not being in the 1-5 constraint.
+Please check your values and try again.""",
+            style="red",
+        )
 
 
 @app.command("activity")
@@ -159,10 +171,14 @@ def add_activity(
                 },
             )
         except ValueError as error:
-            print(error)
+            console.print(f"ERROR: {error}", style="red")
+            return
 
         except sqlite3.IntegrityError:
-            print("You passed in invalid values.")
+            console.print(
+                "ERROR: Failed to update record: Invalid values were passed to the database.",
+                style="red",
+            )
 
         return
 
@@ -192,16 +208,25 @@ def add_activity(
         "How much did you enjoy this activity? (1-5)"
     )
 
-    database.add_activity(
-        database_path=database_path,
-        date=date,
-        activity_description=activity_description,
-        activity_category=activity_category,
-        activity_start=activity_start,
-        activity_end=activity_end,
-        effort=effort,
-        enjoyability=enjoyability,
-    )
+    try:
+        database.add_activity(
+            database_path=database_path,
+            date=date,
+            activity_description=activity_description,
+            activity_category=activity_category,
+            activity_start=activity_start,
+            activity_end=activity_end,
+            effort=effort,
+            enjoyability=enjoyability,
+        )
+    except sqlite3.IntegrityError:
+        console.print(
+            """ERROR: Invalid values were provided.
+
+This is usually caused by one of your flags having an invalid value.
+Please check your values and try again.""",
+            style="red",
+        )
 
 
 @app.command("sleep")
@@ -260,10 +285,14 @@ def add_sleep(
                 },
             )
         except ValueError as error:
-            print(error)
+            console.print(f"ERROR: {error}", style="red")
+            return
 
         except sqlite3.IntegrityError:
-            print("You passed in invalid values.")
+            console.print(
+                "ERROR: Failed to update record: Invalid values were passed in the database.",
+                style="red",
+            )
 
         return
 
@@ -285,12 +314,21 @@ def add_sleep(
         "How was your sleep quality? (1-5)"
     )
 
-    database.add_sleep(
-        database_path=database_path,
-        sleep_start_datetime=sleep_start_datetime,
-        sleep_end_datetime=sleep_end_datetime,
-        sleep_quality=sleep_quality,
-    )
+    try:
+        database.add_sleep(
+            database_path=database_path,
+            sleep_start_datetime=sleep_start_datetime,
+            sleep_end_datetime=sleep_end_datetime,
+            sleep_quality=sleep_quality,
+        )
+    except sqlite3.IntegrityError:
+        console.print(
+            """ERROR: Invalid values were provided.
+
+This is usually caused by one of your flags having an invalid value.
+Please check your values and try again.""",
+            style="red",
+        )
 
 
 @app.command("stats")
@@ -327,7 +365,9 @@ def show_stats(
             )
 
         if generated_table is None:
-            print(f"There is no data inside the {table_type} table.")
+            console.print(
+                f"There is no data inside the {table_type} table.", style="yellow"
+            )
             continue
 
         console.print(generated_table)
@@ -353,3 +393,7 @@ def clear_all_data(
 
     if clear_data_confirm:
         database.clear_database(database_path)
+        print("Successfully cleared data.")
+        return
+
+    print("Aborting clear command.")
