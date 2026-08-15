@@ -7,16 +7,16 @@ from life_analytics.logic import database
 
 
 def test_sleep_cli_command_creates_database_entry(tmp_path: Path) -> None:
-    temp_db_path = tmp_path / "test.db"
+    test_database_path = tmp_path / "test.db"
 
-    database.create_database(temp_db_path)
+    database.create_database(test_database_path)
     cli_runner = CliRunner()
 
     result = cli_runner.invoke(
         cli.app,
         [
             "-db",
-            str(temp_db_path),
+            str(test_database_path),
             "sleep",
             "--start",
             "21:00",
@@ -28,10 +28,79 @@ def test_sleep_cli_command_creates_database_entry(tmp_path: Path) -> None:
     )
     assert result.exit_code == 0
 
-    data = database.fetch_sleep_records(temp_db_path)
+    data = database.fetch_sleep_records(test_database_path)
     _, test_sleep_start, test_sleep_end, test_sleep_quality = data[0]
 
     # time in the sleep database in stored in YYYY-MM-DDTHH:MM which is why im using onnly the time here
     assert "21:00" in test_sleep_start
     assert "6:00" in test_sleep_end
     assert test_sleep_quality == 5
+
+
+def test_sleep_cli_command_updates_record(tmp_path: Path) -> None:
+    test_database_path = tmp_path / "test.db"
+
+    database.create_database(test_database_path)
+    cli_runner = CliRunner()
+
+    result1 = cli_runner.invoke(
+        cli.app,
+        [
+            "-db",
+            str(test_database_path),
+            "sleep",
+            "--start",
+            "21:00",
+            "--end",
+            "06:00",
+            "--quality",
+            "5",
+        ],
+    )
+    assert result1.exit_code == 0
+
+    result2 = cli_runner.invoke(
+        cli.app,
+        [
+            "-db",
+            str(test_database_path),
+            "sleep",
+            "--edit",
+            "1",
+            "--quality",
+            "1",
+        ],
+    )
+    assert result2.exit_code == 0
+
+    data = database.fetch_sleep_records(test_database_path)
+    _, test_sleep_start, test_sleep_end, test_sleep_quality = data[0]
+
+    # time in the sleep database in stored in YYYY-MM-DDTHH:MM which is why im using onnly the time here
+    assert "21:00" in test_sleep_start
+    assert "6:00" in test_sleep_end
+    assert test_sleep_quality == 1
+
+
+def test_sleep_cli_command_handles_invalid_values(tmp_path: Path) -> None:
+    test_database_path = tmp_path / "test.db"
+
+    database.create_database(test_database_path)
+    cli_runner = CliRunner()
+
+    result = cli_runner.invoke(
+        cli.app,
+        [
+            "-db",
+            str(test_database_path),
+            "sleep",
+            "--start",
+            "21:00",
+            "--end",
+            "06:00",
+            "--quality",
+            "-500",
+        ],
+    )
+    assert result.exit_code == 0
+    assert "ERROR:" in result.stdout
