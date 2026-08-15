@@ -44,3 +44,6 @@ exclude = [
 typeCheckingMode = "standard"
 venvPath = "."
 venv = ".venv"
+
+[tool.ruff.lint]
+ignore = ["DTZ007"]
