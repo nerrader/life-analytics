@@ -126,18 +126,18 @@ def _update_record(
     Raises:
         ValueError: If there are no valid fields to update, raise this error.
     """
-    validated_fields = {field: value for field, value in fields.items() if value}
-    if not validated_fields:
+    fields_to_update = {field: value for field, value in fields.items() if value}
+    if not fields_to_update:
         raise ValueError("There are no valid fields to update.")
 
-    update_statements = ", ".join(f"{field} = ?" for field in validated_fields)
+    update_statements = ", ".join(f"{field} = ?" for field in fields_to_update)
 
     query: str = (
         f"UPDATE {table_name} SET {update_statements} WHERE {primary_key_column} = ?"
     )
 
     with sqlite3.connect(database_path) as connection:
-        connection.execute(query, (*validated_fields.values(), primary_key))
+        connection.execute(query, (*fields_to_update.values(), primary_key))
 
 
 def update_daily_summary_record(
