@@ -72,16 +72,18 @@ def test_add_activity_with_invalid_data(tmp_path: Path) -> None:
 
 def test_add_sleep_with_valid_data(tmp_path: Path) -> None:
     database.create_database(tmp_path / "test.db")
-    database.add_sleep(tmp_path / "test.db", "2026-04-08T17:37", "2026-04-09T06:56", 5)
+    database.add_sleep(
+        tmp_path / "test.db", "2026-04-08T17:37", "2026-04-09T06:56", 5, "sleep"
+    )
 
     with sqlite3.connect(tmp_path / "test.db") as connection:
         cursor = connection.cursor()
         cursor.execute(
-            "SELECT sleep_id, sleep_start_time, sleep_end_time, sleep_quality FROM sleep"
+            "SELECT sleep_id, sleep_start_time, sleep_end_time, sleep_quality, sleep_type FROM sleep"
         )
         test_row = cursor.fetchone()
 
-    assert test_row == (1, "2026-04-08T17:37", "2026-04-09T06:56", 5)
+    assert test_row == (1, "2026-04-08T17:37", "2026-04-09T06:56", 5, "sleep")
 
 
 def test_add_sleep_with_invalid_data(tmp_path: Path) -> None:
@@ -90,4 +92,4 @@ def test_add_sleep_with_invalid_data(tmp_path: Path) -> None:
     # this is literally supposed to be invalid data for testing
     # which is why we have type: ignore[arg-type]
     with pytest.raises(sqlite3.IntegrityError):
-        database.add_sleep(tmp_path / "test.db", "2026-20-01", 5, 11)  # type: ignore[arg-type]
+        database.add_sleep(tmp_path / "test.db", "2026-20-01", 5, 11, "nap")  # type: ignore[arg-type]

@@ -18,3 +18,6 @@ VALID_ACTIVITY_CATEGORIES: Final[tuple[str, str, str, str, str]] = (
     "SPORTS",
     "IDLE",
 )
+
+SleepType = Literal["sleep", "nap"]
+VALID_SLEEP_TYPES: Final[tuple[str, str]] = ("sleep", "nap")

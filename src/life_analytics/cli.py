@@ -244,6 +244,14 @@ def add_sleep(
             help="The record's Sleep ID that you want to be updated.",
         ),
     ] = None,
+    nap: Annotated[
+        bool,
+        typer.Option(
+            "--nap",
+            "-n",
+            help="If this flag is provoked, treat this sleep entry as a nap (both times will be on the same date).",
+        ),
+    ] = False,
     sleep_start_input: Annotated[
         str | None,
         typer.Option(
@@ -268,14 +276,21 @@ def add_sleep(
 
     today_date = datetime.now().date()  # noqa: DTZ005
     yesterday_date = today_date - timedelta(days=1)
+
     if edit:
         try:
             edit_sleep_record = database.fetch_sleep_record(database_path, edit)
             if edit_sleep_record is None:
                 raise ValueError(f"Sleep record with ID {edit} does not exist.")
 
-            sleep_start_date = datetime.strptime(edit_sleep_record[1], "%Y-%m-%d")
-            sleep_end_date = datetime.strptime(edit_sleep_record[2], "%Y-%m-%d")
+            sleep_start_date = datetime.fromisoformat(edit_sleep_record[1]).date()
+            sleep_end_date = datetime.fromisoformat(edit_sleep_record[2]).date()
+
+            if nap:
+                console.print(
+                    "Sorry, you are not allowed to change a record's sleep_type.",
+                    style="yellow",
+                )
 
             database.update_sleep_record(
                 database_path,
@@ -310,7 +325,7 @@ def add_sleep(
         "When did you start sleeping? (HH:MM)", sleep_start_input
     )
     sleep_start_datetime = time_utils.combine_date_and_time(
-        yesterday_date, start_sleep_time
+        today_date if nap else yesterday_date, start_sleep_time
     ).isoformat(timespec="minutes")
 
     end_sleep_time: str = prompts.ask_datetime_question(
@@ -330,6 +345,7 @@ def add_sleep(
             sleep_start_datetime=sleep_start_datetime,
             sleep_end_datetime=sleep_end_datetime,
             sleep_quality=sleep_quality,
+            sleep_type="nap" if nap else "sleep",
         )
     except sqlite3.IntegrityError:
         console.print(

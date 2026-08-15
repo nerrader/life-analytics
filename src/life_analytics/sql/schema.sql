@@ -23,5 +23,6 @@ CREATE TABLE IF NOT EXISTS sleep (
     sleep_id INTEGER PRIMARY KEY AUTOINCREMENT,
     sleep_start_time TEXT NOT NULL, --iso string
     sleep_end_time TEXT NOT NULL, --iso string
-    sleep_quality INTEGER NOT NULL CHECK (sleep_quality BETWEEN 1 AND 5)
+    sleep_quality INTEGER NOT NULL CHECK (sleep_quality BETWEEN 1 AND 5),
+    sleep_type TEXT NOT NULL CHECK (sleep_type IN ("sleep", "nap"))
 );

@@ -90,6 +90,7 @@ def add_sleep(
     sleep_start_datetime: str,
     sleep_end_datetime: str,
     sleep_quality: float,
+    sleep_type: const.SleepType,
 ) -> None:
     with sqlite3.connect(database_path) as connection:
         connection.execute(
@@ -97,13 +98,10 @@ def add_sleep(
     INSERT INTO sleep
     (sleep_start_time,
     sleep_end_time,
-    sleep_quality)
-    VALUES (?, ?, ?)""",
-            (
-                sleep_start_datetime,
-                sleep_end_datetime,
-                sleep_quality,
-            ),
+    sleep_quality,
+    sleep_type)
+    VALUES (?, ?, ?, ?)""",
+            (sleep_start_datetime, sleep_end_datetime, sleep_quality, sleep_type),
         )
 
 
@@ -202,7 +200,7 @@ def fetch_activities_records(
 
 def fetch_sleep_records(
     database_path: Path, limit: int | None = None
-) -> list[tuple[int, str, str, float]]:
+) -> list[tuple[int, str, str, float, str]]:
     query = "SELECT * FROM sleep ORDER BY sleep_id DESC"
     params = []
 
@@ -218,8 +216,8 @@ def fetch_sleep_records(
 
 def fetch_sleep_record(
     database_path: Path, sleep_id: int
-) -> tuple[int, str, str, float] | None:
+) -> tuple[int, str, str, float, str] | None:
     with sqlite3.connect(database_path) as connection:
         cursor = connection.cursor()
         cursor.execute("SELECT * FROM sleep WHERE sleep_id = ?", (sleep_id,))
-        return cast(tuple[int, str, str, float], cursor.fetchone())
+        return cast(tuple[int, str, str, float, str], cursor.fetchone())
