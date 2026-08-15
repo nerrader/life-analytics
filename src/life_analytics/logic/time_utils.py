@@ -19,3 +19,15 @@ def combine_date_and_time(date: date, time: str | dt_time) -> datetime:
         hour=time_object.hour,
         minute=time_object.minute,
     )
+
+
+def validate_time(time: str | None) -> bool:
+    """Validates the time string. Returns True if time is valid, and vice versa."""
+    try:
+        if time is None:
+            return False
+        # all it does is just see if this code runs without errors
+        datetime.strptime(time, "%H:%M")  # noqa: DTZ007
+        return True
+    except ValueError:
+        return False

@@ -164,8 +164,12 @@ def add_activity(
                 {
                     "activity_category": activity_category_input,
                     "activity_description": activity_description_input,
-                    "activity_start": activity_start_input,
-                    "activity_end": activity_end_input,
+                    "activity_start": activity_start_input
+                    if time_utils.validate_time(activity_start_input)
+                    else None,
+                    "activity_end": activity_end_input
+                    if time_utils.validate_time(activity_end_input)
+                    else None,
                     "effort": effort,
                     "enjoyability": enjoyability,
                 },
@@ -274,12 +278,12 @@ def add_sleep(
                     "sleep_start_time": time_utils.combine_date_and_time(
                         yesterday_date, sleep_start_input
                     )
-                    if sleep_start_input
+                    if sleep_start_input and time_utils.validate_time(sleep_start_input)
                     else None,
                     "sleep_end_time": time_utils.combine_date_and_time(
                         today_date, sleep_end_input
                     )
-                    if sleep_end_input
+                    if sleep_end_input and time_utils.validate_time(sleep_end_input)
                     else None,
                     "sleep_quality": sleep_quality,
                 },
