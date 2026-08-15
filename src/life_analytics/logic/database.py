@@ -137,6 +137,15 @@ def _update_record(
     )
 
     with sqlite3.connect(database_path) as connection:
+        # this is just for the existence check
+        # so it doesnt silently fail if the primary key is not given
+        results = connection.execute(
+            f"SELECT 1 FROM {table_name} WHERE {primary_key_column} = ?", (primary_key,)
+        )
+
+        if results.fetchone() is None:
+            raise ValueError("Record to update does not exist.")
+
         connection.execute(query, (*fields_to_update.values(), primary_key))
 
 
@@ -144,7 +153,7 @@ def update_daily_summary_record(
     database_path: Path, date: str, fields: dict[str, Any]
 ) -> None:
     """This updates a record in the daily_summaries table based on the date (primary key)."""
-    _update_record(database_path, "daily_summaries", "date", date, fields)
+    _update_record(database_path, "daily_summaries", "summary_date", date, fields)
 
 
 def update_activity_record(

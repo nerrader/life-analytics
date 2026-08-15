@@ -162,7 +162,7 @@ def add_activity(
                 database_path,
                 edit,
                 {
-                    "activity_category_input": activity_category_input,
+                    "activity_category": activity_category_input,
                     "activity_description": activity_description_input,
                     "activity_start": activity_start_input,
                     "activity_end": activity_end_input,
@@ -223,8 +223,8 @@ def add_activity(
         console.print(
             """ERROR: Invalid values were provided.
 
-This is usually caused by one of your flags having an invalid value.
-Please check your values and try again.""",
+this is usually caused by one of your flags having an invalid value.
+please check your values and try again.""",
             style="red",
         )
 
