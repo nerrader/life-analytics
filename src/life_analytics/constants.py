@@ -8,15 +8,16 @@ DEFAULT_DATABASE_PATH: Final[Path] = (
 )
 
 # for static checking
-ActivityCategory = Literal["DEV", "MAINT", "SOCIAL", "SPORTS", "IDLE"]
+ActivityCategory = Literal["DEV", "MAINT", "SOCIAL", "SPORTS", "IDLE", "SCHOOL"]
 
 # for checking at runtime
-VALID_ACTIVITY_CATEGORIES: Final[tuple[str, str, str, str, str]] = (
+VALID_ACTIVITY_CATEGORIES: Final[tuple[str, str, str, str, str, str]] = (
     "DEV",
     "MAINT",
     "SOCIAL",
     "SPORTS",
     "IDLE",
+    "SCHOOL",
 )
 
 SleepType = Literal["sleep", "nap"]

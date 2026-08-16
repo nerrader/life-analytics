@@ -9,7 +9,16 @@ CREATE TABLE IF NOT EXISTS activities (
     activity_id INTEGER PRIMARY KEY AUTOINCREMENT,
     activity_date TEXT NOT NULL,
     activity_category TEXT NOT NULL
-    CHECK (activity_category IN ('DEV', 'MAINT', 'SOCIAL', 'IDLE', 'SCHOOL')),
+    CHECK (
+        activity_category IN (
+            'DEV',
+            'MAINT',
+            'SOCIAL',
+            'IDLE',
+            'SCHOOL',
+            'SPORTS'
+        )
+    ),
     activity_description TEXT, -- the only nullable value
     activity_start TEXT NOT NULL, --iso string
     activity_end TEXT NOT NULL, --iso string
