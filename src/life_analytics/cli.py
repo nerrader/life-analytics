@@ -77,9 +77,12 @@ def add_daily_summary(
             console.print(f"ERROR: {error}", style="red")
             return
 
-        except sqlite3.IntegrityError:
+        except sqlite3.IntegrityError as error:
             console.print(
-                "ERROR: Failed to update record: Invalid values were passed to the database."
+                f"""ERROR: Failed to update record: Invalid values were passed to the database.
+
+Full Error Message:
+{error}"""
             )
         return
 
@@ -99,12 +102,14 @@ def add_daily_summary(
             productivity=productivity,
             stress=stress,
         )
-    except sqlite3.IntegrityError:
+    except sqlite3.IntegrityError as error:
         console.print(
-            """ERROR: Invalid values were provided.
+            f"""ERROR: Invalid values were provided.
 
 This is usually caused by your flag's values not being in the 1-5 constraint.
-Please check your values and try again.""",
+Please check your values and try again.
+
+Full Error Message: {error}""",
             style="red",
         )
 
@@ -178,9 +183,12 @@ def add_activity(
             console.print(f"ERROR: {error}", style="red")
             return
 
-        except sqlite3.IntegrityError:
+        except sqlite3.IntegrityError as error:
             console.print(
-                "ERROR: Failed to update record: Invalid values were passed to the database.",
+                f"""ERROR: Failed to update record: Invalid values were passed to the database.
+
+Full Error Message:
+{error}""",
                 style="red",
             )
 
@@ -223,12 +231,15 @@ def add_activity(
             effort=effort,
             enjoyability=enjoyability,
         )
-    except sqlite3.IntegrityError:
+    except sqlite3.IntegrityError as error:
         console.print(
-            """ERROR: Invalid values were provided.
+            f"""ERROR: Invalid values were provided.
 
-this is usually caused by one of your flags having an invalid value.
-please check your values and try again.""",
+This is usually caused by one of your flags having an invalid value.
+Please check your values and try again.
+
+Full Error Message:
+{error}""",
             style="red",
         )
 
@@ -313,9 +324,12 @@ def add_sleep(
             console.print(f"ERROR: {error}", style="red")
             return
 
-        except sqlite3.IntegrityError:
+        except sqlite3.IntegrityError as error:
             console.print(
-                "ERROR: Failed to update record: Invalid values were passed in the database.",
+                f"""ERROR: Failed to update record: Invalid values were passed in the database.
+
+Full Error Message:
+{error}""",
                 style="red",
             )
 
@@ -347,12 +361,15 @@ def add_sleep(
             sleep_quality=sleep_quality,
             sleep_type="nap" if nap else "sleep",
         )
-    except sqlite3.IntegrityError:
+    except sqlite3.IntegrityError as error:
         console.print(
-            """ERROR: Invalid values were provided.
+            f"""ERROR: Invalid values were provided.
 
 This is usually caused by one of your flags having an invalid value.
-Please check your values and try again.""",
+Please check your values and try again.
+
+Full Error Message:
+{error}""",
             style="red",
         )
 
