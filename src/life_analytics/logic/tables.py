@@ -16,7 +16,7 @@ ACTIVITY_COLUMNS: Final[tuple[str, ...]] = (
     "Acitivity Description",
     "Activity Start",
     "Activity End",
-    "Difficulty",
+    "Effort",
     "Enjoyability",
 )
 SLEEP_COLUMNS: Final[tuple[str, ...]] = (
