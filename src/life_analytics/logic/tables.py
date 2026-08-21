@@ -24,6 +24,7 @@ SLEEP_COLUMNS: Final[tuple[str, ...]] = (
     "Sleep Start Time",
     "Sleep End Time",
     "Sleep Quality",
+    "Sleep Type",
 )
 
 
