@@ -47,7 +47,7 @@ def add_daily_summary(
         typer.Option(
             "--edit",
             "-e",
-            help="The record's date that you want updated in YYYY-MM-DD format.",
+            help="The record's date to edit (YYYY-MM-DD). Use the flags/options to update the specific fields. Interactive mode cannot be used when editing.",
         ),
     ] = None,
     mood: Annotated[
@@ -63,7 +63,7 @@ def add_daily_summary(
         typer.Option("--stress", "-s", help="Your stress levels today (1-5)."),
     ] = None,
 ) -> None:
-    """Record a daily summary entry."""
+    """Record a daily summary entry. Omitting the *optional* flags will trigger interactive mode."""
     database_path = context.obj["database_path"]
 
     if edit:
@@ -120,7 +120,9 @@ def add_activity(
     edit: Annotated[
         int | None,
         typer.Option(
-            "--edit", "-e", help="The record's Activity ID that you want to update."
+            "--edit",
+            "-e",
+            help="The record's Activity ID to edit. Use the flags/options to update the specific fields. Interactive mode cannot be used when editing.",
         ),
     ] = None,
     activity_category_input: Annotated[
@@ -174,7 +176,7 @@ def add_activity(
         ),
     ] = None,
 ) -> None:
-    """Record an activity entry."""
+    """Record an activity entry. Omitting the *optional* flags will trigger interactive mode."""
     database_path = context.obj["database_path"]
 
     if edit:
@@ -281,7 +283,7 @@ def add_sleep(
         typer.Option(
             "--edit",
             "-e",
-            help="The record's Sleep ID that you want to be updated.",
+            help="The record's Sleep ID to edit. Use the flags/options to update the specific fields. Interactive mode cannot be used when editing.",
         ),
     ] = None,
     nap: Annotated[
@@ -311,7 +313,7 @@ def add_sleep(
         typer.Option("--quality", "-q", help="The quality of your sleep (1-5)."),
     ] = None,
 ) -> None:
-    """Record a sleep entry."""
+    """Record a sleep entry. Omitting the *optional* flags will trigger interactive mode."""
     database_path = context.obj["database_path"]
 
     today_date = datetime.now().date()  # noqa: DTZ005
@@ -421,6 +423,7 @@ def show_stats(
         typer.Option("--limit", "-l", help="The limit of rows to fetch"),
     ] = None,
 ) -> None:
+    """Display all-time daily summaries, activities, and sleep"""
     database_path = context.obj["database_path"]
     if table_types is None:
         table_types = ["summary", "activity", "sleep"]
@@ -462,11 +465,7 @@ def clear_all_data(
         bool | None, typer.Option("--skip", "-s", help="Skips the confirmation prompt.")
     ] = None,
 ) -> None:
-    """Removes all tracking data from the database.
-
-    Args:
-        skip_confirm (bool, Optional): If this flag is invoked, it skips the confirmation prompt.
-    """
+    """Removes all tracking data from the database."""
     database_path = context.obj["database_path"]
 
     clear_data_confirm = prompts.ask_for_confirmation(
