@@ -60,7 +60,7 @@ def add_daily_summary(
     ] = None,
     stress: Annotated[
         float | None,
-        typer.Option("--stress", "-s", help="Your stress level today (1-5)."),
+        typer.Option("--stress", "-s", help="Your stress levels today (1-5)."),
     ] = None,
 ) -> None:
     """Record a daily summary entry."""
@@ -125,11 +125,15 @@ def add_activity(
     ] = None,
     activity_category_input: Annotated[
         str | None,
-        typer.Option("--category", "-ac", help="The activity you did today."),
+        typer.Option(
+            "--category",
+            "-ac",
+            help="The category of the activity you did today. Available categories are: 'IDLE', 'MAINT', 'DEV', 'SCHOOL', 'SPORTS', 'SOCIAL'.",
+        ),
     ] = None,
     activity_description_input: Annotated[
         str | None,
-        typer.Option("--description", "-ad", help="The activity you did today."),
+        typer.Option("--description", "-ad", help="Further describe your activity."),
     ] = None,
     activity_start_input: Annotated[
         str | None,
@@ -379,7 +383,11 @@ def show_stats(
     context: typer.Context,
     table_types: Annotated[
         list[str] | None,
-        typer.Option("--table", "-t", help="The table to list"),
+        typer.Option(
+            "--table",
+            "-t",
+            help="The table to list. Available options are: 'summary', 'activity', 'sleep'.",
+        ),
     ] = None,
     limit: Annotated[
         int | None,
