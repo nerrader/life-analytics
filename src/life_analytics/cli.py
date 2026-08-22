@@ -381,6 +381,10 @@ def show_stats(
         list[str] | None,
         typer.Option("--table", "-t", help="The table to list"),
     ] = None,
+    limit: Annotated[
+        int | None,
+        typer.Option("--limit", "-l", help="The limit of rows to fetch"),
+    ] = None,
 ) -> None:
     database_path = context.obj["database_path"]
     if table_types is None:
@@ -392,19 +396,19 @@ def show_stats(
     for table_type in table_types:
         if table_type == "summary":
             generated_table = tables.create_table(
-                database.fetch_daily_summaries_records(database_path),
+                database.fetch_daily_summaries_records(database_path, limit),
                 tables.SUMMARY_COLUMNS,
             )
 
         elif table_type == "activity":
             generated_table = tables.create_table(
-                database.fetch_activities_records(database_path),
+                database.fetch_activities_records(database_path, limit),
                 tables.ACTIVITY_COLUMNS,
             )
 
         else:
             generated_table = tables.create_table(
-                database.fetch_sleep_records(database_path), tables.SLEEP_COLUMNS
+                database.fetch_sleep_records(database_path, limit), tables.SLEEP_COLUMNS
             )
 
         if generated_table is None:
