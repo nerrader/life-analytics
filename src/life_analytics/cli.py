@@ -161,6 +161,18 @@ def add_activity(
             "--enjoyability", "-en", help="The enjoyability of the activity (1-5)."
         ),
     ] = None,
+    energy_before: Annotated[
+        float | None,
+        typer.Option(
+            "--energy-before", "-eb", help="Your energy before the activity (1-5)."
+        ),
+    ] = None,
+    energy_after: Annotated[
+        float | None,
+        typer.Option(
+            "--energy-after", "-ea", help="Your energy after the activity (1-5)."
+        ),
+    ] = None,
 ) -> None:
     """Record an activity entry."""
     database_path = context.obj["database_path"]
@@ -181,6 +193,8 @@ def add_activity(
                     else None,
                     "effort": effort,
                     "enjoyability": enjoyability,
+                    "energy_before": energy_before,
+                    "energy_after": energy_after,
                 },
             )
         except ValueError as error:
@@ -220,8 +234,17 @@ Full Error Message:
     effort = effort or prompts.ask_rating_question(
         "How much effort did you think this activity required? (1-5)"
     )
+
     enjoyability = enjoyability or prompts.ask_rating_question(
         "How much did you enjoy this activity? (1-5)"
+    )
+
+    energy_before = energy_before or prompts.ask_rating_question(
+        "How much energy did you have before your activity? (1-5)"
+    )
+
+    energy_after = energy_after or prompts.ask_rating_question(
+        "How much energy did you have after your activity? (1-5)"
     )
 
     try:
@@ -234,6 +257,8 @@ Full Error Message:
             activity_end=activity_end,
             effort=effort,
             enjoyability=enjoyability,
+            energy_before=energy_before,
+            energy_after=energy_after,
         )
     except sqlite3.IntegrityError as error:
         console.print(
@@ -342,6 +367,7 @@ Full Error Message:
     start_sleep_time: str = prompts.ask_datetime_question(
         "When did you start sleeping? (HH:MM)", sleep_start_input
     )
+
     sleep_start_datetime = time_utils.combine_date_and_time(
         today_date if nap else yesterday_date, start_sleep_time
     ).isoformat(timespec="minutes")
@@ -349,6 +375,7 @@ Full Error Message:
     end_sleep_time: str = prompts.ask_datetime_question(
         "When did you wake up? (HH:MM)", sleep_end_input
     )
+
     sleep_end_datetime = time_utils.combine_date_and_time(
         today_date, end_sleep_time
     ).isoformat(timespec="minutes")

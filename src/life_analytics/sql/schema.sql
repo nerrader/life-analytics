@@ -24,6 +24,8 @@ CREATE TABLE IF NOT EXISTS activities (
     activity_end TEXT NOT NULL, --iso string
     effort INTEGER NOT NULL CHECK (effort BETWEEN 1 AND 5),
     enjoyability INTEGER NOT NULL CHECK (enjoyability BETWEEN 1 AND 5),
+    energy_before INTEGER NOT NULL CHECK (energy_before BETWEEN 1 AND 5),
+    energy_after INTEGER NOT NULL CHECK (energy_after BETWEEN 1 AND 5),
 
     FOREIGN KEY (activity_date) REFERENCES daily_summaries (summary_date)
 );

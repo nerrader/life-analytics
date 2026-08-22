@@ -60,6 +60,8 @@ def add_activity(
     activity_end: str,
     effort: float,
     enjoyability: float,
+    energy_before: float,
+    energy_after: float,
 ) -> None:
     with sqlite3.connect(database_path) as connection:
         connection.execute(
@@ -71,8 +73,10 @@ INSERT INTO activities
     activity_start,
     activity_end,
     effort,
-    enjoyability)
-    VALUES (?, ?, ?, ?, ?, ?, ?)""",
+    enjoyability,
+    energy_before,
+    energy_after)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             (
                 date,
                 activity_category,
@@ -81,6 +85,8 @@ INSERT INTO activities
                 activity_end,
                 effort,
                 enjoyability,
+                energy_before,
+                energy_after,
             ),
         )
 
@@ -183,7 +189,9 @@ def fetch_daily_summaries_records(
 
 def fetch_activities_records(
     database_path: Path, limit: int | None = None
-) -> list[tuple[int, str, const.ActivityCategory, str, str, str, float, float]]:
+) -> list[
+    tuple[int, str, const.ActivityCategory, str, str, str, float, float, float, float]
+]:
 
     query = "SELECT * FROM activities ORDER BY activity_id DESC"
     params = []

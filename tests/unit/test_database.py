@@ -40,16 +40,29 @@ def test_add_activity_with_valid_data(tmp_path: Path) -> None:
         "20:08",
         5,
         5,
+        5,
+        5,
     )
 
     with sqlite3.connect(tmp_path / "test.db") as connection:
         cursor = connection.cursor()
         cursor.execute(
-            "SELECT activity_id, activity_date, activity_category, activity_description, activity_start, activity_end, effort, enjoyability FROM activities"
+            "SELECT activity_id, activity_date, activity_category, activity_description, activity_start, activity_end, effort, enjoyability, energy_before, energy_after FROM activities"
         )
         test_row = cursor.fetchone()
 
-    assert test_row == (1, "2026-20-20", "DEV", "unit testing", "17:34", "20:08", 5, 5)
+    assert test_row == (
+        1,
+        "2026-20-20",
+        "DEV",
+        "unit testing",
+        "17:34",
+        "20:08",
+        5,
+        5,
+        5,
+        5,
+    )
 
 
 def test_add_activity_with_invalid_data(tmp_path: Path) -> None:
@@ -67,6 +80,8 @@ def test_add_activity_with_invalid_data(tmp_path: Path) -> None:
             activity_end="99:99",
             effort=0,
             enjoyability=0,
+            energy_before=5,
+            energy_after=5,
         )
 
 

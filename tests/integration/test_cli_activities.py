@@ -30,6 +30,10 @@ def test_activities_cli_command_creates_database_entry(tmp_path: Path) -> None:
             "5",
             "--enjoyability",
             "5",
+            "--energy-before",
+            "5",
+            "--energy-after",
+            "5",
         ],
     )
     assert result.exit_code == 0
@@ -38,21 +42,25 @@ def test_activities_cli_command_creates_database_entry(tmp_path: Path) -> None:
     (
         _,
         test_date,
-        test_activity_category,
-        test_activity_description,
-        test_activity_start_time,
-        test_activity_end_time,
-        test_activity_effort,
-        test_activity_enjoyability,
+        test_category,
+        test_description,
+        test_start_time,
+        test_end_time,
+        test_effort,
+        test_enjoyability,
+        test_energy_before,
+        test_energy_after,
     ) = data[0]
 
     assert test_date
-    assert test_activity_category == "DEV"
-    assert test_activity_description == "integration testing"
-    assert test_activity_start_time == "20:24"
-    assert test_activity_end_time == "20:24"
-    assert test_activity_effort == 5
-    assert test_activity_enjoyability == 5
+    assert test_category == "DEV"
+    assert test_description == "integration testing"
+    assert test_start_time == "20:24"
+    assert test_end_time == "20:24"
+    assert test_effort == 5
+    assert test_enjoyability == 5
+    assert test_energy_before == 5
+    assert test_energy_after == 5
 
 
 def test_activities_cli_command_updates_record(tmp_path: Path) -> None:
@@ -79,6 +87,10 @@ def test_activities_cli_command_updates_record(tmp_path: Path) -> None:
             "5",
             "--enjoyability",
             "5",
+            "--energy-before",
+            "1",
+            "--energy-after",
+            "3",
         ],
     )
     assert result1.exit_code == 0
@@ -93,10 +105,14 @@ def test_activities_cli_command_updates_record(tmp_path: Path) -> None:
             "1",
             "--effort",
             "1",
+            "--energy-before",
+            "5",
             "--enjoyability",
             "1",
             "--category",
             "DEV",
+            "--energy-after",
+            "5",
         ],
     )
     assert result2.exit_code == 0
@@ -105,21 +121,25 @@ def test_activities_cli_command_updates_record(tmp_path: Path) -> None:
     (
         _,
         test_date,
-        test_activity_category,
-        test_activity_description,
-        test_activity_start_time,
-        test_activity_end_time,
-        test_activity_effort,
-        test_activity_enjoyability,
+        test_category,
+        test_description,
+        test_start_time,
+        test_end_time,
+        test_effort,
+        test_enjoyability,
+        test_energy_before,
+        test_energy_after,
     ) = data[0]
 
     assert test_date
-    assert test_activity_category == "DEV"
-    assert test_activity_description == "integration testing"
-    assert test_activity_start_time == "20:24"
-    assert test_activity_end_time == "20:24"
-    assert test_activity_effort == 1
-    assert test_activity_enjoyability == 1
+    assert test_category == "DEV"
+    assert test_description == "integration testing"
+    assert test_start_time == "20:24"
+    assert test_end_time == "20:24"
+    assert test_effort == 1
+    assert test_enjoyability == 1
+    assert test_energy_before == 5
+    assert test_energy_after == 5
 
 
 def test_activity_cli_command_handles_invalid_data(tmp_path: Path) -> None:
@@ -148,6 +168,10 @@ def test_activity_cli_command_handles_invalid_data(tmp_path: Path) -> None:
             "5",
             "-en",
             "-500",
+            "-eb",
+            "5",
+            "-ea",
+            "5",
         ],
     )
 
