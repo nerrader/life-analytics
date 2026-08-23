@@ -27,7 +27,8 @@ def main(
         bool, typer.Option("--version", "-v", help="Displays the version")
     ] = False,
 ) -> None:
-    """Main entry point for the CLI."""
+    """For more information on advanced usage, like using command options and editing,
+    refer to the 'How to Use' section in the life analytics GitHub README."""
     # this is so every command function can access the db path
     context.obj = {"database_path": database_path}
 
