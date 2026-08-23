@@ -340,12 +340,12 @@ def add_sleep(
                 {
                     "sleep_start_time": time_utils.combine_date_and_time(
                         sleep_start_date, sleep_start_input
-                    )
+                    ).isoformat(timespec="minutes")
                     if sleep_start_input and time_utils.validate_time(sleep_start_input)
                     else None,
                     "sleep_end_time": time_utils.combine_date_and_time(
                         sleep_end_date, sleep_end_input
-                    )
+                    ).isoformat(timespec="minutes")
                     if sleep_end_input and time_utils.validate_time(sleep_end_input)
                     else None,
                     "sleep_quality": sleep_quality,
