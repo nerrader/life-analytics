@@ -99,7 +99,7 @@ def ask_activity_category(prompt: str, skip_value: str | None = None) -> str:
 
     activity_category: str | None = questionary.text(
         prompt,
-        validate=lambda text: text.strip,
+        validate=lambda text: bool(text.strip),
     ).ask()
 
     if activity_category is None:

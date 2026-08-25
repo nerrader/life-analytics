@@ -479,3 +479,44 @@ def clear_all_data(
         return
 
     print("Aborting clear command.")
+
+
+@app.command("migrate")
+def migrate_database(
+    context: typer.Context,
+    migrate_path: Annotated[
+        str | None,
+        typer.Option(
+            "--migrate-path",
+            "-n",
+            help="The new database migration path. Omitting will start an in-place schema migration.",
+        ),
+    ] = None,
+) -> None:
+    """Migrates the database if the schema changes in the future.
+    This only works if the columns remain the same.
+    """
+    database_path: Path = context.obj["database_path"]
+    do_in_place_migration: bool = migrate_path is None
+
+    if do_in_place_migration:
+        print("Doing an in-place schema migration.")
+        final_migration_path = const.DEFAULT_DATABASE_PATH.parent / "temp-migration.db"
+
+    else:
+        # this assert exists just for mypy
+        assert migrate_path is not None
+        final_migration_path = Path(migrate_path)
+
+    database.migrate_database(database_path, final_migration_path)
+
+    if not do_in_place_migration:
+        return
+
+    # just rename the files instead of doing another migration
+    backup_filepath = database_path.with_name("life.db.backup")
+
+    # remove if it exists then replace it
+    backup_filepath.unlink(missing_ok=True)
+    database_path.rename(backup_filepath)
+    final_migration_path.rename(final_migration_path.with_name("life.db"))

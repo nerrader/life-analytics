@@ -12,10 +12,13 @@ sql_dir: Traversable = files("life_analytics.sql")
 def create_database(database_path: Path) -> None:
     database_path.parent.mkdir(parents=True, exist_ok=True)
 
-    with sqlite3.connect(database_path) as connection:
+    connection = sqlite3.connect(database_path)
+    try:
         # enable foreign keys
         connection.execute("PRAGMA foreign_keys = ON")
         connection.executescript((sql_dir / "schema.sql").read_text())
+    finally:
+        connection.close()
 
 
 def clear_database(database_path: Path) -> None:
@@ -23,7 +26,10 @@ def clear_database(database_path: Path) -> None:
         try:
             connection.executescript((sql_dir / "clear_database.sql").read_text())
         except sqlite3.OperationalError as error:
+            connection.rollback()
             print(f"Clearing database was not successful: {error!s}")
+        finally:
+            connection.close()
 
 
 def add_daily_summary(
@@ -33,7 +39,8 @@ def add_daily_summary(
     productivity: float,
     stress: float,
 ) -> None:
-    with sqlite3.connect(database_path) as connection:
+    connection = sqlite3.connect(database_path)
+    try:
         connection.execute(
             """
 INSERT INTO daily_summaries
@@ -49,6 +56,9 @@ INSERT INTO daily_summaries
                 stress,
             ),
         )
+        connection.commit()
+    finally:
+        connection.close()
 
 
 def add_activity(
@@ -63,7 +73,8 @@ def add_activity(
     energy_before: float,
     energy_after: float,
 ) -> None:
-    with sqlite3.connect(database_path) as connection:
+    connection = sqlite3.connect(database_path)
+    try:
         connection.execute(
             """
 INSERT INTO activities
@@ -89,6 +100,9 @@ INSERT INTO activities
                 energy_after,
             ),
         )
+        connection.commit()
+    finally:
+        connection.close()
 
 
 def add_sleep(
@@ -98,7 +112,8 @@ def add_sleep(
     sleep_quality: float,
     sleep_type: const.SleepType,
 ) -> None:
-    with sqlite3.connect(database_path) as connection:
+    connection = sqlite3.connect(database_path)
+    try:
         connection.execute(
             """
     INSERT INTO sleep
@@ -109,6 +124,9 @@ def add_sleep(
     VALUES (?, ?, ?, ?)""",
             (sleep_start_datetime, sleep_end_datetime, sleep_quality, sleep_type),
         )
+        connection.commit()
+    finally:
+        connection.close()
 
 
 def _update_record(
@@ -137,7 +155,8 @@ def _update_record(
         f"UPDATE {table_name} SET {update_statements} WHERE {primary_key_column} = ?"
     )
 
-    with sqlite3.connect(database_path) as connection:
+    connection = sqlite3.connect(database_path)
+    try:
         # this is just for the existence check
         # so it doesnt silently fail if the primary key is not given
         results = connection.execute(
@@ -148,6 +167,9 @@ def _update_record(
             raise ValueError("Record to update does not exist.")
 
         connection.execute(query, (*fields_to_update.values(), primary_key))
+        connection.commit()
+    finally:
+        connection.close()
 
 
 def update_daily_summary_record(
@@ -181,10 +203,13 @@ def fetch_daily_summaries_records(
         query += " LIMIT (?)"
         params.append(limit)
 
-    with sqlite3.connect(database_path) as connection:
+    connection = sqlite3.connect(database_path)
+    try:
         cursor = connection.cursor()
         cursor.execute(query, params)
         return cursor.fetchall()
+    finally:
+        connection.close()
 
 
 def fetch_activities_records(
@@ -198,10 +223,13 @@ def fetch_activities_records(
         query += " LIMIT (?)"
         params.append(limit)
 
-    with sqlite3.connect(database_path) as connection:
+    connection = sqlite3.connect(database_path)
+    try:
         cursor = connection.cursor()
         cursor.execute(query, params)
         return cursor.fetchall()
+    finally:
+        connection.close()
 
 
 def fetch_sleep_records(
@@ -214,16 +242,53 @@ def fetch_sleep_records(
         query += " LIMIT (?)"
         params.append(limit)
 
-    with sqlite3.connect(database_path) as connection:
-        cursor = connection.cursor()
-        cursor.execute(query, params)
-        return cursor.fetchall()
+    connection = sqlite3.connect(database_path)
+    try:
+        return connection.execute(query, params).fetchall()
+    finally:
+        connection.close()
 
 
 def fetch_sleep_record(
     database_path: Path, sleep_id: int
 ) -> tuple[int, str, str, float, str] | None:
-    with sqlite3.connect(database_path) as connection:
+    connection = sqlite3.connect(database_path)
+    try:
         cursor = connection.cursor()
         cursor.execute("SELECT * FROM sleep WHERE sleep_id = ?", (sleep_id,))
         return cast(tuple[int, str, str, float, str], cursor.fetchone())
+    finally:
+        connection.close()
+
+
+def migrate_database(database_path: Path, new_database_path: Path) -> None:
+    # to make sure theres no duplicated data there
+    new_database_path.unlink(missing_ok=True)
+
+    create_database(new_database_path)
+    new_db_connection = sqlite3.connect(new_database_path)
+
+    try:
+        daily_summary_rows = fetch_daily_summaries_records(database_path)
+        activity_rows = fetch_activities_records(database_path)
+        sleep_rows = fetch_sleep_records(database_path)
+
+        new_db_connection.executemany(
+            "INSERT INTO daily_summaries VALUES (?, ?, ?, ?)", (daily_summary_rows)
+        )
+        new_db_connection.executemany(
+            "INSERT INTO activities VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (activity_rows),
+        )
+        new_db_connection.executemany(
+            "INSERT INTO sleep VALUES (?, ?, ?, ?, ?)", (sleep_rows)
+        )
+
+        new_db_connection.commit()
+
+    except Exception:
+        new_db_connection.rollback()
+        raise
+
+    finally:
+        new_db_connection.close()
