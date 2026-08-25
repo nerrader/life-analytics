@@ -520,9 +520,9 @@ def migrate_database(
         return
 
     # just rename the files instead of doing another migration
-    backup_filepath = database_path.with_name("life.db.backup")
+    backup_filepath = Path(str(database_path) + ".backup")
 
     # remove if it exists then replace it
     backup_filepath.unlink(missing_ok=True)
     database_path.rename(backup_filepath)
-    final_migration_path.rename(final_migration_path.with_name("life.db"))
+    final_migration_path.rename(database_path)
