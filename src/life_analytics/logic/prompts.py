@@ -1,9 +1,7 @@
 from datetime import datetime
-from typing import Literal, cast
+from typing import Literal
 
 import questionary
-
-from life_analytics import constants as const
 
 
 def _validate_rating(value: str) -> Literal[True] | str:
@@ -56,7 +54,7 @@ def _validate_datetime(value: str) -> Literal[True] | str:
         bool | str: Returns True if the value is valid, otherwise returns a string with an error message.
     """
     try:
-        datetime.strptime(value, "%H:%M")  # noqa: DTZ007
+        datetime.strptime(value, "%H:%M")
         return True
     except ValueError:
         return "Please enter a valid time in HH:MM format."
@@ -86,9 +84,7 @@ def ask_datetime_question(prompt: str, skip_value: str | None = None) -> str:
     return datetime_value
 
 
-def ask_activity_category(
-    prompt: str, skip_value: str | None = None
-) -> const.ActivityCategory:
+def ask_activity_category(prompt: str, skip_value: str | None = None) -> str:
     """The helper function to ask questions about the category of an activity.
 
     Args:
@@ -98,16 +94,12 @@ def ask_activity_category(
     Returns:
         str: The category of the activity
     """
-    if skip_value in const.VALID_ACTIVITY_CATEGORIES:
-        return cast(const.ActivityCategory, skip_value)
+    if isinstance(skip_value, str) and skip_value.strip():
+        return skip_value
 
-    activity_category: const.ActivityCategory | None = questionary.text(
+    activity_category: str | None = questionary.text(
         prompt,
-        validate=lambda text: (
-            True
-            if text in const.VALID_ACTIVITY_CATEGORIES
-            else "Please enter a valid activity category."
-        ),
+        validate=lambda text: text.strip,
     ).ask()
 
     if activity_category is None:

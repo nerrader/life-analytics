@@ -217,7 +217,7 @@ Full Error Message:
 
     date = datetime.now().date().isoformat()  # noqa: DTZ005
 
-    activity_category: const.ActivityCategory = prompts.ask_activity_category(
+    activity_category: str = prompts.ask_activity_category(
         "What category would this activity fit into?", activity_category_input
     )
 

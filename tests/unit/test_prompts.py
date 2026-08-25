@@ -1,11 +1,7 @@
-from typing import TYPE_CHECKING
-
 import pytest
+from pytest_mock import MockerFixture
 
 from life_analytics.logic import prompts
-
-if TYPE_CHECKING:
-    from pytest_mock import MockerFixture
 
 
 def test_validate_datetime_with_valid_datetime() -> None:

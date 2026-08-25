@@ -54,7 +54,7 @@ INSERT INTO daily_summaries
 def add_activity(
     database_path: Path,
     date: str,
-    activity_category: const.ActivityCategory,
+    activity_category: str,
     activity_description: str | None,
     activity_start: str,
     activity_end: str,
@@ -189,9 +189,7 @@ def fetch_daily_summaries_records(
 
 def fetch_activities_records(
     database_path: Path, limit: int | None = None
-) -> list[
-    tuple[int, str, const.ActivityCategory, str, str, str, float, float, float, float]
-]:
+) -> list[tuple[int, str, str, str, str, str, float, float, float, float]]:
 
     query = "SELECT * FROM activities ORDER BY activity_id DESC"
     params = []
