@@ -195,14 +195,14 @@ def migrate_database(database_path: Path, new_database_path: Path) -> None:
         sleep_rows = fetch_sleep_records(database_path)
 
         new_db_connection.executemany(
-            "INSERT INTO daily_summaries VALUES (?, ?, ?, ?)", (daily_summary_rows)
+            "INSERT INTO daily_summaries VALUES (?, ?, ?, ?)", daily_summary_rows
         )
         new_db_connection.executemany(
             "INSERT INTO activities VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            (activity_rows),
+            activity_rows,
         )
         new_db_connection.executemany(
-            "INSERT INTO sleep VALUES (?, ?, ?, ?, ?)", (sleep_rows)
+            "INSERT INTO sleep VALUES (?, ?, ?, ?, ?)", sleep_rows
         )
 
         new_db_connection.commit()
