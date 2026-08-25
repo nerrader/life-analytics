@@ -4,9 +4,9 @@ from importlib.resources.abc import Traversable
 from pathlib import Path
 from typing import Any, Literal, cast
 
-from life_analytics import constants as const
-
 sql_dir: Traversable = files("life_analytics.sql")
+
+VALID_TABLE_NAMES = Literal["daily_summaries", "activities", "sleep"]
 
 
 def create_database(database_path: Path) -> None:
@@ -32,106 +32,46 @@ def clear_database(database_path: Path) -> None:
             connection.close()
 
 
-def add_daily_summary(
+def _add_record(
     database_path: Path,
-    date: str,
-    mood: float,
-    productivity: float,
-    stress: float,
+    table_name: VALID_TABLE_NAMES,
+    fields: dict[str, Any],
 ) -> None:
     connection = sqlite3.connect(database_path)
+
+    columns = ", ".join(fields)
+    placeholder_question_marks = ", ".join("?" for _ in fields)
+
     try:
         connection.execute(
-            """
-INSERT INTO daily_summaries
-    (summary_date,
-    mood,
-    productivity,
-    stress)
-    VALUES (?, ?, ?, ?)""",
-            (
-                date,
-                mood,
-                productivity,
-                stress,
-            ),
+            f"""
+        INSERT INTO {table_name}
+        ({columns})
+
+        VALUES ({placeholder_question_marks})
+        """,
+            tuple(fields.values()),
         )
         connection.commit()
     finally:
         connection.close()
 
 
-def add_activity(
-    database_path: Path,
-    date: str,
-    activity_category: str,
-    activity_description: str | None,
-    activity_start: str,
-    activity_end: str,
-    effort: float,
-    enjoyability: float,
-    energy_before: float,
-    energy_after: float,
-) -> None:
-    connection = sqlite3.connect(database_path)
-    try:
-        connection.execute(
-            """
-INSERT INTO activities
-    (activity_date,
-    activity_category,
-    activity_description,
-    activity_start,
-    activity_end,
-    effort,
-    enjoyability,
-    energy_before,
-    energy_after)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-            (
-                date,
-                activity_category,
-                activity_description,
-                activity_start,
-                activity_end,
-                effort,
-                enjoyability,
-                energy_before,
-                energy_after,
-            ),
-        )
-        connection.commit()
-    finally:
-        connection.close()
+def add_daily_summary(database_path: Path, fields: dict[str, Any]) -> None:
+    _add_record(database_path, "daily_summaries", fields)
 
 
-def add_sleep(
-    database_path: Path,
-    sleep_start_datetime: str,
-    sleep_end_datetime: str,
-    sleep_quality: float,
-    sleep_type: const.SleepType,
-) -> None:
-    connection = sqlite3.connect(database_path)
-    try:
-        connection.execute(
-            """
-    INSERT INTO sleep
-    (sleep_start_time,
-    sleep_end_time,
-    sleep_quality,
-    sleep_type)
-    VALUES (?, ?, ?, ?)""",
-            (sleep_start_datetime, sleep_end_datetime, sleep_quality, sleep_type),
-        )
-        connection.commit()
-    finally:
-        connection.close()
+def add_activity(database_path: Path, fields: dict[str, Any]) -> None:
+    _add_record(database_path, "activities", fields)
+
+
+def add_sleep(database_path: Path, fields: dict[str, Any]) -> None:
+    _add_record(database_path, "sleep", fields)
 
 
 def _update_record(
     database_path: Path,
-    table_name: Literal["daily_summaries", "activities", "sleep"],
+    table_name: VALID_TABLE_NAMES,
     primary_key_column: str,
     primary_key: str | int,
     fields: dict[str, Any],
@@ -193,10 +133,10 @@ def update_sleep_record(
     _update_record(database_path, "sleep", "sleep_id", sleep_id, fields)
 
 
-def fetch_daily_summaries_records(
-    database_path: Path, limit: int | None = None
-) -> list[tuple[str, int, float, float]]:
-    query = "SELECT * FROM daily_summaries ORDER BY summary_date DESC"
+def _fetch_table_records(
+    database_path: Path, table_name: VALID_TABLE_NAMES, limit: int | None = None
+) -> list[tuple[Any, ...]]:
+    query = f"SELECT * FROM {table_name} ORDER BY 1 DESC"
     params = []
 
     if limit is not None:
@@ -210,43 +150,24 @@ def fetch_daily_summaries_records(
         return cursor.fetchall()
     finally:
         connection.close()
+
+
+def fetch_daily_summaries_records(
+    database_path: Path, limit: int | None = None
+) -> list[tuple[str, int, float, float]]:
+    return _fetch_table_records(database_path, "daily_summaries", limit)
 
 
 def fetch_activities_records(
     database_path: Path, limit: int | None = None
 ) -> list[tuple[int, str, str, str, str, str, float, float, float, float]]:
-
-    query = "SELECT * FROM activities ORDER BY activity_id DESC"
-    params = []
-
-    if limit is not None:
-        query += " LIMIT (?)"
-        params.append(limit)
-
-    connection = sqlite3.connect(database_path)
-    try:
-        cursor = connection.cursor()
-        cursor.execute(query, params)
-        return cursor.fetchall()
-    finally:
-        connection.close()
+    return _fetch_table_records(database_path, "activities", limit)
 
 
 def fetch_sleep_records(
     database_path: Path, limit: int | None = None
 ) -> list[tuple[int, str, str, float, str]]:
-    query = "SELECT * FROM sleep ORDER BY sleep_id DESC"
-    params = []
-
-    if limit is not None:
-        query += " LIMIT (?)"
-        params.append(limit)
-
-    connection = sqlite3.connect(database_path)
-    try:
-        return connection.execute(query, params).fetchall()
-    finally:
-        connection.close()
+    return _fetch_table_records(database_path, "sleep", limit)
 
 
 def fetch_sleep_record(

@@ -97,11 +97,13 @@ Full Error Message:
 
     try:
         database.add_daily_summary(
-            database_path=database_path,
-            date=date,
-            mood=mood,
-            productivity=productivity,
-            stress=stress,
+            database_path,
+            {
+                "summary_date": date,
+                "mood": mood,
+                "productivity": productivity,
+                "stress": stress,
+            },
         )
     except sqlite3.IntegrityError as error:
         console.print(
@@ -252,16 +254,18 @@ Full Error Message:
 
     try:
         database.add_activity(
-            database_path=database_path,
-            date=date,
-            activity_description=activity_description,
-            activity_category=activity_category,
-            activity_start=activity_start,
-            activity_end=activity_end,
-            effort=effort,
-            enjoyability=enjoyability,
-            energy_before=energy_before,
-            energy_after=energy_after,
+            database_path,
+            {
+                "activity_category": activity_category,
+                "activity_description": activity_description,
+                "activity_start": activity_start,
+                "activity_end": activity_end,
+                "effort": effort,
+                "enjoyability": enjoyability,
+                "energy_before": energy_before,
+                "energy_after": energy_after,
+                "activity_date": date,
+            },
         )
     except sqlite3.IntegrityError as error:
         console.print(
@@ -389,11 +393,13 @@ Full Error Message:
 
     try:
         database.add_sleep(
-            database_path=database_path,
-            sleep_start_datetime=sleep_start_datetime,
-            sleep_end_datetime=sleep_end_datetime,
-            sleep_quality=sleep_quality,
-            sleep_type="nap" if nap else "sleep",
+            database_path,
+            {
+                "sleep_start_time": sleep_start_datetime,
+                "sleep_end_time": sleep_end_datetime,
+                "sleep_quality": sleep_quality,
+                "sleep_type": "nap" if nap else "sleep",
+            },
         )
     except sqlite3.IntegrityError as error:
         console.print(
