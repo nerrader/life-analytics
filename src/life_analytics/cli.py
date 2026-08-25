@@ -494,7 +494,7 @@ def migrate_database(
         str | None,
         typer.Option(
             "--migrate-path",
-            "-n",
+            "-m",
             help="The new database migration path. Omitting will start an in-place schema migration.",
         ),
     ] = None,
