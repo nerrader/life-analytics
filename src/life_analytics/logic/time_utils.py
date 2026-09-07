@@ -5,9 +5,7 @@ from datetime import time as dt_time
 def combine_date_and_time(date: date, time: str | dt_time) -> datetime:
     # change it to a time object
     if isinstance(time, str):
-        time_object: dt_time = datetime.strptime(  # noqa: DTZ007
-            time, "%H:%M"
-        ).time()
+        time_object: dt_time = datetime.strptime(time, "%H:%M").time()
     else:
         time_object = time
 
@@ -27,7 +25,7 @@ def validate_time(time: str | None) -> bool:
         if time is None:
             return False
         # all it does is just see if this code runs without errors
-        datetime.strptime(time, "%H:%M")  # noqa: DTZ007
+        datetime.strptime(time, "%H:%M")
         return True
     except ValueError:
         return False
