@@ -1,7 +1,7 @@
 # Life Analytics Project
 
-This is a simple personal data analytics project I made to observe and track my
-own daily life, which includes:
+This is a simple personal data analytics project, using the CLI I made to observe
+and track my own daily life, which includes:
 
 - my activities
 - sleep duration
@@ -26,14 +26,29 @@ decision making and quality of life.
 - `undo` and `redo` commands to reverse mistakes
 - To make activity entry more convenient: `start` and `stop` commands.
 - Make listing UX better, by adding extra commands like `recent`, and `today`
-- Add `--detailed` flag for sleep command to pass in your own sleep start/end datetime, and sleep type.
+- Add `--detailed` flag for sleep command to pass in your own sleep
+start/end datetime, and sleep type.
 - GUI version of this tool.
 
 ## How to Install
 
-pass
+You must have Windows 10 or 11 to install this CLI tool:
 
-## How to use
+1. Find the latest release in the releases page of this GitHub repository
+1. Download the .exe file.
+
+## Adding the CLI to Path
+
+This step is optional, but also **highly recommended**
+
+If you want to run the CLI from any folder without having to navigate to the
+directory containing the .exe, you should add its folder to your system's PATH.
+
+> [!IMPORTANT]
+> If you do not add the .exe location to your PATH, you will need to navigate to
+> its folder before running the CLI, or provide the full path to the executable.
+
+## Usage
 
 For more information about the life tracker's CLI commands, use the `--help` menu.
 
