@@ -148,8 +148,6 @@ def test_activity_cli_command_handles_invalid_data(tmp_path: Path) -> None:
 
     cli_runner = CliRunner()
 
-    # so pytest doesnt exit with code 1 cuz of bad terminal or smth
-
     result = cli_runner.invoke(
         cli.app,
         [
