@@ -1,43 +1,49 @@
 repos:
-    - repo: https://github.com/astral-sh/ruff-pre-commit
-      # Ruff version.
-      rev: v0.16.1
-      hooks:
-          # Run the linter.
-          - id: ruff-check
-            types_or: [python, pyproject]
-            args: [--fix]
-          # Run the formatter.
-          - id: ruff-format
-            types_or: [python]
-    - repo: https://github.com/astral-sh/uv-pre-commit
-      # uv version.
-      rev: 0.12.1
-      hooks:
-          # Update the uv lockfile
-          - id: uv-lock
-    - repo: https://github.com/pre-commit/pre-commit-hooks
-      rev: v5.0.0
-      hooks:
-          - id: trailing-whitespace
-          - id: end-of-file-fixer
-          - id: check-yaml
-          - id: check-toml
-          - id: check-added-large-files
-    - repo: https://github.com/RobertCraigie/pyright-python
-      rev: v1.1.411
-      hooks:
-          - id: pyright
-    - repo: local
-      hooks:
-          - id: mypy
-            name: mypy
-            entry: uv run mypy
-            language: system
-            types: [python]
-            args: [--strict]
-    - repo: https://github.com/sqlfluff/sqlfluff
-      rev: 4.3.0
-      hooks:
-          - id: sqlfluff-fix
-            args: [--dialect, sqlite]
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.16.1
+    hooks:
+      - id: ruff-check
+        types_or: [python, pyproject]
+        args: [--fix]
+      - id: ruff-format
+        types_or: [python]
+
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    rev: 0.12.1
+    hooks:
+      - id: uv-lock
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-toml
+      - id: check-added-large-files
+
+  - repo: https://github.com/RobertCraigie/pyright-python
+    rev: v1.1.411
+    hooks:
+      - id: pyright
+
+  - repo: local
+    hooks:
+      - id: mypy
+        name: mypy
+        entry: uv run mypy
+        language: system
+        types: [python]
+        args: [--strict]
+
+  - repo: https://github.com/sqlfluff/sqlfluff
+    rev: 4.3.0
+    hooks:
+      - id: sqlfluff-fix
+        args: [--dialect, sqlite]
+
+  - repo: https://github.com/commit-check/commit-check
+    rev: v2.17.0
+    hooks:
+      - id: check-message
+      - id: check-branch

@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 permissions:
   contents: read
@@ -14,38 +14,50 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-    - name: Install uv
-      uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
-      with:
-        enable-cache: true
+      - name: Install uv
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          enable-cache: true
 
-    - name: Install Python using UV
-      run: uv python install
+      - name: Install Python using UV
+        run: uv python install
 
-    - name: Get dependencies
-      run: uv sync --locked
+      - name: Get dependencies
+        run: uv sync --locked
 
-    - name: Run pre-commits on all files
-      run: uv run pre-commit run --all-files
+      - name: Run pre-commits on all files
+        run: uv run pre-commit run --all-files
 
   test:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-    - name: Install uv
-      uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
-      with:
-        enable-cache: true
+      - name: Install uv
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          enable-cache: true
 
-    - name: Install Python using UV
-      run: uv python install
+      - name: Install Python using UV
+        run: uv python install
 
-    - name: Get dependencies
-      run: uv sync --locked
+      - name: Get dependencies
+        run: uv sync --locked
 
-    - name: Test with pytest
-      run: uv run pytest
+      - name: Test with pytest
+        run: uv run pytest
+
+  commit-msg-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: commit-check/commit-check-action@v2
+        with:
+          message: true
+          branch: true

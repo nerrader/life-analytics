@@ -26,7 +26,7 @@ you can get started by just following these steps:
 1. Use `uv sync` to automatically set up the virtual environment and grab all
 the dependencies for you.
 
-1. Run `uv run pre-commit install` to initialize all the pre-commit hooks in
+1. Run `uv run pre-commit install` and `uv run pre-commit install --hook-type commit-msg` to initialize all the pre-commit hooks in
 the repository.
 
 1. Commit your changes. Make sure your commit messages are clear and concise.
