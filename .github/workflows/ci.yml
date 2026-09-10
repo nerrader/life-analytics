@@ -54,10 +54,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
-      - uses: commit-check/commit-check-action@v2
+      - uses: commit-check/commit-check-action@fd3d923eab0876650f261d2a75572e8161a9a58e # v2.16.0
         with:
           message: true
           branch: true
