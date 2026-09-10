@@ -9,7 +9,7 @@ This section will be removed once the data analysis is fully finished.
 Start Date: 2026-08-23
 Current Phase: Phase 1
 
-Phase 2 is expected to start on 2026-10-1.
+Phase 2 is expected to start on 2026-9-24.
 
 ## Methodology
 
@@ -47,7 +47,7 @@ Though while I did say I was going to turn data into questions later, I would li
 - Does taking a nap seem to affect that day's mood or productivity in a positive way?
 - Does sleep duration correlate with sleep quality?
 - Does sleep quality tend increase on the weekends?
-- Does my percieved productivity increase on the weekends?
+- Does my perceived productivity increase on the weekends?
 - Does sleep quality seem to affect the day's mood, productivity, or even stress?
 - Does my energy seem to affect productivity or mood?
 - What activities tend to increase or decrease my energy?
