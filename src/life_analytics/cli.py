@@ -435,9 +435,18 @@ def show_stats(
         int | None,
         typer.Option("--limit", "-l", help="The limit of rows to fetch"),
     ] = None,
+    latest: Annotated[
+        bool | None,
+        typer.Option(
+            "--latest", help="Fetch the latest row. Overrides the limit option."
+        ),
+    ] = None,
 ) -> None:
     """Display all-time daily summaries, activities, and sleep. Aliases: 'ls'"""
     database_path = context.obj["database_path"]
+
+    if latest is True:
+        limit = 1
 
     if table_types is None:
         table_types = ["summary", "activity", "sleep"]
