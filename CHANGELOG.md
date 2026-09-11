@@ -7,7 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-- Nothing added yet!
+- To make activity entry more convenient: `start` and `stop` commands.
+- Removed unnecessary activity category schema constraint.
+- Add migrate command.
 
 ## [1.0.0]
 

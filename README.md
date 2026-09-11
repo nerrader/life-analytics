@@ -24,7 +24,6 @@ decision making and quality of life.
 ## Upcoming Features
 
 - `undo` and `redo` commands to reverse mistakes
-- To make activity entry more convenient: `start` and `stop` commands.
 - Make listing UX better, by adding extra commands like `recent`, and `today`
 - Add `--detailed` flag for sleep command to pass in your own sleep
 start/end datetime, and sleep type.
