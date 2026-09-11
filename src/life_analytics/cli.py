@@ -21,7 +21,12 @@ VALID_TABLE_TYPES: Final[tuple[str, ...]] = ("summary", "activity", "sleep")
 def main(
     context: typer.Context,
     database_path: Annotated[
-        Path, typer.Option("--database-path", "-db", help="Path to the database file.")
+        Path,
+        typer.Option(
+            "--database-path",
+            "-db",
+            help="Path to the database file.",
+        ),
     ] = const.DEFAULT_DATABASE_PATH,
     version: Annotated[
         bool, typer.Option("--version", "-v", help="Displays the version")
@@ -87,7 +92,7 @@ Full Error Message:
             )
         return
 
-    date = datetime.now().date().isoformat()  # noqa: DTZ005
+    date = datetime.now().date().isoformat()
 
     mood = mood or prompts.ask_rating_question("How was your mood today? (1-5)")
     productivity = productivity or prompts.ask_rating_question(
@@ -217,7 +222,7 @@ Full Error Message:
 
         return
 
-    date = datetime.now().date().isoformat()  # noqa: DTZ005
+    date = datetime.now().date().isoformat()
 
     activity_category: str = prompts.ask_activity_category(
         "What category would this activity fit into?", activity_category_input
@@ -321,7 +326,7 @@ def add_sleep(
     """Record a sleep entry. Omitting the *optional* flags will trigger interactive mode."""
     database_path = context.obj["database_path"]
 
-    today_date = datetime.now().date()  # noqa: DTZ005
+    today_date = datetime.now().date()
     yesterday_date = today_date - timedelta(days=1)
 
     if edit:
@@ -526,3 +531,106 @@ def migrate_database(
     backup_filepath.unlink(missing_ok=True)
     database_path.rename(backup_filepath)
     final_migration_path.rename(database_path)
+
+
+@app.command("start")
+def start_activity_time() -> None:
+    """Start tracking an activity"""
+    date_time: str = datetime.now().isoformat(timespec="minutes")
+    print(f"Activity started: {date_time.replace('T', ' ')}")
+
+    const.ACTIVITY_START_TEXT_PATH.write_text(date_time)
+
+
+@app.command("end")
+def end_activity_time(
+    context: typer.Context,
+    activity_category_input: Annotated[
+        str | None,
+        typer.Option(
+            "--category",
+            "-ac",
+            help="The category of the activity you did today. Available categories are: 'IDLE', 'MAINT', 'DEV', 'SCHOOL', 'SPORTS', 'SOCIAL'.",
+        ),
+    ] = None,
+    activity_description_input: Annotated[
+        str | None,
+        typer.Option("--description", "-ad", help="Further describe your activity."),
+    ] = None,
+    effort: Annotated[
+        float | None,
+        typer.Option("--effort", "-ef", help="The difficulty of the activity (1-5)."),
+    ] = None,
+    enjoyability: Annotated[
+        float | None,
+        typer.Option(
+            "--enjoyability", "-en", help="The enjoyability of the activity (1-5)."
+        ),
+    ] = None,
+    energy_before: Annotated[
+        float | None,
+        typer.Option(
+            "--energy-before", "-eb", help="Your energy before the activity (1-5)."
+        ),
+    ] = None,
+    energy_after: Annotated[
+        float | None,
+        typer.Option(
+            "--energy-after", "-ea", help="Your energy after the activity (1-5)."
+        ),
+    ] = None,
+) -> None:
+    """Stops the activity tracking, and prompts for activity details."""
+    database_path: Path = context.obj["database_path"]
+
+    if not const.ACTIVITY_START_TEXT_PATH.exists():
+        raise ValueError(
+            "No activity found to end. Start an activity first using the start command first."
+        )
+
+    start_activity_datetime = datetime.fromisoformat(
+        const.ACTIVITY_START_TEXT_PATH.read_text()
+    )
+
+    start_activity_date = start_activity_datetime.date().isoformat()
+    start_activity_time = start_activity_datetime.time().isoformat(timespec="minutes")
+    end_activity_time = datetime.now().time().isoformat(timespec="minutes")
+
+    activity_category: str = prompts.ask_activity_category(
+        "What category would this activity fit into?", activity_category_input
+    )
+
+    activity_description: str | None = prompts.ask_activity_description(
+        "What would be a good description for this activity? (optional):",
+        activity_description_input,
+    )
+
+    effort = effort or prompts.ask_rating_question(
+        "How much effort did you think this activity required? (1-5)"
+    )
+
+    enjoyability = enjoyability or prompts.ask_rating_question(
+        "How much did you enjoy this activity? (1-5)"
+    )
+
+    energy_before = energy_before or prompts.ask_rating_question(
+        "How much energy did you have before your activity? (1-5)"
+    )
+
+    energy_after = energy_after or prompts.ask_rating_question(
+        "How much energy did you have after your activity? (1-5)"
+    )
+    database.add_activity(
+        database_path,
+        {
+            "activity_category": activity_category,
+            "activity_description": activity_description,
+            "activity_start": start_activity_time,
+            "activity_end": end_activity_time,
+            "effort": effort,
+            "enjoyability": enjoyability,
+            "energy_before": energy_before,
+            "energy_after": energy_after,
+            "activity_date": start_activity_date,
+        },
+    )
