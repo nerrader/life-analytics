@@ -419,7 +419,8 @@ Full Error Message:
         )
 
 
-@app.command("stats")
+@app.command("ls", hidden=True)
+@app.command("list")
 def show_stats(
     context: typer.Context,
     table_types: Annotated[
@@ -435,8 +436,9 @@ def show_stats(
         typer.Option("--limit", "-l", help="The limit of rows to fetch"),
     ] = None,
 ) -> None:
-    """Display all-time daily summaries, activities, and sleep"""
+    """Display all-time daily summaries, activities, and sleep. Aliases: 'ls'"""
     database_path = context.obj["database_path"]
+
     if table_types is None:
         table_types = ["summary", "activity", "sleep"]
     else:
