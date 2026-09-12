@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 - To make activity entry more convenient: `start` and `stop` commands.
+- Add `-ap` option for activity start/stop commands time stamp text path.
 - Removed unnecessary activity category schema constraint.
 - Add migrate command.
 - Rename old `stats` command to `list`
