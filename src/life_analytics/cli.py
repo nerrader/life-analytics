@@ -28,6 +28,14 @@ def main(
             help="Path to the database file.",
         ),
     ] = const.DEFAULT_DATABASE_PATH,
+    activity_start_path: Annotated[
+        Path,
+        typer.Option(
+            "--activity-start-path",
+            "-ap",
+            help="This is the path used for the start and stop text file storage.",
+        ),
+    ] = const.ACTIVITY_START_TEXT_PATH,
     version: Annotated[
         bool, typer.Option("--version", "-v", help="Displays the version")
     ] = False,
@@ -35,7 +43,10 @@ def main(
     """For more information on advanced usage, like using command options and editing,
     refer to the 'How to Use' section in the life analytics GitHub README."""
     # this is so every command function can access the db path
-    context.obj = {"database_path": database_path}
+    context.obj = {
+        "database_path": database_path,
+        "activity_start_path": activity_start_path,
+    }
 
     if version:
         print(__version__)
@@ -556,12 +567,14 @@ def migrate_database(
 
 
 @app.command("start")
-def start_activity_time() -> None:
+def start_activity_time(context: typer.Context) -> None:
     """Start tracking an activity"""
+    activity_start_path: Path = context.obj["activity_start_path"]
+
     date_time: str = datetime.now().isoformat(timespec="minutes")
     print(f"Activity started: {date_time.replace('T', ' ')}")
 
-    const.ACTIVITY_START_TEXT_PATH.write_text(date_time)
+    activity_start_path.write_text(date_time)
 
 
 @app.command("end")
@@ -604,15 +617,16 @@ def end_activity_time(
 ) -> None:
     """Stops the activity tracking, and prompts for activity details."""
     database_path: Path = context.obj["database_path"]
+    activity_start_path: Path = context.obj["activity_start_path"]
 
-    if not const.ACTIVITY_START_TEXT_PATH.exists():
+    if not activity_start_path.exists():
         raise ValueError(
-            "ERROR: No activity found to end. Start an activity first using the start command first."
+            "No activity found to end. Start an activity first using the start command first."
         )
 
-    start_activity_datetime = datetime.fromisoformat(
-        const.ACTIVITY_START_TEXT_PATH.read_text()
-    )
+    start_activity_datetime = datetime.fromisoformat(activity_start_path.read_text())
+
+    activity_start_path.unlink()
 
     start_activity_date = start_activity_datetime.date().isoformat()
     start_activity_time = start_activity_datetime.time().isoformat(timespec="minutes")

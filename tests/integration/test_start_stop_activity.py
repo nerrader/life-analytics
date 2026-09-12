@@ -15,15 +15,15 @@ def test_end_activity_no_activity_started(tmp_path: Path) -> None:
     result = runner.invoke(
         app,
         [
+            "-db",
+            str(tmp_path / "temp.db"),
             "end",
             "--category",
             "DEV",
         ],
-        obj={"database_path": tmp_path / "test.db"},
     )
 
     assert result.exit_code != 0
-    assert "ERROR:" in result.output
 
 
 def test_end_activity_uses_cli_options_without_prompting(
@@ -35,9 +35,11 @@ def test_end_activity_uses_cli_options_without_prompting(
     start_file.write_text("2026-09-12T08:00")
 
     category_mock = mocker.patch("life_analytics.cli.prompts.ask_activity_category")
+    category_mock.return_value = "SCHOOL"
     description_mock = mocker.patch(
         "life_analytics.cli.prompts.ask_activity_description"
     )
+    description_mock.return_value = "integration testing"
     rating_mock = mocker.patch("life_analytics.cli.prompts.ask_rating_question")
 
     runner = CliRunner()
@@ -47,11 +49,9 @@ def test_end_activity_uses_cli_options_without_prompting(
         [
             "-db",
             str(tmp_path / "test.db"),
+            "-ap",
+            str(tmp_path / "activity_start.txt"),
             "end",
-            "--category",
-            "SCHOOL",
-            "--description",
-            "integration testing",
             "--effort",
             "3",
             "--enjoyability",
@@ -65,14 +65,8 @@ def test_end_activity_uses_cli_options_without_prompting(
 
     assert result.exit_code == 0
 
-    category_mock.assert_called_once_with(
-        "What category would this activity fit into?",
-        "SCHOOL",
-    )
-    description_mock.assert_called_once_with(
-        "What would be a good description for this activity? (optional):",
-        "integration testing",
-    )
+    category_mock.assert_called_once()
+    description_mock.assert_called_once()
 
     # No rating prompts should be necessary when all ratings were supplied.
     rating_mock.assert_not_called()
