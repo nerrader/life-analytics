@@ -1,12 +1,45 @@
 import sqlite3
+from collections.abc import Iterable
+from dataclasses import astuple, dataclass
 from importlib.resources import files
 from importlib.resources.abc import Traversable
 from pathlib import Path
-from typing import Any, Literal, cast
+from typing import Any, Literal
 
 sql_dir: Traversable = files("life_analytics.sql")
 
 VALID_TABLE_NAMES = Literal["daily_summaries", "activities", "sleep"]
+
+
+@dataclass(frozen=True)
+class SummaryRecord:
+    summary_date: str
+    mood: int
+    productivity: int
+    stress: int
+
+
+@dataclass(frozen=True)
+class ActivityRecord:
+    activity_id: int
+    activity_date: str
+    activity_category: str
+    activity_description: str | None
+    activity_start: str
+    activity_end: str
+    effort: int
+    enjoyability: int
+    energy_before: int
+    energy_after: int
+
+
+@dataclass(frozen=True)
+class SleepRecord:
+    sleep_id: int
+    sleep_start_time: str
+    sleep_end_time: str
+    sleep_quality: int
+    sleep_type: str
 
 
 def create_database(database_path: Path) -> None:
@@ -154,32 +187,45 @@ def _fetch_table_records(
 
 def fetch_daily_summaries_records(
     database_path: Path, limit: int | None = None
-) -> list[tuple[str, int, float, float]]:
-    return _fetch_table_records(database_path, "daily_summaries", limit)
+) -> list[SummaryRecord]:
+    return [
+        SummaryRecord(*record)
+        for record in _fetch_table_records(database_path, "daily_summaries", limit)
+    ]
 
 
 def fetch_activities_records(
     database_path: Path, limit: int | None = None
-) -> list[tuple[int, str, str, str, str, str, float, float, float, float]]:
-    return _fetch_table_records(database_path, "activities", limit)
+) -> list[ActivityRecord]:
+    return [
+        ActivityRecord(*record)
+        for record in _fetch_table_records(database_path, "activities", limit)
+    ]
 
 
 def fetch_sleep_records(
     database_path: Path, limit: int | None = None
-) -> list[tuple[int, str, str, float, str]]:
-    return _fetch_table_records(database_path, "sleep", limit)
+) -> list[SleepRecord]:
+    return [
+        SleepRecord(*record)
+        for record in _fetch_table_records(database_path, "sleep", limit)
+    ]
 
 
-def fetch_sleep_record(
-    database_path: Path, sleep_id: int
-) -> tuple[int, str, str, float, str] | None:
+def fetch_sleep_record(database_path: Path, sleep_id: int) -> SleepRecord | None:
     connection = sqlite3.connect(database_path)
     try:
         cursor = connection.cursor()
         cursor.execute("SELECT * FROM sleep WHERE sleep_id = ?", (sleep_id,))
-        return cast(tuple[int, str, str, float, str], cursor.fetchone())
+        return SleepRecord(*cursor.fetchone())
     finally:
         connection.close()
+
+
+def records_to_tuples(
+    records: Iterable[SleepRecord | ActivityRecord | SummaryRecord],
+) -> list[tuple[Any, ...]]:
+    return [astuple(record) for record in records]
 
 
 def migrate_database(database_path: Path, new_database_path: Path) -> None:
@@ -195,14 +241,16 @@ def migrate_database(database_path: Path, new_database_path: Path) -> None:
         sleep_rows = fetch_sleep_records(database_path)
 
         new_db_connection.executemany(
-            "INSERT INTO daily_summaries VALUES (?, ?, ?, ?)", daily_summary_rows
+            "INSERT INTO daily_summaries VALUES (?, ?, ?, ?)",
+            records_to_tuples(daily_summary_rows),
         )
         new_db_connection.executemany(
             "INSERT INTO activities VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            activity_rows,
+            records_to_tuples(activity_rows),
         )
         new_db_connection.executemany(
-            "INSERT INTO sleep VALUES (?, ?, ?, ?, ?)", sleep_rows
+            "INSERT INTO sleep VALUES (?, ?, ?, ?, ?)",
+            records_to_tuples(sleep_rows),
         )
 
         new_db_connection.commit()

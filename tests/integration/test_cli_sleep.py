@@ -29,14 +29,13 @@ def test_sleep_cli_command_creates_database_entry(tmp_path: Path) -> None:
     )
     assert result.exit_code == 0
 
-    data = database.fetch_sleep_records(test_database_path)
-    _, test_sleep_start, test_sleep_end, test_sleep_quality, test_sleep_type = data[0]
+    sleep_record = database.fetch_sleep_records(test_database_path)[0]
 
-    # time in the sleep database in stored in YYYY-MM-DDTHH:MM which is why im using onnly the time here
-    assert "21:00" in test_sleep_start
-    assert "6:00" in test_sleep_end
-    assert test_sleep_quality == 5
-    assert test_sleep_type == "nap"
+    # time in the sleep database in stored in YYYY-MM-DDTHH:MM which is why im using only the time here
+    assert "21:00" in sleep_record.sleep_start_time
+    assert "6:00" in sleep_record.sleep_end_time
+    assert sleep_record.sleep_quality == 5
+    assert sleep_record.sleep_type == "nap"
 
 
 def test_sleep_cli_command_updates_record(tmp_path: Path) -> None:
@@ -75,14 +74,13 @@ def test_sleep_cli_command_updates_record(tmp_path: Path) -> None:
     )
     assert result2.exit_code == 0
 
-    data = database.fetch_sleep_records(test_database_path)
-    _, test_sleep_start, test_sleep_end, test_sleep_quality, test_sleep_type = data[0]
+    sleep_record = database.fetch_sleep_records(test_database_path)[0]
 
     # time in the sleep database in stored in YYYY-MM-DDTHH:MM which is why im using only the time here
-    assert "21:00" in test_sleep_start
-    assert "6:00" in test_sleep_end
-    assert test_sleep_quality == 1
-    assert test_sleep_type == "sleep"
+    assert "21:00" in sleep_record.sleep_start_time
+    assert "6:00" in sleep_record.sleep_end_time
+    assert sleep_record.sleep_quality == 1
+    assert sleep_record.sleep_type == "sleep"
 
 
 def test_sleep_cli_command_handles_invalid_values(tmp_path: Path) -> None:

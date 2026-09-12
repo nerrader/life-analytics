@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - To make activity entry more convenient: `start` and `stop` commands.
 - Removed unnecessary activity category schema constraint.
 - Add migrate command.
+- Rename old `stats` command to `list`
+- Add `--latest` option for `list` command.
 
 ## [1.0.0]
 

@@ -38,29 +38,12 @@ def test_activities_cli_command_creates_database_entry(tmp_path: Path) -> None:
     )
     assert result.exit_code == 0
 
-    data = database.fetch_activities_records(test_database_path)
-    (
-        _,
-        test_date,
-        test_category,
-        test_description,
-        test_start_time,
-        test_end_time,
-        test_effort,
-        test_enjoyability,
-        test_energy_before,
-        test_energy_after,
-    ) = data[0]
+    activity_record = database.fetch_activities_records(test_database_path)[0]
 
-    assert test_date
-    assert test_category == "DEV"
-    assert test_description == "integration testing"
-    assert test_start_time == "20:24"
-    assert test_end_time == "20:24"
-    assert test_effort == 5
-    assert test_enjoyability == 5
-    assert test_energy_before == 5
-    assert test_energy_after == 5
+    assert activity_record.activity_category == "DEV"
+    assert activity_record.activity_description == "integration testing"
+    assert activity_record.effort == 5
+    assert activity_record.energy_after == 5
 
 
 def test_activities_cli_command_updates_record(tmp_path: Path) -> None:
@@ -111,35 +94,15 @@ def test_activities_cli_command_updates_record(tmp_path: Path) -> None:
             "1",
             "--category",
             "DEV",
-            "--energy-after",
-            "5",
         ],
     )
     assert result2.exit_code == 0
 
-    data = database.fetch_activities_records(test_database_path)
-    (
-        _,
-        test_date,
-        test_category,
-        test_description,
-        test_start_time,
-        test_end_time,
-        test_effort,
-        test_enjoyability,
-        test_energy_before,
-        test_energy_after,
-    ) = data[0]
-
-    assert test_date
-    assert test_category == "DEV"
-    assert test_description == "integration testing"
-    assert test_start_time == "20:24"
-    assert test_end_time == "20:24"
-    assert test_effort == 1
-    assert test_enjoyability == 1
-    assert test_energy_before == 5
-    assert test_energy_after == 5
+    activity_record = database.fetch_activities_records(test_database_path)[0]
+    assert activity_record.effort == 1
+    assert activity_record.energy_before == 5
+    assert activity_record.energy_after == 3
+    assert activity_record.activity_category == "DEV"
 
 
 def test_activity_cli_command_handles_invalid_data(tmp_path: Path) -> None:

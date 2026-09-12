@@ -335,8 +335,12 @@ def add_sleep(
             if edit_sleep_record is None:
                 raise ValueError(f"Sleep record with ID {edit} does not exist.")
 
-            sleep_start_date = datetime.fromisoformat(edit_sleep_record[1]).date()
-            sleep_end_date = datetime.fromisoformat(edit_sleep_record[2]).date()
+            sleep_start_date = datetime.fromisoformat(
+                edit_sleep_record.sleep_start_time
+            ).date()
+            sleep_end_date = datetime.fromisoformat(
+                edit_sleep_record.sleep_end_time
+            ).date()
 
             if nap:
                 console.print(
@@ -457,19 +461,26 @@ def show_stats(
     for table_type in table_types:
         if table_type == "summary":
             generated_table = tables.create_table(
-                database.fetch_daily_summaries_records(database_path, limit),
+                database.records_to_tuples(
+                    database.fetch_daily_summaries_records(database_path, limit)
+                ),
                 tables.SUMMARY_COLUMNS,
             )
 
         elif table_type == "activity":
             generated_table = tables.create_table(
-                database.fetch_activities_records(database_path, limit),
+                database.records_to_tuples(
+                    database.fetch_activities_records(database_path, limit)
+                ),
                 tables.ACTIVITY_COLUMNS,
             )
 
         else:
             generated_table = tables.create_table(
-                database.fetch_sleep_records(database_path, limit), tables.SLEEP_COLUMNS
+                database.records_to_tuples(
+                    database.fetch_sleep_records(database_path, limit)
+                ),
+                tables.SLEEP_COLUMNS,
             )
 
         if generated_table is None:

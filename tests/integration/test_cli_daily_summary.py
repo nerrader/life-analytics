@@ -29,13 +29,12 @@ def test_daily_summary_cli_command_creates_database_entry(tmp_path: Path) -> Non
     )
     assert result.exit_code == 0
 
-    data = database.fetch_daily_summaries_records(test_database_path)
-    test_date, test_mood, test_productivity, test_stress = data[0]
+    summary_record = database.fetch_daily_summaries_records(test_database_path)[0]
 
-    assert test_date
-    assert test_mood == 5
-    assert test_productivity == 5
-    assert test_stress == 5
+    assert summary_record.summary_date
+    assert summary_record.mood == 5
+    assert summary_record.productivity == 5
+    assert summary_record.stress == 5
 
 
 def test_daily_summary_cli_command_updates_record(tmp_path: Path) -> None:
@@ -68,7 +67,7 @@ def test_daily_summary_cli_command_updates_record(tmp_path: Path) -> None:
             str(test_database_path),
             "summary",
             "--edit",
-            datetime.now().strftime("%Y-%m-%d"),  # noqa: DTZ005
+            datetime.now().strftime("%Y-%m-%d"),
             "--mood",
             "1",
             "--stress",
@@ -78,13 +77,12 @@ def test_daily_summary_cli_command_updates_record(tmp_path: Path) -> None:
 
     assert result2.exit_code == 0
 
-    data = database.fetch_daily_summaries_records(test_database_path)
-    test_date, test_mood, test_productivity, test_stress = data[0]
+    summary_record = database.fetch_daily_summaries_records(test_database_path)[0]
 
-    assert test_date
-    assert test_mood == 1
-    assert test_productivity == 5
-    assert test_stress == 3
+    assert summary_record.summary_date
+    assert summary_record.mood == 1
+    assert summary_record.productivity == 5
+    assert summary_record.stress == 3
 
 
 def test_daily_summary_cli_command_handles_invalid_data(tmp_path: Path) -> None:

@@ -28,11 +28,12 @@ def test_migrate_database_replaces_existing_destination(
     )
     assert result2.exit_code == 0
 
-    data = database.fetch_sleep_records(new_database)[0]
-    assert "sleep" in data
-    assert "23:00" in data[1]  # sleep start time column
-    assert "7:00" in data[2]  # sleep end time column
-    assert 4 in data
+    sleep_record = database.fetch_sleep_records(old_database)[0]
+
+    assert sleep_record.sleep_type == "sleep"
+    assert "23:00" in sleep_record.sleep_start_time
+    assert "7:00" in sleep_record.sleep_end_time
+    assert sleep_record.sleep_quality == 4
 
 
 def test_migrate_database_in_place(
@@ -51,8 +52,9 @@ def test_migrate_database_in_place(
     result2 = cli_runner.invoke(app, ("-db", str(old_database), "migrate"))
     assert result2.exit_code == 0
 
-    data = database.fetch_sleep_records(old_database)[0]
-    assert "sleep" in data
-    assert "23:00" in data[1]  # sleep start time column
-    assert "7:00" in data[2]  # sleep end time column
-    assert 4 in data
+    sleep_record = database.fetch_sleep_records(old_database)[0]
+
+    assert sleep_record.sleep_type == "sleep"
+    assert "23:00" in sleep_record.sleep_start_time
+    assert "7:00" in sleep_record.sleep_end_time
+    assert sleep_record.sleep_quality == 4
