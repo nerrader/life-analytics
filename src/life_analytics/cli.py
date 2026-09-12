@@ -607,7 +607,7 @@ def end_activity_time(
 
     if not const.ACTIVITY_START_TEXT_PATH.exists():
         raise ValueError(
-            "No activity found to end. Start an activity first using the start command first."
+            "ERROR: No activity found to end. Start an activity first using the start command first."
         )
 
     start_activity_datetime = datetime.fromisoformat(
