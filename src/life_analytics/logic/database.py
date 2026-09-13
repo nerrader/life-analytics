@@ -4,11 +4,11 @@ from dataclasses import astuple, dataclass
 from importlib.resources import files
 from importlib.resources.abc import Traversable
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any
+
+from life_analytics.constants import TableName
 
 sql_dir: Traversable = files("life_analytics.sql")
-
-VALID_TABLE_NAMES = Literal["daily_summaries", "activities", "sleep"]
 
 
 @dataclass(frozen=True)
@@ -67,7 +67,7 @@ def clear_database(database_path: Path) -> None:
 
 def _add_record(
     database_path: Path,
-    table_name: VALID_TABLE_NAMES,
+    table_name: TableName,
     fields: dict[str, Any],
 ) -> None:
     connection = sqlite3.connect(database_path)
@@ -91,11 +91,11 @@ def _add_record(
 
 
 def add_daily_summary(database_path: Path, fields: dict[str, Any]) -> None:
-    _add_record(database_path, "daily_summaries", fields)
+    _add_record(database_path, "summary", fields)
 
 
 def add_activity(database_path: Path, fields: dict[str, Any]) -> None:
-    _add_record(database_path, "activities", fields)
+    _add_record(database_path, "activity", fields)
 
 
 def add_sleep(database_path: Path, fields: dict[str, Any]) -> None:
@@ -104,7 +104,7 @@ def add_sleep(database_path: Path, fields: dict[str, Any]) -> None:
 
 def _update_record(
     database_path: Path,
-    table_name: VALID_TABLE_NAMES,
+    table_name: TableName,
     primary_key_column: str,
     primary_key: str | int,
     fields: dict[str, Any],
@@ -149,14 +149,15 @@ def update_daily_summary_record(
     database_path: Path, date: str, fields: dict[str, Any]
 ) -> None:
     """This updates a record in the daily_summaries table based on the date (primary key)."""
-    _update_record(database_path, "daily_summaries", "summary_date", date, fields)
+    _update_record(database_path, "summary", "summary_date", date, fields)
 
 
 def update_activity_record(
     database_path: Path, activity_id: int, fields: dict[str, Any]
 ) -> None:
     """This updates a record in the activities table based on the activity_id (primary key)."""
-    _update_record(database_path, "activities", "activity_id", activity_id, fields)
+
+    _update_record(database_path, "activity", "activity_id", activity_id, fields)
 
 
 def update_sleep_record(
@@ -167,7 +168,7 @@ def update_sleep_record(
 
 
 def _fetch_table_records(
-    database_path: Path, table_name: VALID_TABLE_NAMES, limit: int | None = None
+    database_path: Path, table_name: TableName, limit: int | None = None
 ) -> list[tuple[Any, ...]]:
     query = f"SELECT * FROM {table_name} ORDER BY 1 DESC"
     params = []
@@ -190,7 +191,7 @@ def fetch_daily_summaries_records(
 ) -> list[SummaryRecord]:
     return [
         SummaryRecord(*record)
-        for record in _fetch_table_records(database_path, "daily_summaries", limit)
+        for record in _fetch_table_records(database_path, "summary", limit)
     ]
 
 
@@ -199,7 +200,7 @@ def fetch_activities_records(
 ) -> list[ActivityRecord]:
     return [
         ActivityRecord(*record)
-        for record in _fetch_table_records(database_path, "activities", limit)
+        for record in _fetch_table_records(database_path, "activity", limit)
     ]
 
 
