@@ -8,7 +8,7 @@ from rich.console import Console
 
 from life_analytics import __version__
 from life_analytics import constants as const
-from life_analytics.logic import database, prompts, tables, time_utils
+from life_analytics.logic import database, display, prompts, time_utils
 
 app = typer.Typer()
 
@@ -444,7 +444,7 @@ Full Error Message:
 def list_records(
     context: typer.Context,
     table_types: Annotated[
-        list[str] | None,
+        list[const.TableName] | None,
         typer.Option(
             "--table",
             "-t",
@@ -466,28 +466,35 @@ def list_records(
             raise typer.BadParameter("Invalid table types.")
 
     for table_type in table_types:
+        display_columns = [
+            display.db_to_table_column_name(column_name)
+            for column_name in database.get_table_column_names(
+                database_path, table_type
+            )
+        ]
+
         if table_type == "summary":
-            generated_table = tables.create_table(
+            generated_table = display.create_table(
                 database.records_to_tuples(
                     database.fetch_daily_summaries_records(database_path, limit)
                 ),
-                tables.SUMMARY_COLUMNS,
+                display_columns,
             )
 
         elif table_type == "activity":
-            generated_table = tables.create_table(
+            generated_table = display.create_table(
                 database.records_to_tuples(
                     database.fetch_activities_records(database_path, limit)
                 ),
-                tables.ACTIVITY_COLUMNS,
+                display_columns,
             )
 
         else:
-            generated_table = tables.create_table(
+            generated_table = display.create_table(
                 database.records_to_tuples(
                     database.fetch_sleep_records(database_path, limit)
                 ),
-                tables.SLEEP_COLUMNS,
+                display_columns,
             )
 
         if generated_table is None:

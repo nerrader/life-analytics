@@ -1,11 +1,11 @@
 from rich.console import Console
 from rich.table import Table
 
-from life_analytics.logic import tables
+from life_analytics.logic import display
 
 
 def test_create_table_columns_and_rows() -> None:
-    table = tables.create_table(
+    table = display.create_table(
         [("Alice", 10), ("Bob", 20)],
         ["Name", "Score"],
     )
@@ -19,7 +19,7 @@ def test_create_table_columns_and_rows() -> None:
 
 
 def test_create_table_converts_numerical_data_into_strings() -> None:
-    table = tables.create_table([(10, 20)], ["Score1", "Score2"])
+    table = display.create_table([(10, 20)], ["Score1", "Score2"])
     assert isinstance(table, Table)
 
     console = Console()

@@ -262,3 +262,16 @@ def migrate_database(database_path: Path, new_database_path: Path) -> None:
 
     finally:
         new_db_connection.close()
+
+
+def get_table_column_names(database_path: Path, table: TableName) -> list[str]:
+    connection = sqlite3.connect(database_path)
+    try:
+        cursor = connection.execute(f"PRAGMA table_info('{table}')")
+        table_columns_info = cursor.fetchall()
+    finally:
+        connection.close()
+
+    # column_info[1] represents the actual column name
+    column_names: list[str] = [column_info[1] for column_info in table_columns_info]
+    return column_names
