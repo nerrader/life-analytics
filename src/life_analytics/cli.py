@@ -234,6 +234,9 @@ Full Error Message:
         return
 
     date = datetime.now().date().isoformat()
+    current_time = (
+        datetime.now().time().isoformat(timespec="minutes")
+    )  # for activity end default
 
     activity_category: str = prompts.ask_activity_category(
         "What category would this activity fit into?", activity_category_input
@@ -244,12 +247,14 @@ Full Error Message:
         activity_description_input,
     )
 
-    activity_start = prompts.ask_datetime_question(
+    activity_start: str = prompts.ask_datetime_question(
         "When did your activity start? (HH:MM)", activity_start_input
     )
 
     activity_end: str = prompts.ask_datetime_question(
-        "When did your activity end? (HH:MM)", activity_end_input
+        "When did your activity end? (HH:MM)",
+        activity_end_input,
+        default=current_time,
     )
 
     effort = effort or prompts.ask_rating_question(

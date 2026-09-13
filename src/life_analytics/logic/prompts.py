@@ -60,7 +60,10 @@ def _validate_datetime(value: str) -> Literal[True] | str:
         return "Please enter a valid time in HH:MM format."
 
 
-def ask_datetime_question(prompt: str, skip_value: str | None = None) -> str:
+# only reason default exists is for the activity_end prompt to have a default value
+def ask_datetime_question(
+    prompt: str, skip_value: str | None = None, default: str | None = None
+) -> str:
     """The helper function to ask questions requiring datetime in HH:MM.
 
     Args:
@@ -74,8 +77,7 @@ def ask_datetime_question(prompt: str, skip_value: str | None = None) -> str:
         return skip_value
 
     datetime_value: str | None = questionary.text(
-        prompt,
-        validate=_validate_datetime,
+        prompt, validate=_validate_datetime, default=default if default else ""
     ).ask()
 
     if datetime_value is None:
