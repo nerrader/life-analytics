@@ -32,9 +32,9 @@ def test_sleep_cli_command_creates_database_entry(tmp_path: Path) -> None:
     sleep_record = database.fetch_sleep_records(test_database_path)[0]
 
     # time in the sleep database in stored in YYYY-MM-DDTHH:MM which is why im using only the time here
-    assert "21:00" in sleep_record.sleep_start_time
-    assert "6:00" in sleep_record.sleep_end_time
-    assert sleep_record.sleep_quality == 5
+    assert "21:00" in sleep_record.start_at
+    assert "6:00" in sleep_record.end_at
+    assert sleep_record.quality == 5
     assert sleep_record.sleep_type == "nap"
 
 
@@ -77,9 +77,9 @@ def test_sleep_cli_command_updates_record(tmp_path: Path) -> None:
     sleep_record = database.fetch_sleep_records(test_database_path)[0]
 
     # time in the sleep database in stored in YYYY-MM-DDTHH:MM which is why im using only the time here
-    assert "21:00" in sleep_record.sleep_start_time
-    assert "6:00" in sleep_record.sleep_end_time
-    assert sleep_record.sleep_quality == 1
+    assert "21:00" in sleep_record.start_at
+    assert "6:00" in sleep_record.end_at
+    assert sleep_record.quality == 1
     assert sleep_record.sleep_type == "sleep"
 
 

@@ -21,12 +21,11 @@ class SummaryRecord:
 
 @dataclass(frozen=True)
 class ActivityRecord:
-    activity_id: int
-    activity_date: str
-    activity_category: str
-    activity_description: str | None
-    activity_start: str
-    activity_end: str
+    id: int
+    category: str
+    description: str | None
+    start_at: str
+    end_at: str
     effort: int
     enjoyability: int
     energy_before: int
@@ -35,20 +34,17 @@ class ActivityRecord:
 
 @dataclass(frozen=True)
 class SleepRecord:
-    sleep_id: int
-    sleep_start_time: str
-    sleep_end_time: str
-    sleep_quality: int
+    id: int
+    start_at: str
+    end_at: str
+    quality: int
     sleep_type: str
 
 
 def create_database(database_path: Path) -> None:
     database_path.parent.mkdir(parents=True, exist_ok=True)
-
     connection = sqlite3.connect(database_path)
     try:
-        # enable foreign keys
-        connection.execute("PRAGMA foreign_keys = ON")
         connection.executescript((sql_dir / "schema.sql").read_text())
     finally:
         connection.close()
@@ -91,11 +87,11 @@ def _add_record(
 
 
 def add_daily_summary(database_path: Path, fields: dict[str, Any]) -> None:
-    _add_record(database_path, "summary", fields)
+    _add_record(database_path, "daily_summaries", fields)
 
 
 def add_activity(database_path: Path, fields: dict[str, Any]) -> None:
-    _add_record(database_path, "activity", fields)
+    _add_record(database_path, "activities", fields)
 
 
 def add_sleep(database_path: Path, fields: dict[str, Any]) -> None:
@@ -149,22 +145,20 @@ def update_daily_summary_record(
     database_path: Path, date: str, fields: dict[str, Any]
 ) -> None:
     """This updates a record in the daily_summaries table based on the date (primary key)."""
-    _update_record(database_path, "summary", "summary_date", date, fields)
+    _update_record(database_path, "daily_summaries", "summary_date", date, fields)
 
 
 def update_activity_record(
-    database_path: Path, activity_id: int, fields: dict[str, Any]
+    database_path: Path, id: int, fields: dict[str, Any]
 ) -> None:
-    """This updates a record in the activities table based on the activity_id (primary key)."""
+    """This updates a record in the activities table based on the id (primary key)."""
 
-    _update_record(database_path, "activity", "activity_id", activity_id, fields)
+    _update_record(database_path, "activities", "id", id, fields)
 
 
-def update_sleep_record(
-    database_path: Path, sleep_id: int, fields: dict[str, Any]
-) -> None:
-    """This updates a record in the sleep table based on the sleep_id (primary key)."""
-    _update_record(database_path, "sleep", "sleep_id", sleep_id, fields)
+def update_sleep_record(database_path: Path, id: int, fields: dict[str, Any]) -> None:
+    """This updates a record in the sleep table based on the id (primary key)."""
+    _update_record(database_path, "sleep", "id", id, fields)
 
 
 def _fetch_table_records(
@@ -191,7 +185,7 @@ def fetch_daily_summaries_records(
 ) -> list[SummaryRecord]:
     return [
         SummaryRecord(*record)
-        for record in _fetch_table_records(database_path, "summary", limit)
+        for record in _fetch_table_records(database_path, "daily_summaries", limit)
     ]
 
 
@@ -200,7 +194,7 @@ def fetch_activities_records(
 ) -> list[ActivityRecord]:
     return [
         ActivityRecord(*record)
-        for record in _fetch_table_records(database_path, "activity", limit)
+        for record in _fetch_table_records(database_path, "activities", limit)
     ]
 
 
@@ -213,11 +207,11 @@ def fetch_sleep_records(
     ]
 
 
-def fetch_sleep_record(database_path: Path, sleep_id: int) -> SleepRecord | None:
+def fetch_sleep_record(database_path: Path, id: int) -> SleepRecord | None:
     connection = sqlite3.connect(database_path)
     try:
         cursor = connection.cursor()
-        cursor.execute("SELECT * FROM sleep WHERE sleep_id = ?", (sleep_id,))
+        cursor.execute("SELECT * FROM sleep WHERE id = ?", (id,))
         return SleepRecord(*cursor.fetchone())
     finally:
         connection.close()
@@ -227,41 +221,6 @@ def records_to_tuples(
     records: Iterable[SleepRecord | ActivityRecord | SummaryRecord],
 ) -> list[tuple[Any, ...]]:
     return [astuple(record) for record in records]
-
-
-def migrate_database(database_path: Path, new_database_path: Path) -> None:
-    # to make sure theres no duplicated data there
-    new_database_path.unlink(missing_ok=True)
-
-    create_database(new_database_path)
-    new_db_connection = sqlite3.connect(new_database_path)
-
-    try:
-        daily_summary_rows = fetch_daily_summaries_records(database_path)
-        activity_rows = fetch_activities_records(database_path)
-        sleep_rows = fetch_sleep_records(database_path)
-
-        new_db_connection.executemany(
-            "INSERT INTO daily_summaries VALUES (?, ?, ?, ?)",
-            records_to_tuples(daily_summary_rows),
-        )
-        new_db_connection.executemany(
-            "INSERT INTO activities VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            records_to_tuples(activity_rows),
-        )
-        new_db_connection.executemany(
-            "INSERT INTO sleep VALUES (?, ?, ?, ?, ?)",
-            records_to_tuples(sleep_rows),
-        )
-
-        new_db_connection.commit()
-
-    except Exception:
-        new_db_connection.rollback()
-        raise
-
-    finally:
-        new_db_connection.close()
 
 
 def get_table_column_names(database_path: Path, table: TableName) -> list[str]:

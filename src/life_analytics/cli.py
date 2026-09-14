@@ -8,7 +8,7 @@ from rich.console import Console
 
 from life_analytics import __version__
 from life_analytics import constants as const
-from life_analytics.logic import database, display, prompts, time_utils
+from life_analytics.logic import database, display, migrations, prompts, time_utils
 
 app = typer.Typer()
 
@@ -54,6 +54,8 @@ def main(
 
     if not database_path.exists():
         database.create_database(database_path)
+    else:
+        migrations.migrate_database(database_path)
 
 
 @app.command("summary")
@@ -141,7 +143,7 @@ def add_activity(
         typer.Option(
             "--edit",
             "-e",
-            help="The record's Activity ID to edit. Use the flags/options to update the specific fields. Interactive mode cannot be used when editing.",
+            help="The record's ID to edit. Use the flags/options to update the specific fields. Interactive mode cannot be used when editing.",
         ),
     ] = None,
     activity_category_input: Annotated[
@@ -200,6 +202,9 @@ def add_activity(
 
     if edit:
         try:
+            raise NotImplementedError(
+                "yo we just upgraded the schema and now activity_start and activity_end need the date as well, so we aint letting you edit shit till we figure that out."
+            )
             database.update_activity_record(
                 database_path,
                 edit,
@@ -233,7 +238,7 @@ Full Error Message:
 
         return
 
-    date = datetime.now().date().isoformat()
+    date = datetime.now().date()
     current_time = (
         datetime.now().time().isoformat(timespec="minutes")
     )  # for activity end default
@@ -250,12 +255,14 @@ Full Error Message:
     activity_start: str = prompts.ask_datetime_question(
         "When did your activity start? (HH:MM)", activity_start_input
     )
+    activity_start = f"{date}T{activity_start}"
 
     activity_end: str = prompts.ask_datetime_question(
         "When did your activity end? (HH:MM)",
         activity_end_input,
         default=current_time,
     )
+    activity_end = f"{date}T{activity_end}"
 
     effort = effort or prompts.ask_rating_question(
         "How much effort did you think this activity required? (1-5)"
@@ -277,15 +284,14 @@ Full Error Message:
         database.add_activity(
             database_path,
             {
-                "activity_category": activity_category,
-                "activity_description": activity_description,
-                "activity_start": activity_start,
-                "activity_end": activity_end,
+                "category": activity_category,
+                "description": activity_description,
+                "start_at": activity_start,
+                "end_at": activity_end,
                 "effort": effort,
                 "enjoyability": enjoyability,
                 "energy_before": energy_before,
                 "energy_after": energy_after,
-                "activity_date": date,
             },
         )
     except sqlite3.IntegrityError as error:
@@ -309,7 +315,7 @@ def add_sleep(
         typer.Option(
             "--edit",
             "-e",
-            help="The record's Sleep ID to edit. Use the flags/options to update the specific fields. Interactive mode cannot be used when editing.",
+            help="The record's ID to edit. Use the flags/options to update the specific fields. Interactive mode cannot be used when editing.",
         ),
     ] = None,
     nap: Annotated[
@@ -351,12 +357,8 @@ def add_sleep(
             if edit_sleep_record is None:
                 raise ValueError(f"Sleep record with ID {edit} does not exist.")
 
-            sleep_start_date = datetime.fromisoformat(
-                edit_sleep_record.sleep_start_time
-            ).date()
-            sleep_end_date = datetime.fromisoformat(
-                edit_sleep_record.sleep_end_time
-            ).date()
+            sleep_start_date = datetime.fromisoformat(edit_sleep_record.start_at).date()
+            sleep_end_date = datetime.fromisoformat(edit_sleep_record.end_at).date()
 
             if nap:
                 console.print(
@@ -368,17 +370,17 @@ def add_sleep(
                 database_path,
                 edit,
                 {
-                    "sleep_start_time": time_utils.combine_date_and_time(
+                    "start_at": time_utils.combine_date_and_time(
                         sleep_start_date, sleep_start_input
                     ).isoformat(timespec="minutes")
                     if sleep_start_input and time_utils.validate_time(sleep_start_input)
                     else None,
-                    "sleep_end_time": time_utils.combine_date_and_time(
+                    "end_at": time_utils.combine_date_and_time(
                         sleep_end_date, sleep_end_input
                     ).isoformat(timespec="minutes")
                     if sleep_end_input and time_utils.validate_time(sleep_end_input)
                     else None,
-                    "sleep_quality": sleep_quality,
+                    "quality": sleep_quality,
                 },
             )
         except ValueError as error:
@@ -420,9 +422,9 @@ Full Error Message:
         database.add_sleep(
             database_path,
             {
-                "sleep_start_time": sleep_start_datetime,
-                "sleep_end_time": sleep_end_datetime,
-                "sleep_quality": sleep_quality,
+                "start_at": sleep_start_datetime,
+                "end_at": sleep_end_datetime,
+                "quality": sleep_quality,
                 "sleep_type": "nap" if nap else "sleep",
             },
         )
@@ -444,7 +446,7 @@ Full Error Message:
 def list_records(
     context: typer.Context,
     table_types: Annotated[
-        list[const.TableName] | None,
+        list[str] | None,
         typer.Option(
             "--table",
             "-t",
@@ -465,7 +467,15 @@ def list_records(
         if any(table_type not in VALID_TABLE_TYPES for table_type in table_types):
             raise typer.BadParameter("Invalid table types.")
 
+    table_name_map: dict[str, const.TableName] = {
+        "summary": "daily_summaries",
+        "activity": "activities",
+        "sleep": "sleep",
+    }
+
     for table_type in table_types:
+        table_type = table_name_map[table_type]
+
         display_columns = [
             display.db_to_table_column_name(column_name)
             for column_name in database.get_table_column_names(
@@ -473,7 +483,7 @@ def list_records(
             )
         ]
 
-        if table_type == "summary":
+        if table_type == "daily_summaries":
             generated_table = display.create_table(
                 database.records_to_tuples(
                     database.fetch_daily_summaries_records(database_path, limit)
@@ -481,7 +491,7 @@ def list_records(
                 display_columns,
             )
 
-        elif table_type == "activity":
+        elif table_type == "activities":
             generated_table = display.create_table(
                 database.records_to_tuples(
                     database.fetch_activities_records(database_path, limit)
@@ -526,47 +536,6 @@ def clear_all_data(
         return
 
     print("Aborting clear command.")
-
-
-@app.command("migrate")
-def migrate_database(
-    context: typer.Context,
-    migrate_path: Annotated[
-        str | None,
-        typer.Option(
-            "--migrate-path",
-            "-m",
-            help="The new database migration path. Omitting will start an in-place schema migration.",
-        ),
-    ] = None,
-) -> None:
-    """Migrates the database if the schema changes in the future.
-    This only works if the columns remain the same.
-    """
-    database_path: Path = context.obj["database_path"]
-    do_in_place_migration: bool = migrate_path is None
-
-    if do_in_place_migration:
-        print("Doing an in-place schema migration.")
-        final_migration_path = const.DEFAULT_DATABASE_PATH.parent / "temp-migration.db"
-
-    else:
-        # this assert exists just for mypy
-        assert migrate_path is not None
-        final_migration_path = Path(migrate_path)
-
-    database.migrate_database(database_path, final_migration_path)
-
-    if not do_in_place_migration:
-        return
-
-    # just rename the files instead of doing another migration
-    backup_filepath = Path(str(database_path) + ".backup")
-
-    # remove if it exists then replace it
-    backup_filepath.unlink(missing_ok=True)
-    database_path.rename(backup_filepath)
-    final_migration_path.rename(database_path)
 
 
 @app.command("start")
@@ -627,13 +596,10 @@ def end_activity_time(
             "No activity found to end. Start an activity first using the start command first."
         )
 
-    start_activity_datetime = datetime.fromisoformat(activity_start_path.read_text())
+    start_activity_datetime = activity_start_path.read_text()
+    end_activity_datetime = datetime.now().isoformat(timespec="minutes")
 
     activity_start_path.unlink()
-
-    start_activity_date = start_activity_datetime.date().isoformat()
-    start_activity_time = start_activity_datetime.time().isoformat(timespec="minutes")
-    end_activity_time = datetime.now().time().isoformat(timespec="minutes")
 
     activity_category: str = prompts.ask_activity_category(
         "What category would this activity fit into?", activity_category_input
@@ -662,14 +628,13 @@ def end_activity_time(
     database.add_activity(
         database_path,
         {
-            "activity_category": activity_category,
-            "activity_description": activity_description,
-            "activity_start": start_activity_time,
-            "activity_end": end_activity_time,
+            "category": activity_category,
+            "description": activity_description,
+            "start_at": start_activity_datetime,
+            "end_at": end_activity_datetime,
             "effort": effort,
             "enjoyability": enjoyability,
             "energy_before": energy_before,
             "energy_after": energy_after,
-            "activity_date": start_activity_date,
         },
     )

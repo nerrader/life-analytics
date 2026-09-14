@@ -40,8 +40,8 @@ def test_activities_cli_command_creates_database_entry(tmp_path: Path) -> None:
 
     activity_record = database.fetch_activities_records(test_database_path)[0]
 
-    assert activity_record.activity_category == "DEV"
-    assert activity_record.activity_description == "integration testing"
+    assert activity_record.category == "DEV"
+    assert activity_record.description == "integration testing"
     assert activity_record.effort == 5
     assert activity_record.energy_after == 5
 
@@ -102,7 +102,7 @@ def test_activities_cli_command_updates_record(tmp_path: Path) -> None:
     assert activity_record.effort == 1
     assert activity_record.energy_before == 5
     assert activity_record.energy_after == 3
-    assert activity_record.activity_category == "DEV"
+    assert activity_record.category == "DEV"
 
 
 def test_activity_cli_command_handles_invalid_data(tmp_path: Path) -> None:

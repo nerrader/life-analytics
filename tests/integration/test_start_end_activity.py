@@ -72,8 +72,8 @@ def test_end_activity_uses_cli_options_without_prompting(
     rating_mock.assert_not_called()
 
     activity_record = database.fetch_activities_records(tmp_path / "test.db")[0]
-    assert activity_record.activity_category == "SCHOOL"
-    assert activity_record.activity_description == "integration testing"
+    assert activity_record.category == "SCHOOL"
+    assert activity_record.description == "integration testing"
     assert activity_record.enjoyability == 4
     assert activity_record.energy_before == 5
     assert activity_record.energy_after == 2

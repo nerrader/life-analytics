@@ -4,7 +4,7 @@ from typing import Final, Literal
 from platformdirs import user_data_path
 
 SleepType = Literal["sleep", "nap"]
-TableName = Literal["summary", "activity", "sleep"]
+TableName = Literal["daily_summaries", "activities", "sleep"]
 
 MAIN_DATA_DIR: Final[Path] = user_data_path("life-analytics", appauthor="nerrader")
 DEFAULT_DATABASE_PATH: Final[Path] = MAIN_DATA_DIR / "life.db"
