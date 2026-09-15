@@ -83,6 +83,9 @@ def ask_datetime_question(
     if datetime_value is None:
         raise RuntimeError("User cancelled the datetime question prompt.")
 
+    # so 6:03 gets turned to 06:03
+    datetime_value = datetime.strptime(datetime_value, "%H:%M").strftime("%H:%M")
+
     return datetime_value
 
 

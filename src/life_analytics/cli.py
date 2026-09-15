@@ -8,7 +8,14 @@ from rich.console import Console
 
 from life_analytics import __version__
 from life_analytics import constants as const
-from life_analytics.logic import database, display, migrations, prompts, time_utils
+from life_analytics.logic import (
+    database,
+    display,
+    migrations,
+    prompts,
+    stats,
+    time_utils,
+)
 
 app = typer.Typer()
 
@@ -204,17 +211,26 @@ def add_activity(
             if edit_record is None:
                 raise ValueError("--edit gave a non-existant record.")
 
+            existing_start_date = datetime.fromisoformat(edit_record.start_at).date()
+            existing_end_date = datetime.fromisoformat(edit_record.end_at).date()
+
             database.update_activity_record(
                 database_path,
                 edit,
                 {
                     "category": category_input,
                     "description": description_input,
-                    "start_at": f"{edit_record.start_at}T{activity_start_input}"
-                    if time_utils.validate_time(activity_start_input)
+                    "start_at": time_utils.combine_date_and_time(
+                        existing_start_date, activity_start_input
+                    )
+                    if activity_start_input is not None
+                    and time_utils.validate_time(activity_start_input)
                     else None,
-                    "end_at": f"{edit_record.end_at}T{activity_end_input}"
-                    if time_utils.validate_time(activity_end_input)
+                    "end_at": time_utils.combine_date_and_time(
+                        existing_end_date, activity_end_input
+                    )
+                    if activity_end_input is not None
+                    and time_utils.validate_time(activity_end_input)
                     else None,
                     "effort": effort,
                     "enjoyability": enjoyability,
@@ -237,7 +253,7 @@ Full Error Message:
 
         return
 
-    date = datetime.now().date()
+    date = datetime.now().date().isoformat()
     current_time = (
         datetime.now().time().isoformat(timespec="minutes")
     )  # for activity end default
@@ -512,6 +528,39 @@ def list_records(
             continue
 
         console.print(generated_table)
+
+
+@app.command("stats")
+def display_stats(context: typer.Context) -> None:
+    """Displays overall statistics of collected data"""
+    database_path = context.obj["database_path"]
+
+    summary_records = database.fetch_daily_summaries_records(database_path)
+    activity_records = database.fetch_activities_records(database_path)
+    sleep_records = database.fetch_sleep_records(database_path)
+
+    tracking_data = stats.calculate_tracking_stats(summary_records)
+    summary_data = stats.calculate_daily_summary_data(summary_records)
+    activity_data = stats.calculate_activity_data(activity_records)
+    sleep_data = stats.calculate_sleep_data(sleep_records)
+
+    average_duration_format = "{}h {}m"
+    # tryna do some formatting here
+    activity_average_duration = activity_data["Avg Duration"]
+    hours, minutes = divmod(round(activity_average_duration / 60), 60)
+    activity_data["Avg Duration"] = average_duration_format.format(hours, minutes)
+
+    sleep_average_duration = sleep_data["Avg Duration"]
+    hours, minutes = divmod(round(sleep_average_duration / 60), 60)
+    sleep_data["Avg Duration"] = average_duration_format.format(hours, minutes)
+
+    stat_dict = tracking_data.copy()
+    stat_dict["Daily Summaries"] = summary_data
+    stat_dict["Activities"] = activity_data
+    stat_dict["Sleep"] = sleep_data
+
+    grid = display.create_stats_grid(stat_dict)
+    console.print(grid)
 
 
 @app.command("clear")

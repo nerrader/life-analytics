@@ -26,20 +26,27 @@ def create_table(
     return table
 
 
-def create_stats_grid() -> Table:
+def create_stats_grid(data: dict[str, dict[str, str] | str]) -> Table:
     """Creates a table with no borders and headers,
     to create a dashboard-like display for the stats command
     to use.
     """
-    grid = Table.grid()
+    grid = Table.grid(expand=False)
 
-    grid.add_column()
-    grid.add_column()
+    grid.add_column(width=30, no_wrap=True)
+    grid.add_column(no_wrap=True)
+
+    for name, value in data.items():
+        if not isinstance(value, dict):
+            grid.add_row(name, str(value))
+            continue
+
+        grid.add_row("-------------------------", "---------")  # add separator
+
+        grid.add_row(name, "")
+        for section_name, section_value in value.items():
+            if isinstance(section_value, float):
+                section_value = round(section_value, 2)
+            grid.add_row(f"\t{section_name}", str(section_value))
 
     return grid
-
-
-def create_grid_section(grid: Table, title: str, contents: dict[str, str]) -> None:
-    grid.add_row(title, "")
-    for name, value in contents.items():
-        grid.add_row("\tname", "value")
