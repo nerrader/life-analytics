@@ -207,6 +207,16 @@ def fetch_sleep_records(
     ]
 
 
+def fetch_activity_record(database_path: Path, id: int) -> ActivityRecord | None:
+    connection = sqlite3.connect(database_path)
+    try:
+        cursor = connection.cursor()
+        cursor.execute("SELECT * FROM activities WHERE id = ?", (id,))
+        return ActivityRecord(*cursor.fetchone())
+    finally:
+        connection.close()
+
+
 def fetch_sleep_record(database_path: Path, id: int) -> SleepRecord | None:
     connection = sqlite3.connect(database_path)
     try:

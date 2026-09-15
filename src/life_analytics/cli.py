@@ -65,7 +65,6 @@ def add_daily_summary(
         str | None,
         typer.Option(
             "--edit",
-            "-e",
             help="The record's date to edit (YYYY-MM-DD). Use the flags/options to update the specific fields. Interactive mode cannot be used when editing.",
         ),
     ] = None,
@@ -142,27 +141,26 @@ def add_activity(
         int | None,
         typer.Option(
             "--edit",
-            "-e",
             help="The record's ID to edit. Use the flags/options to update the specific fields. Interactive mode cannot be used when editing.",
         ),
     ] = None,
-    activity_category_input: Annotated[
+    category_input: Annotated[
         str | None,
         typer.Option(
             "--category",
-            "-ac",
+            "-c",
             help="The category of the activity you did today. Available categories are: 'IDLE', 'MAINT', 'DEV', 'SCHOOL', 'SPORTS', 'SOCIAL'.",
         ),
     ] = None,
-    activity_description_input: Annotated[
+    description_input: Annotated[
         str | None,
-        typer.Option("--description", "-ad", help="Further describe your activity."),
+        typer.Option("--description", "-d", help="Further describe your activity."),
     ] = None,
     activity_start_input: Annotated[
         str | None,
         typer.Option(
             "--start",
-            "-as",  # stands for activity-start
+            "-s",  # stands for activity-start
             help="The time you started the activity (HH:MM, 24-hour format).",
         ),
     ] = None,
@@ -170,7 +168,7 @@ def add_activity(
         str | None,
         typer.Option(
             "--end",
-            "-ae",  # stands for activity-end
+            "-e",  # stands for activity-end
             help="The time you ended the activity (HH:MM, 24-hour format).",
         ),
     ] = None,
@@ -202,19 +200,20 @@ def add_activity(
 
     if edit:
         try:
-            raise NotImplementedError(
-                "yo we just upgraded the schema and now activity_start and activity_end need the date as well, so we aint letting you edit shit till we figure that out."
-            )
+            edit_record = database.fetch_activity_record(database_path, edit)
+            if edit_record is None:
+                raise ValueError("--edit gave a non-existant record.")
+
             database.update_activity_record(
                 database_path,
                 edit,
                 {
-                    "activity_category": activity_category_input,
-                    "activity_description": activity_description_input,
-                    "activity_start": activity_start_input
+                    "category": category_input,
+                    "description": description_input,
+                    "start_at": f"{edit_record.start_at}T{activity_start_input}"
                     if time_utils.validate_time(activity_start_input)
                     else None,
-                    "activity_end": activity_end_input
+                    "end_at": f"{edit_record.end_at}T{activity_end_input}"
                     if time_utils.validate_time(activity_end_input)
                     else None,
                     "effort": effort,
@@ -244,12 +243,12 @@ Full Error Message:
     )  # for activity end default
 
     activity_category: str = prompts.ask_activity_category(
-        "What category would this activity fit into?", activity_category_input
+        "What category would this activity fit into?", category_input
     )
 
     activity_description: str | None = prompts.ask_activity_description(
         "What would be a good description for this activity? (optional):",
-        activity_description_input,
+        description_input,
     )
 
     activity_start: str = prompts.ask_datetime_question(
@@ -314,7 +313,6 @@ def add_sleep(
         int | None,
         typer.Option(
             "--edit",
-            "-e",
             help="The record's ID to edit. Use the flags/options to update the specific fields. Interactive mode cannot be used when editing.",
         ),
     ] = None,
@@ -330,14 +328,14 @@ def add_sleep(
         str | None,
         typer.Option(
             "--start",
-            "-ss",
+            "-s",
             help="The time you went to sleep yesterday (HH:MM, 24-hour format).",
         ),
     ] = None,
     sleep_end_input: Annotated[
         str | None,
         typer.Option(
-            "--end", "-se", help="The time you woke up today (HH:MM, 24-hour format)."
+            "--end", "-e", help="The time you woke up today (HH:MM, 24-hour format)."
         ),
     ] = None,
     sleep_quality: Annotated[

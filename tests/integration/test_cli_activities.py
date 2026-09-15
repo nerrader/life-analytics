@@ -117,13 +117,13 @@ def test_activity_cli_command_handles_invalid_data(tmp_path: Path) -> None:
             "-db",
             str(test_database_path),
             "activity",
-            "-ac",
+            "-c",
             "DEV",
-            "-ad",
+            "-d",
             "integration testing invalid values",
-            "-as",
+            "-s",
             "99:99",
-            "-ae",
+            "-e",
             "99:99",
             "-ef",
             "5",
@@ -135,6 +135,7 @@ def test_activity_cli_command_handles_invalid_data(tmp_path: Path) -> None:
             "5",
         ],
     )
-
+    print(result.output)
+    print(repr(result.exception))
     assert result.exit_code == 0, (result.output, result.exception)
     assert "ERROR:" in result.stdout
