@@ -27,6 +27,7 @@ decision making and quality of life.
 - Make listing UX better, by adding extra commands like `recent`, and `today`
 - Add `--detailed` flag for sleep command to pass in your own sleep
 start/end datetime, and sleep type.
+- Persistent configs.
 - GUI version of this tool.
 
 ## How to Install
