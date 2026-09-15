@@ -4,15 +4,15 @@ from pytest_mock import MockerFixture
 from life_analytics.logic import prompts
 
 
-def test_validate_datetime_with_valid_datetime() -> None:
-    assert prompts._validate_datetime("00:00") is True
-    assert prompts._validate_datetime("18:20") is True
+def test_validate_time_with_valid_datetime() -> None:
+    assert prompts._validate_time("00:00") is True
+    assert prompts._validate_time("18:20") is True
 
 
-def test_validate_datetime_with_invalid_datetime() -> None:
-    assert isinstance(prompts._validate_datetime("25:00"), str)
-    assert isinstance(prompts._validate_datetime("24:60"), str)
-    assert isinstance(prompts._validate_datetime("7 :59 "), str)
+def test_validate_time_with_invalid_datetime() -> None:
+    assert isinstance(prompts._validate_time("25:00"), str)
+    assert isinstance(prompts._validate_time("24:60"), str)
+    assert isinstance(prompts._validate_time("7 :59 "), str)
 
 
 def test_validate_rating_with_valid_rating() -> None:
@@ -57,7 +57,7 @@ def test_datetime_prompt_cancelled_raises_runtime_error(mocker: MockerFixture) -
     mock_rating_prompt.return_value.ask.return_value = None
 
     with pytest.raises(RuntimeError):
-        prompts.ask_datetime_question(
+        prompts.ask_time_question(
             "If my code is correct, this should raise a RuntimeError"
         )
 
@@ -67,7 +67,7 @@ def test_datetime_prompt_returns_correct_value(mocker: MockerFixture) -> None:
     mock_rating_prompt.return_value.ask.return_value = "19:49"
 
     assert (
-        prompts.ask_datetime_question("If my code is correct, this should return 19:49")
+        prompts.ask_time_question("If my code is correct, this should return 19:49")
         == "19:49"
     )
 

@@ -29,3 +29,26 @@ def validate_time(time: str | None) -> bool:
         return True
     except ValueError:
         return False
+
+
+def validate_datetime(date_time: str | None) -> bool:
+    """Validates the time string. Returns True if time is valid, and vice versa."""
+    try:
+        if date_time is None:
+            return False
+        # all it does is just see if this code runs without errors
+        datetime.strptime(date_time, "%Y-%m-%d %H:%M")
+        return True
+    except ValueError:
+        return False
+
+
+def datetime_string_to_iso(date_time: str) -> str:
+    try:
+        return datetime.strptime(date_time, "%Y-%m-%d %H:%M").isoformat(
+            timespec="minutes"
+        )
+    except ValueError:
+        raise ValueError(
+            f"Invalid datetime '{date_time}'. Expected format: YYYY-MM-DD HH:MM."
+        )

@@ -151,6 +151,13 @@ def add_activity(
             help="The record's ID to edit. Use the flags/options to update the specific fields. Interactive mode cannot be used when editing.",
         ),
     ] = None,
+    detailed: Annotated[
+        bool,
+        typer.Option(
+            "--detailed",
+            help="If this flag is provoked, require explicit dates.",
+        ),
+    ] = False,
     category_input: Annotated[
         str | None,
         typer.Option(
@@ -211,8 +218,39 @@ def add_activity(
             if edit_record is None:
                 raise ValueError("--edit gave a non-existant record.")
 
-            existing_start_date = datetime.fromisoformat(edit_record.start_at).date()
-            existing_end_date = datetime.fromisoformat(edit_record.end_at).date()
+            if detailed:
+                start_datetime = (
+                    time_utils.datetime_string_to_iso(activity_start_input)
+                    if activity_start_input is not None
+                    else None
+                )
+
+                end_datetime = (
+                    time_utils.datetime_string_to_iso(activity_end_input)
+                    if activity_end_input is not None
+                    else None
+                )
+            else:
+                existing_start_date = datetime.fromisoformat(
+                    edit_record.start_at
+                ).date()
+                existing_end_date = datetime.fromisoformat(edit_record.end_at).date()
+
+                start_datetime = (
+                    time_utils.combine_date_and_time(
+                        existing_start_date, activity_start_input
+                    ).isoformat(timespec="minutes")
+                    if activity_start_input
+                    else None
+                )
+
+                end_datetime = (
+                    time_utils.combine_date_and_time(
+                        existing_end_date, activity_end_input
+                    ).isoformat(timespec="minutes")
+                    if activity_end_input
+                    else None
+                )
 
             database.update_activity_record(
                 database_path,
@@ -220,18 +258,8 @@ def add_activity(
                 {
                     "category": category_input,
                     "description": description_input,
-                    "start_at": time_utils.combine_date_and_time(
-                        existing_start_date, activity_start_input
-                    )
-                    if activity_start_input is not None
-                    and time_utils.validate_time(activity_start_input)
-                    else None,
-                    "end_at": time_utils.combine_date_and_time(
-                        existing_end_date, activity_end_input
-                    )
-                    if activity_end_input is not None
-                    and time_utils.validate_time(activity_end_input)
-                    else None,
+                    "start_at": start_datetime,
+                    "end_at": end_datetime,
                     "effort": effort,
                     "enjoyability": enjoyability,
                     "energy_before": energy_before,
@@ -246,8 +274,8 @@ def add_activity(
             console.print(
                 f"""ERROR: Failed to update record: Invalid values were passed to the database.
 
-Full Error Message:
-{error}""",
+    Full Error Message:
+    {error}""",
                 style="red",
             )
 
@@ -267,12 +295,12 @@ Full Error Message:
         description_input,
     )
 
-    activity_start: str = prompts.ask_datetime_question(
+    activity_start: str = prompts.ask_time_question(
         "When did your activity start? (HH:MM)", activity_start_input
     )
     activity_start = f"{date}T{activity_start}"
 
-    activity_end: str = prompts.ask_datetime_question(
+    activity_end: str = prompts.ask_time_question(
         "When did your activity end? (HH:MM)",
         activity_end_input,
         default=current_time,
@@ -336,8 +364,14 @@ def add_sleep(
         bool,
         typer.Option(
             "--nap",
-            "-n",
             help="If this flag is provoked, treat this sleep entry as a nap (both times will be on the same date).",
+        ),
+    ] = False,
+    detailed: Annotated[
+        bool,
+        typer.Option(
+            "--detailed",
+            help="If this flag is provoked, require explicit dates.",
         ),
     ] = False,
     sleep_start_input: Annotated[
@@ -371,8 +405,38 @@ def add_sleep(
             if edit_sleep_record is None:
                 raise ValueError(f"Sleep record with ID {edit} does not exist.")
 
-            sleep_start_date = datetime.fromisoformat(edit_sleep_record.start_at).date()
-            sleep_end_date = datetime.fromisoformat(edit_sleep_record.end_at).date()
+            if not detailed:
+                sleep_start_date = datetime.fromisoformat(
+                    edit_sleep_record.start_at
+                ).date()
+                sleep_end_date = datetime.fromisoformat(edit_sleep_record.end_at).date()
+
+                start_datetime = (
+                    time_utils.combine_date_and_time(
+                        sleep_start_date, sleep_start_input
+                    ).isoformat(timespec="minutes")
+                    if sleep_start_input
+                    else None
+                )
+                end_datetime = (
+                    time_utils.combine_date_and_time(
+                        sleep_end_date, sleep_end_input
+                    ).isoformat(timespec="minutes")
+                    if sleep_end_input
+                    else None
+                )
+            else:
+                start_datetime = (
+                    time_utils.datetime_string_to_iso(sleep_start_input)
+                    if sleep_start_input is not None
+                    else None
+                )
+
+                end_datetime = (
+                    time_utils.datetime_string_to_iso(sleep_end_input)
+                    if sleep_end_input is not None
+                    else None
+                )
 
             if nap:
                 console.print(
@@ -384,16 +448,8 @@ def add_sleep(
                 database_path,
                 edit,
                 {
-                    "start_at": time_utils.combine_date_and_time(
-                        sleep_start_date, sleep_start_input
-                    ).isoformat(timespec="minutes")
-                    if sleep_start_input and time_utils.validate_time(sleep_start_input)
-                    else None,
-                    "end_at": time_utils.combine_date_and_time(
-                        sleep_end_date, sleep_end_input
-                    ).isoformat(timespec="minutes")
-                    if sleep_end_input and time_utils.validate_time(sleep_end_input)
-                    else None,
+                    "start_at": start_datetime,
+                    "end_at": end_datetime,
                     "quality": sleep_quality,
                 },
             )
@@ -412,7 +468,7 @@ Full Error Message:
 
         return
 
-    start_sleep_time: str = prompts.ask_datetime_question(
+    start_sleep_time: str = prompts.ask_time_question(
         "When did you start sleeping? (HH:MM)", sleep_start_input
     )
 
@@ -420,7 +476,7 @@ Full Error Message:
         today_date if nap else yesterday_date, start_sleep_time
     ).isoformat(timespec="minutes")
 
-    end_sleep_time: str = prompts.ask_datetime_question(
+    end_sleep_time: str = prompts.ask_time_question(
         "When did you wake up? (HH:MM)", sleep_end_input
     )
 

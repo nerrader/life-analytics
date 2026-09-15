@@ -44,7 +44,7 @@ def ask_rating_question(prompt: str) -> float:
     return rating
 
 
-def _validate_datetime(value: str) -> Literal[True] | str:
+def _validate_time(value: str) -> Literal[True] | str:
     """To be passed into questionary validate keyword to validate datetime questions.
 
     Args:
@@ -61,7 +61,7 @@ def _validate_datetime(value: str) -> Literal[True] | str:
 
 
 # only reason default exists is for the activity_end prompt to have a default value
-def ask_datetime_question(
+def ask_time_question(
     prompt: str, skip_value: str | None = None, default: str | None = None
 ) -> str:
     """The helper function to ask questions requiring datetime in HH:MM.
@@ -73,11 +73,11 @@ def ask_datetime_question(
     Returns:
         str: The datetime value in HH:MM format.
     """
-    if isinstance(skip_value, str) and _validate_datetime(skip_value):
+    if isinstance(skip_value, str) and _validate_time(skip_value):
         return skip_value
 
     datetime_value: str | None = questionary.text(
-        prompt, validate=_validate_datetime, default=default if default else ""
+        prompt, validate=_validate_time, default=default if default else ""
     ).ask()
 
     if datetime_value is None:

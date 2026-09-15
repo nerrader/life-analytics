@@ -139,3 +139,69 @@ def test_activity_cli_command_handles_invalid_data(tmp_path: Path) -> None:
     print(repr(result.exception))
     assert result.exit_code == 0, (result.output, result.exception)
     assert "ERROR:" in result.stdout
+
+
+def test_activity_cli_command_edit_detailed_flag_works(tmp_path: Path) -> None:
+    test_database_path = tmp_path / "test.db"
+
+    database.create_database(test_database_path)
+    cli_runner = CliRunner()
+
+    result1 = cli_runner.invoke(
+        cli.app,
+        [
+            "-db",
+            str(test_database_path),
+            "activity",
+            "--category",
+            "TESTING",
+            "--description",
+            "integration testing",
+            "--start",
+            "20:24",
+            "--end",
+            "20:24",
+            "--effort",
+            "5",
+            "--enjoyability",
+            "5",
+            "--energy-before",
+            "1",
+            "--energy-after",
+            "3",
+        ],
+    )
+    assert result1.exit_code == 0
+
+    result2 = cli_runner.invoke(
+        cli.app,
+        [
+            "-db",
+            str(test_database_path),
+            "activity",
+            "--edit",
+            "1",
+            "--detailed",
+            "--start",
+            "2026-09-15 20:59",
+            "--end",
+            "2026-09-15 21:00",
+            "--effort",
+            "1",
+            "--energy-before",
+            "5",
+            "--enjoyability",
+            "1",
+            "--category",
+            "DEV",
+        ],
+    )
+    assert result2.exit_code == 0
+
+    activity_record = database.fetch_activities_records(test_database_path)[0]
+    assert activity_record.start_at == "2026-09-15T20:59"
+    assert activity_record.end_at == "2026-09-15T21:00"
+    assert activity_record.effort == 1
+    assert activity_record.energy_before == 5
+    assert activity_record.energy_after == 3
+    assert activity_record.category == "DEV"

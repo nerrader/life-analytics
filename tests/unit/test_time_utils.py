@@ -29,3 +29,10 @@ def test_combine_date_and_time_at_midnight() -> None:
     test_date = date(year=2026, month=12, day=12)
 
     assert time_utils.combine_date_and_time(test_date, test_time) == test_datetime
+
+
+def test_validate_datetime() -> None:
+    assert time_utils.validate_datetime("2026-09-15 18:30") is True
+    assert time_utils.validate_datetime("2026-13-15 18:30") is False
+    assert time_utils.validate_datetime("2026-09-15 25:30") is False
+    assert time_utils.validate_datetime("2026-09-15") is False
