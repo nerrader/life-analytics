@@ -14,8 +14,8 @@ from life_analytics.logic import (
     migrations,
     prompts,
     stats,
-    time_utils,
 )
+from life_analytics.utils import time_utils
 
 app = typer.Typer()
 
@@ -360,13 +360,14 @@ def add_sleep(
             help="The record's ID to edit. Use the flags/options to update the specific fields. Interactive mode cannot be used when editing.",
         ),
     ] = None,
-    nap: Annotated[
-        bool,
+    sleep_type: Annotated[
+        str,
         typer.Option(
-            "--nap",
-            help="If this flag is provoked, treat this sleep entry as a nap (both times will be on the same date).",
+            "--type",
+            "-t",
+            help="The sleep type: 'sleep' or 'nap'. When creating a nap, both start and end dates default to today.",
         ),
-    ] = False,
+    ] = "sleep",
     detailed: Annotated[
         bool,
         typer.Option(
@@ -438,12 +439,6 @@ def add_sleep(
                     else None
                 )
 
-            if nap:
-                console.print(
-                    "Sorry, you are not allowed to change a record's sleep_type.",
-                    style="yellow",
-                )
-
             database.update_sleep_record(
                 database_path,
                 edit,
@@ -451,6 +446,7 @@ def add_sleep(
                     "start_at": start_datetime,
                     "end_at": end_datetime,
                     "quality": sleep_quality,
+                    "sleep_type": sleep_type,
                 },
             )
         except ValueError as error:
@@ -468,25 +464,34 @@ Full Error Message:
 
         return
 
-    start_sleep_time: str = prompts.ask_time_question(
-        "When did you start sleeping? (HH:MM)", sleep_start_input
-    )
+    if detailed:
+        sleep_start_datetime: str = prompts.ask_datetime_question(
+            "When did you start sleeping (YYYY-MM-DD HH:MM)?", sleep_start_input
+        )
+        sleep_end_datetime: str = prompts.ask_datetime_question(
+            "When did you wake up (YYYY-MM-DD HH:MM)?", sleep_end_input
+        )
 
-    sleep_start_datetime = time_utils.combine_date_and_time(
-        today_date if nap else yesterday_date, start_sleep_time
-    ).isoformat(timespec="minutes")
+    else:
+        start_sleep_time: str = prompts.ask_time_question(
+            "When did you start sleeping? (HH:MM)", sleep_start_input
+        )
 
-    end_sleep_time: str = prompts.ask_time_question(
-        "When did you wake up? (HH:MM)", sleep_end_input
-    )
+        sleep_start_datetime = time_utils.combine_date_and_time(
+            today_date if sleep_type == "nap" else yesterday_date, start_sleep_time
+        ).isoformat(timespec="minutes")
 
-    sleep_end_datetime = time_utils.combine_date_and_time(
-        today_date, end_sleep_time
-    ).isoformat(timespec="minutes")
+        end_sleep_time: str = prompts.ask_time_question(
+            "When did you wake up? (HH:MM)", sleep_end_input
+        )
 
-    sleep_quality = sleep_quality or prompts.ask_rating_question(
-        "How was your sleep quality? (1-5)"
-    )
+        sleep_end_datetime = time_utils.combine_date_and_time(
+            today_date, end_sleep_time
+        ).isoformat(timespec="minutes")
+
+        sleep_quality = sleep_quality or prompts.ask_rating_question(
+            "How was your sleep quality? (1-5)"
+        )
 
     try:
         database.add_sleep(
@@ -495,7 +500,7 @@ Full Error Message:
                 "start_at": sleep_start_datetime,
                 "end_at": sleep_end_datetime,
                 "quality": sleep_quality,
-                "sleep_type": "nap" if nap else "sleep",
+                "sleep_type": sleep_type,
             },
         )
     except sqlite3.IntegrityError as error:

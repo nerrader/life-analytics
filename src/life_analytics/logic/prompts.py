@@ -3,6 +3,8 @@ from typing import Literal
 
 import questionary
 
+from life_analytics.utils.time_utils import normalize_datetime, validate_datetime
+
 
 def _validate_rating(value: str) -> Literal[True] | str:
     """To be passed into questionary validate keyword to validate rating questions.
@@ -76,17 +78,47 @@ def ask_time_question(
     if isinstance(skip_value, str) and _validate_time(skip_value):
         return skip_value
 
-    datetime_value: str | None = questionary.text(
+    time_value: str | None = questionary.text(
         prompt, validate=_validate_time, default=default if default else ""
+    ).ask()
+
+    if time_value is None:
+        raise RuntimeError("User cancelled the time question prompt.")
+
+    # so 6:03 gets turned to 06:03
+    time_value = datetime.strptime(time_value, "%H:%M").strftime("%H:%M")
+
+    return time_value
+
+
+def _validate_datetime(value: str) -> Literal[True] | str:
+    """To be passed into questionary validate keyword to validate datetime questions.
+
+    Args:
+        value (str): The variable/value to be validated.
+
+    Returns:
+        bool | str: Returns True if the value is valid, otherwise returns a string with an error message.
+    """
+    is_valid_datetime = validate_datetime(value)
+    if not is_valid_datetime:
+        return "Please enter a valid time in HH:MM format."
+    return True
+
+
+def ask_datetime_question(prompt: str, skip_value: str | None) -> str:
+    if isinstance(skip_value, str) and _validate_datetime(skip_value) is True:
+        return skip_value
+
+    datetime_value: str | None = questionary.text(
+        prompt,
+        validate=_validate_datetime,
     ).ask()
 
     if datetime_value is None:
         raise RuntimeError("User cancelled the datetime question prompt.")
 
-    # so 6:03 gets turned to 06:03
-    datetime_value = datetime.strptime(datetime_value, "%H:%M").strftime("%H:%M")
-
-    return datetime_value
+    return normalize_datetime(datetime_value)
 
 
 def ask_activity_category(prompt: str, skip_value: str | None = None) -> str:

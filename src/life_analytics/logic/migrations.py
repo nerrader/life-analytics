@@ -3,6 +3,8 @@ from importlib.resources import files
 from importlib.resources.abc import Traversable
 from pathlib import Path
 
+from life_analytics.utils.time_utils import normalize_datetime
+
 MIGRATIONS_DIR: Traversable = files("life_analytics.sql.migrations")
 
 
@@ -20,14 +22,6 @@ def migrate_database(database_path: Path) -> None:
 
 
 def update_datetimes(connection: sqlite3.Connection) -> None:
-    def normalize_datetime(isostring: str) -> str:
-        """This makes sure the time part of the datetime isostring is valid.
-        Example: 2026-12-25T6:30 -> 2026-12-25T06:30"""
-        date, time = isostring.split("T", 1)
-        hour, minutes = time.split(":", 1)
-
-        return f"{date}T{hour.zfill(2)}:{minutes}"
-
     activities = connection.execute(
         "SELECT id, start_at, end_at FROM activities"
     ).fetchall()

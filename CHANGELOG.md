@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Rename old `stats` command to `list`
 - Revamped the old `stats` command to display overall stats for collected data.
 - Added `--detailed` flag for `activity` and `sleep` commands.
+- Made `sleep_type` modifiable in `--edit`
 
 ## [1.0.0]
 

@@ -1,6 +1,6 @@
 from datetime import date, datetime, time
 
-from life_analytics.logic import time_utils
+from life_analytics.utils import time_utils
 
 
 def test_combine_date_and_time_with_valid_inputs() -> None:

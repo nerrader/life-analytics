@@ -24,7 +24,8 @@ def test_sleep_cli_command_creates_database_entry(tmp_path: Path) -> None:
             "06:00",
             "--quality",
             "5",
-            "--nap",
+            "--type",
+            "nap",
         ],
     )
     assert result.exit_code == 0
