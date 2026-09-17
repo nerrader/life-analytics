@@ -659,6 +659,13 @@ def start_activity_time(context: typer.Context) -> None:
     """Start tracking an activity"""
     activity_start_path: Path = context.obj["activity_start_path"]
 
+    if activity_start_path.exists():
+        confirm = prompts.ask_for_confirmation(
+            "Are you sure you want to rewrite the existing started activity?"
+        )
+        if not confirm:
+            return
+
     date_time: str = datetime.now().isoformat(timespec="minutes")
     print(f"Activity started: {date_time.replace('T', ' ')}")
 
