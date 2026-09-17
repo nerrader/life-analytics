@@ -295,17 +295,25 @@ def add_activity(
         description_input,
     )
 
-    activity_start: str = prompts.ask_time_question(
-        "When did your activity start? (HH:MM)", activity_start_input
-    )
-    activity_start = f"{date}T{activity_start}"
+    if detailed:
+        activity_start = prompts.ask_datetime_question(
+            "When did your activity start? (YYYY-MM-DD HH:MM)", activity_start_input
+        )
+        activity_end = prompts.ask_datetime_question(
+            "When did your activity end? (YYYY-MM-DD HH:MM)", activity_end_input
+        )
+    else:
+        activity_start = prompts.ask_time_question(
+            "When did your activity start? (HH:MM)", activity_start_input
+        )
+        activity_start = f"{date}T{activity_start}"
 
-    activity_end: str = prompts.ask_time_question(
-        "When did your activity end? (HH:MM)",
-        activity_end_input,
-        default=current_time,
-    )
-    activity_end = f"{date}T{activity_end}"
+        activity_end = prompts.ask_time_question(
+            "When did your activity end? (HH:MM)",
+            activity_end_input,
+            default=current_time,
+        )
+        activity_end = f"{date}T{activity_end}"
 
     effort = effort or prompts.ask_rating_question(
         "How much effort did you think this activity required? (1-5)"
