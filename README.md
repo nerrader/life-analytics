@@ -23,7 +23,6 @@ decision making and quality of life.
 
 ## Upcoming Features
 
-- `undo` and `redo` commands to reverse mistakes
 - Make listing UX better, by adding extra commands like `recent`, and `today`
 - Persistent configs.
 - GUI version of this tool.
