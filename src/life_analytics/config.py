@@ -8,10 +8,9 @@ from life_analytics import constants as const
 
 @dataclass
 class Config:
-    # TODO: add config for force_detailed_mode
-    # TODO add verbose mode and logging
     database_path: Path = const.DEFAULT_DATABASE_PATH
     activity_start_path: Path = const.ACTIVITY_START_TEXT_PATH
+    force_detailed_mode: bool = False
     _valid_categories: set[str] | None = None
 
     @property
@@ -24,6 +23,15 @@ class Config:
                 self.database_path = Path(value)
             case "activity_start_path":
                 self.activity_start_path = Path(value)
+            case "force_detailed_mode":
+                if value.lower() == "true" or value == "1":
+                    self.force_detailed_mode = True
+                elif value.lower() == "false" or value == "0":
+                    self.force_detailed_mode = False
+                else:
+                    raise ValueError(
+                        "Use 'false' or '0' to turn it off. Use 'true' or '1' to turn it on."
+                    )
             case "valid_categories":
                 raise ValueError(
                     "Use the category commands to configure valid categories."
@@ -50,9 +58,10 @@ class Config:
 
     def get_config_stats_grid(self) -> dict[str, Any]:
         return {
-            "Database Path": self.database_path,
-            "Activity Start Path": self.activity_start_path,
-            "Valid Categories": self.valid_categories,
+            "database_path": self.database_path,
+            "activity_start_path": self.activity_start_path,
+            "force_detailed_mode": self.force_detailed_mode,
+            "valid_categories": self.valid_categories,
         }
 
 
@@ -60,6 +69,7 @@ def save_configs(config: Config) -> None:
     data = {
         "database_path": str(config.database_path),
         "activity_start_path": str(config.activity_start_path),
+        "force_detailed_mode": config.force_detailed_mode,
         "valid_categories": list(config.valid_categories)
         if config.valid_categories is not None
         else None,
@@ -76,6 +86,7 @@ def load_configs() -> Config:
     return Config(
         database_path=Path(data["database_path"]),
         activity_start_path=Path(data["activity_start_path"]),
+        force_detailed_mode=data["force_detailed_mode"],
         _valid_categories=set(data["valid_categories"])
         if data["valid_categories"] is not None
         else None,

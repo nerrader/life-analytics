@@ -226,6 +226,9 @@ def add_activity(
     configuration: config.Config = context.obj["config"]
     database_path = configuration.database_path
 
+    if configuration.force_detailed_mode:
+        detailed = True
+
     if configuration.valid_categories is not None and (
         category_input is not None
         and category_input not in configuration.valid_categories
@@ -427,6 +430,9 @@ def add_sleep(
     """Record a sleep entry. Omitting the *optional* flags will trigger interactive mode."""
     configuration: config.Config = context.obj["config"]
     database_path = configuration.database_path
+
+    if configuration.force_detailed_mode:
+        detailed = True
 
     today_date = datetime.now().date()
     yesterday_date = today_date - timedelta(days=1)
