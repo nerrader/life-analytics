@@ -29,7 +29,7 @@ decision making and quality of life.
 
 ## How to Install
 
-You must have Windows 10 or 11 to install this CLI tool:
+You must have Windows 10 or 11 to install this CLI tool, any other OSes are not officially supported.
 
 1. Find the latest release in the releases page of this GitHub repository
 1. Download the .exe file.

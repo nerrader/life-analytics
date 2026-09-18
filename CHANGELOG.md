@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added configs/settings using the `config` command.
 - Added schema versioning, and an automatic schema migration system, including datetime normalization.
 - Added `-ap` option for activity start/stop commands time stamp text path.
+- Added powershell scripts to make the building process more painless and consistent.
 - Made `sleep_type` modifiable in `--edit`
 - Revamped the old `stats` command to display overall stats for collected data.
 - Rename old `stats` command to `list`
