@@ -23,7 +23,8 @@ decision making and quality of life.
 
 ## Upcoming Features
 
-- Make listing UX better, by adding extra commands like `recent`, and `today`
+- Make `stats` command have a `--today` flag to analyze today's data.
+- Add logging and `verbose_mode`
 - GUI version of this tool.
 
 ## How to Install
