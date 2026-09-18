@@ -90,7 +90,7 @@ life summary --edit 2026-08-23 --mood 3
 For `life activity` and `life sleep`, you instead pass in the ID for `--edit`.
 
 ```bash
-life sleep --edit 3 -ss 21:00
+life sleep --edit 3 -s 21:00
 ```
 
 You can also pass in multiple values to update, like this:
