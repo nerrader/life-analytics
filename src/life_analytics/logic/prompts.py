@@ -1,3 +1,4 @@
+from collections.abc import Iterable
 from datetime import datetime
 from typing import Literal
 
@@ -121,7 +122,11 @@ def ask_datetime_question(prompt: str, skip_value: str | None) -> str:
     return normalize_datetime(datetime_value)
 
 
-def ask_activity_category(prompt: str, skip_value: str | None = None) -> str:
+def ask_activity_category(
+    prompt: str,
+    valid_activity_categories: Iterable[str] | None = None,
+    skip_value: str | None = None,
+) -> str:
     """The helper function to ask questions about the category of an activity.
 
     Args:
@@ -131,12 +136,25 @@ def ask_activity_category(prompt: str, skip_value: str | None = None) -> str:
     Returns:
         str: The category of the activity
     """
+
+    def validate_categories(text: str) -> Literal[True] | str:
+        if not text.strip():
+            return "Category field may not be empty."
+
+        if valid_activity_categories is None:
+            return True
+
+        return (
+            True
+            if text in valid_activity_categories
+            else "This is not a valid category."
+        )
+
     if isinstance(skip_value, str) and skip_value.strip():
         return skip_value
 
     activity_category: str | None = questionary.text(
-        prompt,
-        validate=lambda text: bool(text.strip),
+        prompt, validate=validate_categories
     ).ask()
 
     if activity_category is None:

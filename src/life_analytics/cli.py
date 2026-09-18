@@ -6,7 +6,7 @@ from typing import Annotated, Final
 import typer
 from rich.console import Console
 
-from life_analytics import __version__
+from life_analytics import __version__, config
 from life_analytics import constants as const
 from life_analytics.logic import (
     database,
@@ -18,6 +18,13 @@ from life_analytics.logic import (
 from life_analytics.utils import time_utils
 
 app = typer.Typer()
+config_app = typer.Typer()
+categories_app = typer.Typer(help="A subcommand to manage valid_categories.")
+
+app.add_typer(config_app, name="config")
+config_app.add_typer(
+    categories_app, name="category", help="A subcommand to manage configs."
+)
 
 console = Console()
 
@@ -28,21 +35,21 @@ VALID_TABLE_TYPES: Final[tuple[str, ...]] = ("summary", "activity", "sleep")
 def main(
     context: typer.Context,
     database_path: Annotated[
-        Path,
+        Path | None,
         typer.Option(
             "--database-path",
             "-db",
             help="Path to the database file.",
         ),
-    ] = const.DEFAULT_DATABASE_PATH,
+    ] = None,
     activity_start_path: Annotated[
-        Path,
+        Path | None,
         typer.Option(
             "--activity-start-path",
             "-ap",
             help="This is the path used for the start and stop text file storage.",
         ),
-    ] = const.ACTIVITY_START_TEXT_PATH,
+    ] = None,
     version: Annotated[
         bool, typer.Option("--version", "-v", help="Displays the version")
     ] = False,
@@ -50,19 +57,26 @@ def main(
     """For more information on advanced usage, like using command options and editing,
     refer to the 'How to Use' section in the life analytics GitHub README."""
     # this is so every command function can access the db path
-    context.obj = {
-        "database_path": database_path,
-        "activity_start_path": activity_start_path,
-    }
+    try:
+        configuration = config.load_configs()
+    except FileNotFoundError:
+        configuration = config.Config()
+
+    if database_path is not None:
+        configuration.database_path = database_path
+    if activity_start_path is not None:
+        configuration.activity_start_path = activity_start_path
+
+    context.obj = {"config": configuration}
 
     if version:
         print(__version__)
         return
 
-    if not database_path.exists():
-        database.create_database(database_path)
+    if not configuration.database_path.exists():
+        database.create_database(configuration.database_path)
     else:
-        migrations.migrate_database(database_path)
+        migrations.migrate_database(configuration.database_path)
 
 
 @app.command("summary")
@@ -89,7 +103,8 @@ def add_daily_summary(
     ] = None,
 ) -> None:
     """Record a daily summary entry. Omitting the *optional* flags will trigger interactive mode."""
-    database_path = context.obj["database_path"]
+    configuration: config.Config = context.obj["config"]
+    database_path = configuration.database_path
 
     if edit:
         try:
@@ -210,7 +225,14 @@ def add_activity(
     ] = None,
 ) -> None:
     """Record an activity entry. Omitting the *optional* flags will trigger interactive mode."""
-    database_path = context.obj["database_path"]
+    configuration: config.Config = context.obj["config"]
+    database_path = configuration.database_path
+
+    if configuration.valid_categories is not None and (
+        category_input is not None
+        and category_input not in configuration.valid_categories
+    ):
+        raise typer.BadParameter("Activity category not in valid categories.")
 
     if edit:
         try:
@@ -267,7 +289,7 @@ def add_activity(
                 },
             )
         except ValueError as error:
-            console.print(f"ERROR: {error}", style="red")
+            console.print(f"ERROR: {error!s}", style="red")
             return
 
         except sqlite3.IntegrityError as error:
@@ -287,7 +309,9 @@ def add_activity(
     )  # for activity end default
 
     activity_category: str = prompts.ask_activity_category(
-        "What category would this activity fit into?", category_input
+        "What category would this activity fit into?",
+        configuration.valid_categories,
+        category_input,
     )
 
     activity_description: str | None = prompts.ask_activity_description(
@@ -403,7 +427,8 @@ def add_sleep(
     ] = None,
 ) -> None:
     """Record a sleep entry. Omitting the *optional* flags will trigger interactive mode."""
-    database_path = context.obj["database_path"]
+    configuration: config.Config = context.obj["config"]
+    database_path = configuration.database_path
 
     today_date = datetime.now().date()
     yesterday_date = today_date - timedelta(days=1)
@@ -542,7 +567,8 @@ def list_records(
     ] = None,
 ) -> None:
     """Display all-time daily summaries, activities, and sleep. Aliases: 'ls'"""
-    database_path = context.obj["database_path"]
+    configuration = context.obj["config"]
+    database_path = configuration.database_path
 
     if table_types is None:
         table_types = ["summary", "activity", "sleep"]
@@ -602,7 +628,8 @@ def list_records(
 @app.command("stats")
 def display_stats(context: typer.Context) -> None:
     """Displays overall statistics of collected data"""
-    database_path = context.obj["database_path"]
+    configuration = context.obj["config"]
+    database_path = configuration.database_path
 
     summary_records = database.fetch_daily_summaries_records(database_path)
     activity_records = database.fetch_activities_records(database_path)
@@ -640,7 +667,8 @@ def clear_all_data(
     ] = None,
 ) -> None:
     """Removes all tracking data from the database."""
-    database_path = context.obj["database_path"]
+    configuration = context.obj["config"]
+    database_path = configuration.database_path
 
     clear_data_confirm = prompts.ask_for_confirmation(
         "Are you sure you want to clear the database?", skip_confirm
@@ -711,8 +739,9 @@ def end_activity_time(
     ] = None,
 ) -> None:
     """Stops the activity tracking, and prompts for activity details."""
-    database_path: Path = context.obj["database_path"]
-    activity_start_path: Path = context.obj["activity_start_path"]
+    configuration = context.obj["config"]
+    database_path = configuration.database_path
+    activity_start_path = configuration.activity_start_path
 
     if not activity_start_path.exists():
         raise ValueError(
@@ -725,7 +754,9 @@ def end_activity_time(
     activity_start_path.unlink()
 
     activity_category: str = prompts.ask_activity_category(
-        "What category would this activity fit into?", activity_category_input
+        "What category would this activity fit into?",
+        configuration.valid_categories,
+        activity_category_input,
     )
 
     activity_description: str | None = prompts.ask_activity_description(
@@ -761,3 +792,75 @@ def end_activity_time(
             "energy_after": energy_after,
         },
     )
+
+
+@config_app.command("set")
+def set_config(
+    context: typer.Context,
+    name: Annotated[str, typer.Argument(help="The name of the config.")],
+    value: Annotated[str, typer.Argument(help="The value of the config.")],
+) -> None:
+    """Sets the config value for the name of the config."""
+    configuration: config.Config = context.obj["config"]
+    try:
+        configuration.set_value(name, value)
+        config.save_configs(configuration)
+    except ValueError as error:
+        raise typer.BadParameter(str(error))
+
+
+@config_app.command("ls")
+@config_app.command("list")
+def display_configs(context: typer.Context) -> None:
+    """Displays configs. Aliases: 'ls'"""
+    configuration: config.Config = context.obj["config"]
+    config_stats_grid_data = configuration.get_config_stats_grid()
+
+    console.print(display.create_stats_grid(config_stats_grid_data))
+
+
+@categories_app.command("add")
+def add_category(
+    context: typer.Context,
+    category_name: Annotated[str, typer.Argument(help="The category to add")],
+) -> None:
+    """Adds a category to the valid_categories config."""
+    configuration: config.Config = context.obj["config"]
+    configuration.add_valid_category(category_name)
+    config.save_configs(configuration)
+
+
+@categories_app.command("del", hidden=True)
+@categories_app.command("rm", hidden=True)
+@categories_app.command("remove", hidden=True)
+@categories_app.command("delete")
+def delete_category(
+    context: typer.Context,
+    category: Annotated[str, typer.Argument(help="The category to delete.")],
+) -> None:
+    """Deletes a category to the valid_categories config. Aliases: 'remove', 'delete', 'del', 'rm'"""
+    configuration: config.Config = context.obj["config"]
+    try:
+        configuration.delete_valid_category(category)
+        config.save_configs(configuration)
+    except ValueError as error:
+        typer.BadParameter(str(error))
+
+
+@categories_app.command("clear")
+def clear_category(
+    context: typer.Context,
+    skip_confirm: Annotated[
+        bool,
+        typer.Option("--skip", "-s", help="To skip the confirmation prompt"),
+    ],
+) -> None:
+    """Clears the categories in valid_categories."""
+    configuration: config.Config = context.obj["config"]
+
+    confirmation = prompts.ask_for_confirmation(
+        "Are you sure you want to clear the valid categories?", skip_confirm
+    )
+    if confirmation:
+        configuration.clear_valid_categories()
+        config.save_configs(configuration)
