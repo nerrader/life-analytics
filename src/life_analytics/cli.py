@@ -18,13 +18,11 @@ from life_analytics.logic import (
 from life_analytics.utils import time_utils
 
 app = typer.Typer()
-config_app = typer.Typer()
+config_app = typer.Typer(help="A subcommand to manage configs")
 categories_app = typer.Typer(help="A subcommand to manage valid_categories.")
 
 app.add_typer(config_app, name="config")
-config_app.add_typer(
-    categories_app, name="category", help="A subcommand to manage configs."
-)
+config_app.add_typer(categories_app, name="category")
 
 console = Console()
 
@@ -809,7 +807,7 @@ def set_config(
         raise typer.BadParameter(str(error))
 
 
-@config_app.command("ls")
+@config_app.command("ls", hidden=True)
 @config_app.command("list")
 def display_configs(context: typer.Context) -> None:
     """Displays configs. Aliases: 'ls'"""
@@ -851,9 +849,10 @@ def delete_category(
 def clear_category(
     context: typer.Context,
     skip_confirm: Annotated[
-        bool,
+        bool | None,
         typer.Option("--skip", "-s", help="To skip the confirmation prompt"),
-    ],
+    ]
+    | None,
 ) -> None:
     """Clears the categories in valid_categories."""
     configuration: config.Config = context.obj["config"]
