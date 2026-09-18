@@ -823,6 +823,25 @@ def display_configs(context: typer.Context) -> None:
     console.print(display.create_stats_grid(config_stats_grid_data))
 
 
+@config_app.command("defaults")
+def config_set_defaults(
+    context: typer.Context,
+    skip_confirm: Annotated[
+        bool | None,
+        typer.Option("--skip", "-s", help="To skip the confirmation prompt"),
+    ] = None,
+) -> None:
+    """Clears the categories in valid_categories."""
+    configuration: config.Config = context.obj["config"]
+
+    confirmation = prompts.ask_for_confirmation(
+        "Are you sure you want to set the configs to default?", skip_confirm
+    )
+    if confirmation:
+        configuration = config.Config()
+        config.save_configs(configuration)
+
+
 @categories_app.command("add")
 def add_category(
     context: typer.Context,
@@ -857,8 +876,7 @@ def clear_category(
     skip_confirm: Annotated[
         bool | None,
         typer.Option("--skip", "-s", help="To skip the confirmation prompt"),
-    ]
-    | None,
+    ] = None,
 ) -> None:
     """Clears the categories in valid_categories."""
     configuration: config.Config = context.obj["config"]
