@@ -79,7 +79,9 @@ def test_activity_category_prompt_skips_if_skip_value_is_valid(
 
     mock_activity_category_prompt.assert_not_called()
     assert (
-        prompts.ask_activity_category("This question should be skipped.", "MAINT")
+        prompts.ask_activity_category(
+            "This question should be skipped.", skip_value="MAINT"
+        )
         == "MAINT"
     )
 

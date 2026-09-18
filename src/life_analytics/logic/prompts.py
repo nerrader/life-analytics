@@ -151,6 +151,15 @@ def ask_activity_category(
         )
 
     if isinstance(skip_value, str) and skip_value.strip():
+        # shouldnt even reach inside this if condition
+        # cuz the cli.py should already raise a typer.BadParameter error
+        # if activity_input aka skip_value isn't valid
+        # but its good to have i guess
+        if (
+            valid_activity_categories is not None
+            and skip_value not in valid_activity_categories
+        ):
+            raise ValueError(f"Invalid activity category: {skip_value!s}")
         return skip_value
 
     activity_category: str | None = questionary.text(
