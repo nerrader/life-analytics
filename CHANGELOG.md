@@ -7,14 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-- To make activity entry more convenient: `start` and `stop` commands.
-- Add `-ap` option for activity start/stop commands time stamp text path.
-- Removed unnecessary activity category schema constraint.
-- Added schema versioning, and an automatic schema migration system, including datetime normalization.
-- Rename old `stats` command to `list`
-- Revamped the old `stats` command to display overall stats for collected data.
+- Added `start` and `stop` commands.
 - Added `--detailed` flag for `activity` and `sleep` commands.
+- Added configs/settings using the `config` command.
+- Added schema versioning, and an automatic schema migration system, including datetime normalization.
+- Added `-ap` option for activity start/stop commands time stamp text path.
 - Made `sleep_type` modifiable in `--edit`
+- Revamped the old `stats` command to display overall stats for collected data.
+- Rename old `stats` command to `list`
+- Removed unnecessary activity category schema constraint.
 
 ## [1.0.0]
 
