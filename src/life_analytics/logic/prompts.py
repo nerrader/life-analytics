@@ -4,6 +4,7 @@ from typing import Literal
 
 import questionary
 
+from life_analytics.errors import RequiredQuestionCancelledError
 from life_analytics.utils.time_utils import normalize_datetime, validate_datetime
 
 
@@ -42,7 +43,7 @@ def ask_rating_question(prompt: str) -> float:
     ).ask()
 
     if rating is None:
-        raise RuntimeError("User skipped the rating question prompt.")
+        raise RequiredQuestionCancelledError("User skipped the rating question prompt.")
 
     return rating
 
@@ -84,7 +85,7 @@ def ask_time_question(
     ).ask()
 
     if time_value is None:
-        raise RuntimeError("User cancelled the time question prompt.")
+        raise RequiredQuestionCancelledError("User cancelled the time question prompt.")
 
     # so 6:03 gets turned to 06:03
     time_value = datetime.strptime(time_value, "%H:%M").strftime("%H:%M")
@@ -117,7 +118,9 @@ def ask_datetime_question(prompt: str, skip_value: str | None) -> str:
     ).ask()
 
     if datetime_value is None:
-        raise RuntimeError("User cancelled the datetime question prompt.")
+        raise RequiredQuestionCancelledError(
+            "User cancelled the datetime question prompt."
+        )
 
     return normalize_datetime(datetime_value)
 
@@ -167,7 +170,9 @@ def ask_activity_category(
     ).ask()
 
     if activity_category is None:
-        raise RuntimeError("The activity category prompt is cancelled.")
+        raise RequiredQuestionCancelledError(
+            "The activity category prompt is cancelled."
+        )
 
     return activity_category
 

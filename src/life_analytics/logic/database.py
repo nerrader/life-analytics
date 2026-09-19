@@ -115,6 +115,7 @@ def _update_record(
         ValueError: If there are no valid fields to update, raise this error.
     """
     fields_to_update = {field: value for field, value in fields.items() if value}
+
     if not fields_to_update:
         raise ValueError("There are no valid fields to update.")
 
@@ -128,14 +129,9 @@ def _update_record(
     try:
         # this is just for the existence check
         # so it doesnt silently fail if the primary key is not given
-        results = connection.execute(
-            f"SELECT 1 FROM {table_name} WHERE {primary_key_column} = ?", (primary_key,)
-        )
-
-        if results.fetchone() is None:
-            raise ValueError("Record to update does not exist.")
-
-        connection.execute(query, (*fields_to_update.values(), primary_key))
+        results = connection.execute(query, (*fields_to_update.values(), primary_key))
+        if results.rowcount == 0:
+            raise ValueError("There are no records to update.")
         connection.commit()
     finally:
         connection.close()
