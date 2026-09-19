@@ -6,7 +6,7 @@ from importlib.resources.abc import Traversable
 from pathlib import Path
 from typing import Any
 
-from life_analytics.constants import TableName
+from life_analytics.domain.constants import TableName
 
 sql_dir: Traversable = files("life_analytics.sql")
 

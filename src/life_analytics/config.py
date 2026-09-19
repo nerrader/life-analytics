@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from life_analytics import constants as const
+from life_analytics.domain import constants as const
 
 
 @dataclass

@@ -7,7 +7,7 @@
 from rich.console import Console
 
 from life_analytics.cli import app
-from life_analytics.errors import RequiredQuestionCancelledError
+from life_analytics.domain.errors import RequiredQuestionCancelledError
 
 console = Console()
 

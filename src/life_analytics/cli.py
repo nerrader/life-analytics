@@ -7,7 +7,7 @@ import typer
 from rich.console import Console
 
 from life_analytics import __version__, config
-from life_analytics import constants as const
+from life_analytics.domain import constants as const
 from life_analytics.logic import (
     database,
     display,

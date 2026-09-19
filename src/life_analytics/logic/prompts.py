@@ -4,7 +4,7 @@ from typing import Literal
 
 import questionary
 
-from life_analytics.errors import RequiredQuestionCancelledError
+from life_analytics.domain.errors import RequiredQuestionCancelledError
 from life_analytics.utils.time_utils import normalize_datetime, validate_datetime
 
 
