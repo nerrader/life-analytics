@@ -2,6 +2,8 @@
 
 This is the documentation for the data that I collected and I analyzed in my own life.
 
+NOTE: This analysis only applies to me and me only. Please don't use the observed findings here as a reason to significantly change parts of your life. Each person has different circumstances and characteristics and responses.
+
 ## Status
 
 This section will be removed once the data analysis is fully finished.
