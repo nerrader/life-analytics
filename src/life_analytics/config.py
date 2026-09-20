@@ -92,7 +92,7 @@ class Config:
         }
 
 
-def save_configs(config: Config) -> None:
+def save_configs(config_path: Path, config: Config) -> None:
     data = {
         "database_path": str(config.database_path),
         "activity_start_path": str(config.activity_start_path),
@@ -102,12 +102,12 @@ def save_configs(config: Config) -> None:
         else None,
     }
 
-    with open(const.CONFIG_PATH, "w", encoding="utf-8") as file:
+    with open(config_path, "w", encoding="utf-8") as file:
         json.dump(data, file, indent=4, ensure_ascii=False)
 
 
-def load_configs() -> Config:
-    with open(const.CONFIG_PATH, encoding="utf-8") as file:
+def load_configs(config_path: Path) -> Config:
+    with open(config_path, encoding="utf-8") as file:
         data = json.load(file)
 
     return Config(

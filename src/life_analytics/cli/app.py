@@ -148,7 +148,7 @@ def main(
     refer to the 'How to Use' section in the life analytics GitHub README."""
     # this is so every command function can access the db path
     try:
-        configuration = config.load_configs()
+        configuration = config.load_configs(const.CONFIG_PATH)
     except FileNotFoundError:
         configuration = config.Config()
 
@@ -975,7 +975,7 @@ def set_config(
     configuration: config.Config = context.obj["config"]
     try:
         configuration.set_value(name, value)
-        config.save_configs(configuration)
+        config.save_configs(const.CONFIG_PATH, configuration)
 
     except errors.InvalidForceDetailModeConfigError as error:
         display.display_error(
@@ -1033,7 +1033,7 @@ def config_set_defaults(
     )
     if confirmation:
         configuration = config.Config()
-        config.save_configs(configuration)
+        config.save_configs(const.CONFIG_PATH, configuration)
 
 
 @categories_app.command("add")
@@ -1044,7 +1044,7 @@ def add_category(
     """Adds a category to the valid_categories config."""
     configuration: config.Config = context.obj["config"]
     configuration.add_valid_category(category_name)
-    config.save_configs(configuration)
+    config.save_configs(const.CONFIG_PATH, configuration)
 
 
 @categories_app.command("del", hidden=True)
@@ -1059,7 +1059,7 @@ def delete_category(
     configuration: config.Config = context.obj["config"]
     try:
         configuration.delete_valid_category(category)
-        config.save_configs(configuration)
+        config.save_configs(const.CONFIG_PATH, configuration)
 
     except errors.NoCategoriesError as error:
         display.display_error(errors.ErrorDiagnostic(message=error.diagnostic.message))
@@ -1090,4 +1090,4 @@ def clear_category(
     )
     if confirmation:
         configuration.clear_valid_categories()
-        config.save_configs(configuration)
+        config.save_configs(const.CONFIG_PATH, configuration)
