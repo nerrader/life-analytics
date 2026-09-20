@@ -1,4 +1,5 @@
 import sqlite3
+import sys
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Annotated, Final
@@ -8,6 +9,7 @@ from rich.console import Console
 
 from life_analytics import __version__, config
 from life_analytics.domain import constants as const
+from life_analytics.domain import errors, validation
 from life_analytics.logic import (
     database,
     display,
@@ -27,6 +29,108 @@ config_app.add_typer(categories_app, name="category")
 console = Console()
 
 VALID_TABLE_TYPES: Final[tuple[str, ...]] = ("summary", "activity", "sleep")
+
+
+def get_user_commands() -> str:
+    return " ".join(sys.argv[1:])
+
+
+def validate_input_category(
+    short_flag: str,
+    long_flag: str,
+    value: str | None,
+    valid_categories: set[str] | None,
+) -> bool:
+    if (
+        value is not None
+        and validation.is_valid_category(value, valid_categories) is False
+    ):
+        user_commands = get_user_commands()
+
+        source_highlight = f"--{long_flag} {value}"
+        if source_highlight not in user_commands:
+            source_highlight = f"-{short_flag} {value}"
+
+        if valid_categories is not None and value not in valid_categories:
+            display.display_error(
+                errors.ErrorDiagnostic(
+                    message=f"category not in valid categories: {value}",
+                    help=f"use `config list` to view current categories, or use `config category add` to add {value} as category",
+                    source=user_commands,
+                    source_highlight=source_highlight,
+                )
+            )
+        else:
+            display.display_error(
+                errors.ErrorDiagnostic(
+                    message=f"category cannot be blank: '{value}'",
+                    source=user_commands,
+                    source_highlight=source_highlight,
+                )
+            )
+
+        return False
+    return True
+
+
+def validate_input_rating(short_flag: str, long_flag: str, value: float | None) -> bool:
+    if value is not None and not validation.is_valid_rating(value):
+        user_commands = get_user_commands()
+
+        source_highlight = f"--{long_flag} {value!s}"
+        if source_highlight not in user_commands:
+            source_highlight = f"-{short_flag} {value}"
+
+        display.display_error(
+            errors.ErrorDiagnostic(
+                message=f"inputted rating is not valid: {value}.",
+                source=user_commands,
+                source_highlight=source_highlight,
+                help="change value value to be 1-5.",
+            )
+        )
+        return False
+    return True
+
+
+def validate_input_datetime(short_flag: str, long_flag: str, value: str | None) -> bool:
+    if value is not None and not validation.is_valid_datetime(value):
+        user_commands = get_user_commands()
+
+        source_highlight = f"--{long_flag} {value!s}"
+        if source_highlight not in user_commands:
+            source_highlight = f"-{short_flag} {value}"
+
+        display.display_error(
+            errors.ErrorDiagnostic(
+                message=f"inputted datetime is not valid: {value}.",
+                source=user_commands,
+                source_highlight=source_highlight,
+                help="ensure value follows the YYYY-MM-DD HH:MM format",
+            )
+        )
+        return False
+    return True
+
+
+def validate_input_time(short_flag: str, long_flag: str, value: str | None) -> bool:
+    if value is not None and not validation.is_valid_time(value):
+        user_commands = get_user_commands()
+
+        source_highlight = f"--{long_flag} {value!s}"
+        if source_highlight not in user_commands:
+            source_highlight = f"-{short_flag} {value}"
+
+        display.display_error(
+            errors.ErrorDiagnostic(
+                message=f"inputted time is not valid: {value}.",
+                source=user_commands,
+                source_highlight=source_highlight,
+                help="ensure value follows the HH:MM format",
+            )
+        )
+        return False
+    return True
 
 
 @app.callback(invoke_without_command=True)
@@ -105,14 +209,27 @@ def add_daily_summary(
     database_path = configuration.database_path
 
     if edit:
+        validate_input_rating("m", "mood", mood)
+        validate_input_rating("p", "productivity", productivity)
+        validate_input_rating("s", "stress", stress)
         try:
             database.update_daily_summary_record(
                 database_path,
                 edit,
                 {"mood": mood, "productivity": productivity, "stress": stress},
             )
-        except ValueError as error:
-            console.print(f"ERROR: {error}", style="red")
+        except errors.NoUpdateFieldsError as error:
+            new_diagnostics = errors.ErrorDiagnostic(
+                message=error.diagnostic.message, help="check your command options"
+            )
+            display.display_error(new_diagnostics)
+        except errors.NoUpdateRecordsError as error:
+            new_diagnostics = errors.ErrorDiagnostic(
+                message=error.diagnostic.message,
+                help="check if --edit ID is an existing ID.",
+                source=" ".join(sys.argv[1:]),
+            )
+            display.display_error(new_diagnostics)
             return
 
         except sqlite3.IntegrityError as error:
@@ -229,17 +346,48 @@ def add_activity(
     if configuration.force_detailed_mode:
         detailed = True
 
-    if configuration.valid_categories is not None and (
-        category_input is not None
-        and category_input not in configuration.valid_categories
+    if (
+        validate_input_category(
+            "c", "category", category_input, configuration.valid_categories
+        )
+        is False
     ):
-        raise typer.BadParameter("Activity category not in valid categories.")
+        return
+
+    if validate_input_rating("ef", "effort", effort) is False:
+        return
+
+    if validate_input_rating("en", "enjoyability", enjoyability) is False:
+        return
+
+    if validate_input_rating("eb", "energy_before", energy_before) is False:
+        return
+
+    if validate_input_rating("ea", "energy_after", energy_after) is False:
+        return
+
+    if detailed:
+        if validate_input_datetime("s", "start", activity_start_input) is False:
+            return
+        if validate_input_datetime("e", "end", activity_end_input) is False:
+            return
+    else:
+        if validate_input_time("s", "start", activity_start_input) is False:
+            return
+        if validate_input_time("e", "end", activity_end_input) is False:
+            return
 
     if edit:
         try:
             edit_record = database.fetch_activity_record(database_path, edit)
             if edit_record is None:
-                raise ValueError("--edit gave a non-existant record.")
+                display.display_error(
+                    errors.ErrorDiagnostic(
+                        message="--edit gave a non-existant record.",
+                        help="use `list` to find record IDs",
+                    )
+                )
+                return
 
             if detailed:
                 start_datetime = (
@@ -289,8 +437,19 @@ def add_activity(
                     "energy_after": energy_after,
                 },
             )
-        except ValueError as error:
-            console.print(f"ERROR: {error!s}", style="red")
+        except errors.NoUpdateFieldsError as error:
+            new_diagnostics = errors.ErrorDiagnostic(
+                message=error.diagnostic.message, help="check your command options"
+            )
+            display.display_error(new_diagnostics)
+
+        except errors.NoUpdateRecordsError as error:
+            new_diagnostics = errors.ErrorDiagnostic(
+                message=error.diagnostic.message,
+                help="check if --edit ID is an existing ID.",
+                source=get_user_commands(),
+            )
+            display.display_error(new_diagnostics)
             return
 
         except sqlite3.IntegrityError as error:
@@ -437,11 +596,47 @@ def add_sleep(
     today_date = datetime.now().date()
     yesterday_date = today_date - timedelta(days=1)
 
+    if detailed:
+        if validate_input_datetime("s", "start", sleep_start_input) is False:
+            return
+        if validate_input_datetime("e", "end", sleep_end_input) is False:
+            return
+    else:
+        if validate_input_time("s", "start", sleep_start_input) is False:
+            return
+        if validate_input_time("e", "end", sleep_end_input) is False:
+            return
+
+    if validate_input_rating("q", "quality", sleep_quality) is False:
+        return
+
+    if sleep_type is not None and sleep_type not in ["sleep", "nap"]:
+        user_commands = get_user_commands()
+        source_highlight = f"--type {sleep_type}"
+        if source_highlight not in user_commands:
+            source_highlight = f"-t {sleep_type}"
+
+        display.display_error(
+            errors.ErrorDiagnostic(
+                message=f"invalid sleep_type value: {sleep_type}",
+                source=user_commands,
+                source_highlight=source_highlight,
+                help="use 'sleep' or 'nap' for sleep_type.",
+            )
+        )
+        return
+
     if edit:
         try:
             edit_sleep_record = database.fetch_sleep_record(database_path, edit)
             if edit_sleep_record is None:
-                raise ValueError(f"Sleep record with ID {edit} does not exist.")
+                display.display_error(
+                    errors.ErrorDiagnostic(
+                        message="--edit gave a non-existant record.",
+                        help="use `list` to find record IDS.",
+                    )
+                )
+                return
 
             if not detailed:
                 sleep_start_date = datetime.fromisoformat(
@@ -486,8 +681,18 @@ def add_sleep(
                     "sleep_type": sleep_type,
                 },
             )
-        except ValueError as error:
-            console.print(f"ERROR: {error}", style="red")
+        except errors.NoUpdateFieldsError as error:
+            new_diagnostics = errors.ErrorDiagnostic(
+                message=error.diagnostic.message, help="check your command options"
+            )
+            display.display_error(new_diagnostics)
+        except errors.NoUpdateRecordsError as error:
+            new_diagnostics = errors.ErrorDiagnostic(
+                message=error.diagnostic.message,
+                help="check if --edit ID is an existing ID.",
+                source=get_user_commands(),
+            )
+            display.display_error(new_diagnostics)
             return
 
         except sqlite3.IntegrityError as error:
@@ -707,17 +912,17 @@ def start_activity_time(context: typer.Context) -> None:
 @app.command("end")
 def end_activity_time(
     context: typer.Context,
-    activity_category_input: Annotated[
+    category_input: Annotated[
         str | None,
         typer.Option(
             "--category",
-            "-ac",
+            "-c",
             help="The category of the activity you did today. Available categories are: 'IDLE', 'MAINT', 'DEV', 'SCHOOL', 'SPORTS', 'SOCIAL'.",
         ),
     ] = None,
-    activity_description_input: Annotated[
+    description_input: Annotated[
         str | None,
-        typer.Option("--description", "-ad", help="Further describe your activity."),
+        typer.Option("--description", "-d", help="Further describe your activity."),
     ] = None,
     effort: Annotated[
         float | None,
@@ -748,9 +953,33 @@ def end_activity_time(
     activity_start_path = configuration.activity_start_path
 
     if not activity_start_path.exists():
-        raise ValueError(
-            "No activity found to end. Start an activity first using the start command first."
+        display.display_error(
+            errors.ErrorDiagnostic(
+                message="started activity not found.",
+                help="use `start` to start an activity first.",
+            )
         )
+        return
+
+    if (
+        validate_input_category(
+            "c", "category", category_input, configuration.valid_categories
+        )
+        is False
+    ):
+        return
+
+    if validate_input_rating("ef", "effort", effort) is False:
+        return
+
+    if validate_input_rating("en", "enjoyability", enjoyability) is False:
+        return
+
+    if validate_input_rating("eb", "energy_before", energy_before) is False:
+        return
+
+    if validate_input_rating("ea", "energy_after", energy_after) is False:
+        return
 
     start_activity_datetime = activity_start_path.read_text()
     end_activity_datetime = datetime.now().isoformat(timespec="minutes")
@@ -760,12 +989,12 @@ def end_activity_time(
     activity_category: str = prompts.ask_activity_category(
         "What category would this activity fit into?",
         configuration.valid_categories,
-        activity_category_input,
+        category_input,
     )
 
     activity_description: str | None = prompts.ask_activity_description(
         "What would be a good description for this activity? (optional):",
-        activity_description_input,
+        description_input,
     )
 
     effort = effort or prompts.ask_rating_question(
@@ -809,8 +1038,30 @@ def set_config(
     try:
         configuration.set_value(name, value)
         config.save_configs(configuration)
-    except ValueError as error:
-        raise typer.BadParameter(str(error))
+    except errors.InvalidForceDetailModeConfigError as error:
+        new_diagnostics = errors.ErrorDiagnostic(
+            message=error.diagnostic.message,
+            source=" ".join(sys.argv[:1]),
+            source_highlight=error.diagnostic.source_highlight,
+            help=error.diagnostic.help,
+        )
+        display.display_error(new_diagnostics)
+    except errors.InvalidConfigNameError as error:
+        new_diagnostics = errors.ErrorDiagnostic(
+            message=error.diagnostic.message,
+            source=get_user_commands(),
+            source_highlight=error.diagnostic.source_highlight,
+            help="use `config list` to display available config names.",
+        )
+        display.display_error(new_diagnostics)
+    except errors.ValidCategoriesNotSettableError as error:
+        new_diagnostics = errors.ErrorDiagnostic(
+            message=error.diagnostic.message,
+            source=get_user_commands(),
+            source_highlight=error.diagnostic.source_highlight,
+            help="use `config category` instead.",
+        )
+        display.display_error(new_diagnostics)
 
 
 @config_app.command("ls", hidden=True)
@@ -866,8 +1117,18 @@ def delete_category(
     try:
         configuration.delete_valid_category(category)
         config.save_configs(configuration)
-    except ValueError as error:
-        typer.BadParameter(str(error))
+
+    except errors.NoCategoriesError as error:
+        display.display_error(errors.ErrorDiagnostic(message=error.diagnostic.message))
+
+    except errors.CategoryNotFoundError as error:
+        display.display_error(
+            errors.ErrorDiagnostic(
+                message=error.diagnostic.message,
+                source=get_user_commands(),
+                source_highlight=error.diagnostic.source_highlight,
+            )
+        )
 
 
 @categories_app.command("clear")

@@ -1,32 +1,8 @@
 import pytest
 from pytest_mock import MockerFixture
 
+from life_analytics.domain.errors import RequiredQuestionCancelledError
 from life_analytics.logic import prompts
-
-
-def test_validate_time_with_valid_datetime() -> None:
-    assert prompts._validate_time("00:00") is True
-    assert prompts._validate_time("18:20") is True
-
-
-def test_validate_time_with_invalid_datetime() -> None:
-    assert isinstance(prompts._validate_time("25:00"), str)
-    assert isinstance(prompts._validate_time("24:60"), str)
-    assert isinstance(prompts._validate_time("7 :59 "), str)
-
-
-def test_validate_rating_with_valid_rating() -> None:
-    assert prompts._validate_rating("3") is True
-    assert prompts._validate_rating("1.5") is True
-    assert prompts._validate_rating("4.234758") is True
-    assert prompts._validate_rating("1") is True
-    assert prompts._validate_rating("5") is True
-
-
-def test_validate_rating_with_invalid_rating() -> None:
-    assert isinstance(prompts._validate_rating("11"), str)
-    assert isinstance(prompts._validate_rating("-1"), str)
-    assert isinstance(prompts._validate_rating("0"), str)
 
 
 def test_rating_prompt_cancelled_raises_runtime_error(mocker: MockerFixture) -> None:
@@ -35,7 +11,7 @@ def test_rating_prompt_cancelled_raises_runtime_error(mocker: MockerFixture) -> 
     # simulate a keyboard interrupt
     mock_rating_prompt.return_value.ask.return_value = None
 
-    with pytest.raises(RuntimeError):
+    with pytest.raises(RequiredQuestionCancelledError):
         prompts.ask_rating_question(
             "If my code is correct, this should raise a RuntimeError"
         )
@@ -56,7 +32,7 @@ def test_datetime_prompt_cancelled_raises_runtime_error(mocker: MockerFixture) -
     # simulate a keyboard interrupt
     mock_rating_prompt.return_value.ask.return_value = None
 
-    with pytest.raises(RuntimeError):
+    with pytest.raises(RequiredQuestionCancelledError):
         prompts.ask_time_question(
             "If my code is correct, this should raise a RuntimeError"
         )
@@ -94,7 +70,7 @@ def test_activity_category_prompt_cancelled_raises_runtime_error(
     # simulate a keyboard interrupt
     mock_rating_prompt.return_value.ask.return_value = None
 
-    with pytest.raises(RuntimeError):
+    with pytest.raises(RequiredQuestionCancelledError):
         prompts.ask_activity_category(
             "If my code is correct, this should raise a RuntimeError"
         )

@@ -1,7 +1,12 @@
 from collections.abc import Sequence
 from typing import Any
 
+from rich.console import Console
 from rich.table import Table
+
+from life_analytics.domain.errors import ErrorDiagnostic
+
+console = Console()
 
 
 # its not the best way, but its better than making a constant dictionary mapping
@@ -50,3 +55,27 @@ def create_stats_grid(data: dict[str, dict[str, str] | str]) -> Table:
             grid.add_row(f"\t{section_name}", str(section_value))
 
     return grid
+
+
+def display_error(diagnostic: ErrorDiagnostic) -> None:
+    console.print(f"error: {diagnostic.message}", style="red")
+
+    if diagnostic.source_highlight is not None and diagnostic.source is None:
+        raise ValueError("source_highlight requires source.")
+
+    if diagnostic.source:
+        print("|")
+        console.print(f"|\t{diagnostic.source}")
+
+        if diagnostic.source_highlight:
+            highlight_start_index = diagnostic.source.index(diagnostic.source_highlight)
+            console.print(
+                f"|\t{' ' * highlight_start_index}[red]{'^' * len(diagnostic.source_highlight)}[/red]"
+            )
+        print("|")
+
+    if diagnostic.description:
+        console.print(f"description: {diagnostic.description}", style="dim white")
+
+    if diagnostic.help:
+        console.print(f"help: {diagnostic.help}", style="green")

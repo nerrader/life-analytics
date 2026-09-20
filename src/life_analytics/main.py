@@ -8,6 +8,7 @@ from rich.console import Console
 
 from life_analytics.cli import app
 from life_analytics.domain.errors import RequiredQuestionCancelledError
+from life_analytics.logic.display import display_error
 
 console = Console()
 
@@ -16,7 +17,7 @@ def main() -> None:
     try:
         app()
     except RequiredQuestionCancelledError as error:
-        console.print(f"ERROR: {error!s}", style="red")
+        display_error(error.diagnostic)
 
 
 if __name__ == "__main__":

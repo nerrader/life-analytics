@@ -7,6 +7,11 @@ from pathlib import Path
 from typing import Any
 
 from life_analytics.domain.constants import TableName
+from life_analytics.domain.errors import (
+    ErrorDiagnostic,
+    NoUpdateFieldsError,
+    NoUpdateRecordsError,
+)
 
 sql_dir: Traversable = files("life_analytics.sql")
 
@@ -117,7 +122,11 @@ def _update_record(
     fields_to_update = {field: value for field, value in fields.items() if value}
 
     if not fields_to_update:
-        raise ValueError("There are no valid fields to update.")
+        raise NoUpdateFieldsError(
+            ErrorDiagnostic(
+                message="no fields to update.",
+            )
+        )
 
     update_statements = ", ".join(f"{field} = ?" for field in fields_to_update)
 
@@ -127,11 +136,13 @@ def _update_record(
 
     connection = sqlite3.connect(database_path)
     try:
-        # this is just for the existence check
-        # so it doesnt silently fail if the primary key is not given
         results = connection.execute(query, (*fields_to_update.values(), primary_key))
         if results.rowcount == 0:
-            raise ValueError("There are no records to update.")
+            raise NoUpdateRecordsError(
+                ErrorDiagnostic(
+                    message="no records to update.", source_highlight=str(primary_key)
+                )
+            )
         connection.commit()
     finally:
         connection.close()

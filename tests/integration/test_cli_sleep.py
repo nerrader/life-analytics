@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from pytest_mock import MockerFixture
 from typer.testing import CliRunner
 
 from life_analytics import cli
@@ -84,11 +85,15 @@ def test_sleep_cli_command_updates_record(tmp_path: Path) -> None:
     assert sleep_record.sleep_type == "sleep"
 
 
-def test_sleep_cli_command_handles_invalid_values(tmp_path: Path) -> None:
+def test_sleep_cli_command_handles_invalid_values(
+    tmp_path: Path, mocker: MockerFixture
+) -> None:
     test_database_path = tmp_path / "test.db"
 
     database.create_database(test_database_path)
     cli_runner = CliRunner()
+
+    display_error_mock = mocker.patch("life_analytics.logic.display.display_error")
 
     result = cli_runner.invoke(
         cli.app,
@@ -104,8 +109,8 @@ def test_sleep_cli_command_handles_invalid_values(tmp_path: Path) -> None:
             "-500",
         ],
     )
+    display_error_mock.assert_called_once()
     assert result.exit_code == 0
-    assert "ERROR:" in result.stdout
 
 
 def test_sleep_cli_command_edit_detailed_flag_works(tmp_path: Path) -> None:

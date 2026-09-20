@@ -4,6 +4,14 @@ from pathlib import Path
 from typing import Any
 
 from life_analytics.domain import constants as const
+from life_analytics.domain.errors import (
+    CategoryNotFoundError,
+    ErrorDiagnostic,
+    InvalidConfigNameError,
+    InvalidForceDetailModeConfigError,
+    NoCategoriesError,
+    ValidCategoriesNotSettableError,
+)
 
 
 @dataclass
@@ -29,15 +37,27 @@ class Config:
                 elif value.lower() == "false" or value == "0":
                     self.force_detailed_mode = False
                 else:
-                    raise ValueError(
-                        "Use 'false' or '0' to turn it off. Use 'true' or '1' to turn it on."
+                    raise InvalidForceDetailModeConfigError(
+                        ErrorDiagnostic(
+                            message=f"encounter invalid force_detailed_mode_value: '{value}'",
+                            help="use 'true' or '1' to enable, and 'false' '0' to disable.",
+                            source_highlight=value,
+                        )
                     )
             case "valid_categories":
-                raise ValueError(
-                    "Use the category commands to configure valid categories."
+                raise ValidCategoriesNotSettableError(
+                    ErrorDiagnostic(
+                        message="'valid_categories' should not be edited in set_value()",
+                        source_highlight=name,
+                    )
                 )
             case _:
-                raise ValueError(f"Unknown config option: {name}")
+                raise InvalidConfigNameError(
+                    ErrorDiagnostic(
+                        message=f"invalid config name: {name}",
+                        source_highlight=name,
+                    )
+                )
 
     def add_valid_category(self, category: str) -> None:
         if isinstance(self._valid_categories, set):
@@ -47,11 +67,22 @@ class Config:
         self._valid_categories = {category}
 
     def delete_valid_category(self, category: str) -> None:
-        if isinstance(self._valid_categories, set):
-            self._valid_categories.remove(category)
-            return
+        if self._valid_categories is None:
+            raise NoCategoriesError(
+                ErrorDiagnostic(
+                    message="there are no valid categories to delete.",
+                )
+            )
 
-        raise ValueError("There are no valid categories yet.")
+        if category not in self._valid_categories:
+            raise CategoryNotFoundError(
+                ErrorDiagnostic(
+                    message=f"category '{category}' was not found.",
+                    source_highlight=category,
+                )
+            )
+
+        self._valid_categories.remove(category)
 
     def clear_valid_categories(self) -> None:
         self._valid_categories = None

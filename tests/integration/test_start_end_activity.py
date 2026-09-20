@@ -23,7 +23,8 @@ def test_end_activity_no_activity_started(tmp_path: Path) -> None:
         ],
     )
 
-    assert result.exit_code != 0
+    assert "error:" in result.stdout
+    assert result.exit_code == 0
 
 
 def test_end_activity_uses_cli_options_without_prompting(
