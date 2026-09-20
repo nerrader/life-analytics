@@ -1,5 +1,4 @@
 import sqlite3
-import sys
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Annotated, Final
@@ -8,13 +7,12 @@ import typer
 from rich.console import Console
 
 from life_analytics import __version__, config
+from life_analytics.cli import diagnostics, display, prompts
 from life_analytics.domain import constants as const
 from life_analytics.domain import errors, validation
 from life_analytics.logic import (
     database,
-    display,
     migrations,
-    prompts,
     stats,
 )
 from life_analytics.utils import time_utils
@@ -31,10 +29,6 @@ console = Console()
 VALID_TABLE_TYPES: Final[tuple[str, ...]] = ("summary", "activity", "sleep")
 
 
-def get_user_commands() -> str:
-    return " ".join(sys.argv[1:])
-
-
 def validate_input_category(
     short_flag: str,
     long_flag: str,
@@ -45,7 +39,7 @@ def validate_input_category(
         value is not None
         and validation.is_valid_category(value, valid_categories) is False
     ):
-        user_commands = get_user_commands()
+        user_commands = diagnostics.get_user_commands()
 
         source_highlight = f"--{long_flag} {value}"
         if source_highlight not in user_commands:
@@ -53,7 +47,7 @@ def validate_input_category(
 
         if valid_categories is not None and value not in valid_categories:
             display.display_error(
-                errors.ErrorDiagnostic(
+                diagnostics.CLIErrorDiagnostic(
                     message=f"category not in valid categories: {value}",
                     help=f"use `config list` to view current categories, or use `config category add` to add {value} as category",
                     source=user_commands,
@@ -62,7 +56,7 @@ def validate_input_category(
             )
         else:
             display.display_error(
-                errors.ErrorDiagnostic(
+                diagnostics.CLIErrorDiagnostic(
                     message=f"category cannot be blank: '{value}'",
                     source=user_commands,
                     source_highlight=source_highlight,
@@ -75,16 +69,14 @@ def validate_input_category(
 
 def validate_input_rating(short_flag: str, long_flag: str, value: float | None) -> bool:
     if value is not None and not validation.is_valid_rating(value):
-        user_commands = get_user_commands()
-
-        source_highlight = f"--{long_flag} {value!s}"
-        if source_highlight not in user_commands:
-            source_highlight = f"-{short_flag} {value}"
+        source, source_highlight = diagnostics.get_flag_source(
+            short_flag, long_flag, f"{value:g}"
+        )
 
         display.display_error(
-            errors.ErrorDiagnostic(
-                message=f"inputted rating is not valid: {value}.",
-                source=user_commands,
+            diagnostics.CLIErrorDiagnostic(
+                message=f"inputted rating is not valid: {value:g}.",
+                source=source,
                 source_highlight=source_highlight,
                 help="change value value to be 1-5.",
             )
@@ -95,16 +87,14 @@ def validate_input_rating(short_flag: str, long_flag: str, value: float | None) 
 
 def validate_input_datetime(short_flag: str, long_flag: str, value: str | None) -> bool:
     if value is not None and not validation.is_valid_datetime(value):
-        user_commands = get_user_commands()
-
-        source_highlight = f"--{long_flag} {value!s}"
-        if source_highlight not in user_commands:
-            source_highlight = f"-{short_flag} {value}"
+        source, source_highlight = diagnostics.get_flag_source(
+            short_flag, long_flag, value
+        )
 
         display.display_error(
-            errors.ErrorDiagnostic(
+            diagnostics.CLIErrorDiagnostic(
                 message=f"inputted datetime is not valid: {value}.",
-                source=user_commands,
+                source=source,
                 source_highlight=source_highlight,
                 help="ensure value follows the YYYY-MM-DD HH:MM format",
             )
@@ -115,16 +105,14 @@ def validate_input_datetime(short_flag: str, long_flag: str, value: str | None) 
 
 def validate_input_time(short_flag: str, long_flag: str, value: str | None) -> bool:
     if value is not None and not validation.is_valid_time(value):
-        user_commands = get_user_commands()
-
-        source_highlight = f"--{long_flag} {value!s}"
-        if source_highlight not in user_commands:
-            source_highlight = f"-{short_flag} {value}"
+        source, source_highlight = diagnostics.get_flag_source(
+            short_flag, long_flag, value
+        )
 
         display.display_error(
-            errors.ErrorDiagnostic(
+            diagnostics.CLIErrorDiagnostic(
                 message=f"inputted time is not valid: {value}.",
-                source=user_commands,
+                source=source,
                 source_highlight=source_highlight,
                 help="ensure value follows the HH:MM format",
             )
@@ -218,18 +206,23 @@ def add_daily_summary(
                 edit,
                 {"mood": mood, "productivity": productivity, "stress": stress},
             )
+
         except errors.NoUpdateFieldsError as error:
-            new_diagnostics = errors.ErrorDiagnostic(
-                message=error.diagnostic.message, help="check your command options"
+            display.display_error(
+                errors.ErrorDiagnostic(
+                    message=error.diagnostic.message, help="check your command options"
+                )
             )
-            display.display_error(new_diagnostics)
+
         except errors.NoUpdateRecordsError as error:
-            new_diagnostics = errors.ErrorDiagnostic(
-                message=error.diagnostic.message,
-                help="check if --edit ID is an existing ID.",
-                source=" ".join(sys.argv[1:]),
+            display.display_error(
+                diagnostics.CLIErrorDiagnostic(
+                    message=error.diagnostic.message,
+                    help="check if --edit ID is an existing ID.",
+                    source=diagnostics.get_user_commands(),
+                    source_highlight=f"--edit {edit}",
+                )
             )
-            display.display_error(new_diagnostics)
             return
 
         except sqlite3.IntegrityError as error:
@@ -380,11 +373,14 @@ def add_activity(
     if edit:
         try:
             edit_record = database.fetch_activity_record(database_path, edit)
+
             if edit_record is None:
                 display.display_error(
-                    errors.ErrorDiagnostic(
-                        message="--edit gave a non-existant record.",
-                        help="use `list` to find record IDs",
+                    diagnostics.CLIErrorDiagnostic(
+                        message="--edit gave a non-existant record id",
+                        help="check if --edit ID is an existing ID.",
+                        source=diagnostics.get_user_commands(),
+                        source_highlight=f"--edit {edit}",
                     )
                 )
                 return
@@ -443,24 +439,6 @@ def add_activity(
             )
             display.display_error(new_diagnostics)
 
-        except errors.NoUpdateRecordsError as error:
-            new_diagnostics = errors.ErrorDiagnostic(
-                message=error.diagnostic.message,
-                help="check if --edit ID is an existing ID.",
-                source=get_user_commands(),
-            )
-            display.display_error(new_diagnostics)
-            return
-
-        except sqlite3.IntegrityError as error:
-            console.print(
-                f"""ERROR: Failed to update record: Invalid values were passed to the database.
-
-    Full Error Message:
-    {error}""",
-                style="red",
-            )
-
         return
 
     date = datetime.now().date().isoformat()
@@ -515,31 +493,19 @@ def add_activity(
         "How much energy did you have after your activity? (1-5)"
     )
 
-    try:
-        database.add_activity(
-            database_path,
-            {
-                "category": activity_category,
-                "description": activity_description,
-                "start_at": activity_start,
-                "end_at": activity_end,
-                "effort": effort,
-                "enjoyability": enjoyability,
-                "energy_before": energy_before,
-                "energy_after": energy_after,
-            },
-        )
-    except sqlite3.IntegrityError as error:
-        console.print(
-            f"""ERROR: Invalid values were provided.
-
-This is usually caused by one of your flags having an invalid value.
-Please check your values and try again.
-
-Full Error Message:
-{error}""",
-            style="red",
-        )
+    database.add_activity(
+        database_path,
+        {
+            "category": activity_category,
+            "description": activity_description,
+            "start_at": activity_start,
+            "end_at": activity_end,
+            "effort": effort,
+            "enjoyability": enjoyability,
+            "energy_before": energy_before,
+            "energy_after": energy_after,
+        },
+    )
 
 
 @app.command("sleep")
@@ -611,15 +577,12 @@ def add_sleep(
         return
 
     if sleep_type is not None and sleep_type not in ["sleep", "nap"]:
-        user_commands = get_user_commands()
-        source_highlight = f"--type {sleep_type}"
-        if source_highlight not in user_commands:
-            source_highlight = f"-t {sleep_type}"
+        source, source_highlight = diagnostics.get_flag_source("t", "type", sleep_type)
 
         display.display_error(
-            errors.ErrorDiagnostic(
+            diagnostics.CLIErrorDiagnostic(
                 message=f"invalid sleep_type value: {sleep_type}",
-                source=user_commands,
+                source=source,
                 source_highlight=source_highlight,
                 help="use 'sleep' or 'nap' for sleep_type.",
             )
@@ -681,28 +644,12 @@ def add_sleep(
                     "sleep_type": sleep_type,
                 },
             )
+
         except errors.NoUpdateFieldsError as error:
             new_diagnostics = errors.ErrorDiagnostic(
                 message=error.diagnostic.message, help="check your command options"
             )
             display.display_error(new_diagnostics)
-        except errors.NoUpdateRecordsError as error:
-            new_diagnostics = errors.ErrorDiagnostic(
-                message=error.diagnostic.message,
-                help="check if --edit ID is an existing ID.",
-                source=get_user_commands(),
-            )
-            display.display_error(new_diagnostics)
-            return
-
-        except sqlite3.IntegrityError as error:
-            console.print(
-                f"""ERROR: Failed to update record: Invalid values were passed in the database.
-
-Full Error Message:
-{error}""",
-                style="red",
-            )
 
         return
 
@@ -710,9 +657,12 @@ Full Error Message:
         sleep_start_datetime: str = prompts.ask_datetime_question(
             "When did you start sleeping (YYYY-MM-DD HH:MM)?", sleep_start_input
         )
+        sleep_start_datetime = time_utils.datetime_string_to_iso(sleep_start_datetime)
+
         sleep_end_datetime: str = prompts.ask_datetime_question(
             "When did you wake up (YYYY-MM-DD HH:MM)?", sleep_end_input
         )
+        sleep_end_datetime = time_utils.datetime_string_to_iso(sleep_end_datetime)
 
     else:
         start_sleep_time: str = prompts.ask_time_question(
@@ -735,7 +685,6 @@ Full Error Message:
             "How was your sleep quality? (1-5)"
         )
 
-    try:
         database.add_sleep(
             database_path,
             {
@@ -744,17 +693,6 @@ Full Error Message:
                 "quality": sleep_quality,
                 "sleep_type": sleep_type,
             },
-        )
-    except sqlite3.IntegrityError as error:
-        console.print(
-            f"""ERROR: Invalid values were provided.
-
-This is usually caused by one of your flags having an invalid value.
-Please check your values and try again.
-
-Full Error Message:
-{error}""",
-            style="red",
         )
 
 
@@ -1038,30 +976,35 @@ def set_config(
     try:
         configuration.set_value(name, value)
         config.save_configs(configuration)
+
     except errors.InvalidForceDetailModeConfigError as error:
-        new_diagnostics = errors.ErrorDiagnostic(
-            message=error.diagnostic.message,
-            source=" ".join(sys.argv[:1]),
-            source_highlight=error.diagnostic.source_highlight,
-            help=error.diagnostic.help,
+        display.display_error(
+            diagnostics.to_cli_diagnostic(
+                error.diagnostic,
+                source=diagnostics.get_user_commands(),
+                source_highlight=value,
+            )
         )
-        display.display_error(new_diagnostics)
+
     except errors.InvalidConfigNameError as error:
-        new_diagnostics = errors.ErrorDiagnostic(
-            message=error.diagnostic.message,
-            source=get_user_commands(),
-            source_highlight=error.diagnostic.source_highlight,
-            help="use `config list` to display available config names.",
+        display.display_error(
+            diagnostics.CLIErrorDiagnostic(
+                message=error.diagnostic.message,
+                source=diagnostics.get_user_commands(),
+                source_highlight=name,
+                help="use `config list` to display available config names",
+            )
         )
-        display.display_error(new_diagnostics)
+
     except errors.ValidCategoriesNotSettableError as error:
-        new_diagnostics = errors.ErrorDiagnostic(
-            message=error.diagnostic.message,
-            source=get_user_commands(),
-            source_highlight=error.diagnostic.source_highlight,
-            help="use `config category` instead.",
+        display.display_error(
+            diagnostics.CLIErrorDiagnostic(
+                message=error.diagnostic.message,
+                source=diagnostics.get_user_commands(),
+                source_highlight=name,
+                help="use `config category` instead.",
+            )
         )
-        display.display_error(new_diagnostics)
 
 
 @config_app.command("ls", hidden=True)
@@ -1123,10 +1066,10 @@ def delete_category(
 
     except errors.CategoryNotFoundError as error:
         display.display_error(
-            errors.ErrorDiagnostic(
+            diagnostics.CLIErrorDiagnostic(
                 message=error.diagnostic.message,
-                source=get_user_commands(),
-                source_highlight=error.diagnostic.source_highlight,
+                source=diagnostics.get_user_commands(),
+                source_highlight=category,
             )
         )
 

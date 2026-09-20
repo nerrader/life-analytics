@@ -3,7 +3,7 @@ from pathlib import Path
 
 from typer.testing import CliRunner
 
-from life_analytics import cli
+from life_analytics.cli.app import app
 from life_analytics.logic import database
 
 
@@ -14,7 +14,7 @@ def test_daily_summary_cli_command_creates_database_entry(tmp_path: Path) -> Non
     cli_runner = CliRunner()
 
     result = cli_runner.invoke(
-        cli.app,
+        app,
         [
             "-db",
             str(test_database_path),
@@ -44,7 +44,7 @@ def test_daily_summary_cli_command_updates_record(tmp_path: Path) -> None:
     cli_runner = CliRunner()
 
     result1 = cli_runner.invoke(
-        cli.app,
+        app,
         [
             "-db",
             str(test_database_path),
@@ -61,7 +61,7 @@ def test_daily_summary_cli_command_updates_record(tmp_path: Path) -> None:
     assert result1.exit_code == 0
 
     result2 = cli_runner.invoke(
-        cli.app,
+        app,
         [
             "-db",
             str(test_database_path),
@@ -92,7 +92,7 @@ def test_daily_summary_cli_command_handles_invalid_data(tmp_path: Path) -> None:
     cli_runner = CliRunner()
 
     result = cli_runner.invoke(
-        cli.app,
+        app,
         [
             "-db",
             str(test_database_path),

@@ -4,6 +4,7 @@ from typing import Any
 from rich.console import Console
 from rich.table import Table
 
+from life_analytics.cli.diagnostics import CLIErrorDiagnostic
 from life_analytics.domain.errors import ErrorDiagnostic
 
 console = Console()
@@ -57,13 +58,10 @@ def create_stats_grid(data: dict[str, dict[str, str] | str]) -> Table:
     return grid
 
 
-def display_error(diagnostic: ErrorDiagnostic) -> None:
+def display_error(diagnostic: ErrorDiagnostic | CLIErrorDiagnostic) -> None:
     console.print(f"error: {diagnostic.message}", style="red")
 
-    if diagnostic.source_highlight is not None and diagnostic.source is None:
-        raise ValueError("source_highlight requires source.")
-
-    if diagnostic.source:
+    if isinstance(diagnostic, CLIErrorDiagnostic):
         print("|")
         console.print(f"|\t{diagnostic.source}")
 

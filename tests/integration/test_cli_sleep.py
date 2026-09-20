@@ -3,7 +3,7 @@ from pathlib import Path
 from pytest_mock import MockerFixture
 from typer.testing import CliRunner
 
-from life_analytics import cli
+from life_analytics.cli.app import app
 from life_analytics.logic import database
 
 
@@ -14,7 +14,7 @@ def test_sleep_cli_command_creates_database_entry(tmp_path: Path) -> None:
     cli_runner = CliRunner()
 
     result = cli_runner.invoke(
-        cli.app,
+        app,
         [
             "-db",
             str(test_database_path),
@@ -47,7 +47,7 @@ def test_sleep_cli_command_updates_record(tmp_path: Path) -> None:
     cli_runner = CliRunner()
 
     result1 = cli_runner.invoke(
-        cli.app,
+        app,
         [
             "-db",
             str(test_database_path),
@@ -63,7 +63,7 @@ def test_sleep_cli_command_updates_record(tmp_path: Path) -> None:
     assert result1.exit_code == 0
 
     result2 = cli_runner.invoke(
-        cli.app,
+        app,
         [
             "-db",
             str(test_database_path),
@@ -78,7 +78,7 @@ def test_sleep_cli_command_updates_record(tmp_path: Path) -> None:
 
     sleep_record = database.fetch_sleep_records(test_database_path)[0]
 
-    # time in the sleep database in stored in YYYY-MM-DDTHH:MM which is why im using only the time here
+    # time in the sleep database is stored as YYYY-MM-DDTHH:MM which is why im using only the time here
     assert "21:00" in sleep_record.start_at
     assert "6:00" in sleep_record.end_at
     assert sleep_record.quality == 1
@@ -93,10 +93,10 @@ def test_sleep_cli_command_handles_invalid_values(
     database.create_database(test_database_path)
     cli_runner = CliRunner()
 
-    display_error_mock = mocker.patch("life_analytics.logic.display.display_error")
+    display_error_mock = mocker.patch("life_analytics.cli.display.display_error")
 
     result = cli_runner.invoke(
-        cli.app,
+        app,
         [
             "-db",
             str(test_database_path),
@@ -120,7 +120,7 @@ def test_sleep_cli_command_edit_detailed_flag_works(tmp_path: Path) -> None:
     cli_runner = CliRunner()
 
     result1 = cli_runner.invoke(
-        cli.app,
+        app,
         [
             "-db",
             str(test_database_path),
@@ -136,7 +136,7 @@ def test_sleep_cli_command_edit_detailed_flag_works(tmp_path: Path) -> None:
     assert result1.exit_code == 0
 
     result2 = cli_runner.invoke(
-        cli.app,
+        app,
         [
             "-db",
             str(test_database_path),

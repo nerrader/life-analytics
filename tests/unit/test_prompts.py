@@ -1,8 +1,8 @@
 import pytest
 from pytest_mock import MockerFixture
 
+from life_analytics.cli import prompts
 from life_analytics.domain.errors import RequiredQuestionCancelledError
-from life_analytics.logic import prompts
 
 
 def test_rating_prompt_cancelled_raises_runtime_error(mocker: MockerFixture) -> None:

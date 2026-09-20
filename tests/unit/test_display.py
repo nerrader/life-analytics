@@ -1,7 +1,7 @@
 from rich.console import Console
 from rich.table import Table
 
-from life_analytics.logic import display
+from life_analytics.cli import display
 
 
 def test_create_table_columns_and_rows() -> None:

@@ -3,7 +3,7 @@ from pathlib import Path
 from pytest_mock import MockerFixture
 from typer.testing import CliRunner
 
-from life_analytics.cli import app
+from life_analytics.cli.app import app
 from life_analytics.logic import database
 
 

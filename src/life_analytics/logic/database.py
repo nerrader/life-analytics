@@ -138,11 +138,7 @@ def _update_record(
     try:
         results = connection.execute(query, (*fields_to_update.values(), primary_key))
         if results.rowcount == 0:
-            raise NoUpdateRecordsError(
-                ErrorDiagnostic(
-                    message="no records to update.", source_highlight=str(primary_key)
-                )
-            )
+            raise NoUpdateRecordsError(ErrorDiagnostic(message="no records to update."))
         connection.commit()
     finally:
         connection.close()

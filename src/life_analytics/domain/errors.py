@@ -4,8 +4,6 @@ from dataclasses import dataclass
 @dataclass(frozen=True)
 class ErrorDiagnostic:
     message: str
-    source: str | None = None
-    source_highlight: str | None = None
     description: str | None = None
     help: str | None = None
 

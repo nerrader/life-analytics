@@ -41,21 +41,18 @@ class Config:
                         ErrorDiagnostic(
                             message=f"encounter invalid force_detailed_mode_value: '{value}'",
                             help="use 'true' or '1' to enable, and 'false' '0' to disable.",
-                            source_highlight=value,
                         )
                     )
             case "valid_categories":
                 raise ValidCategoriesNotSettableError(
                     ErrorDiagnostic(
                         message="'valid_categories' should not be edited in set_value()",
-                        source_highlight=name,
                     )
                 )
             case _:
                 raise InvalidConfigNameError(
                     ErrorDiagnostic(
                         message=f"invalid config name: {name}",
-                        source_highlight=name,
                     )
                 )
 
@@ -78,7 +75,6 @@ class Config:
             raise CategoryNotFoundError(
                 ErrorDiagnostic(
                     message=f"category '{category}' was not found.",
-                    source_highlight=category,
                 )
             )
 

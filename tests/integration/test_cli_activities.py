@@ -3,7 +3,7 @@ from pathlib import Path
 from pytest_mock import MockerFixture
 from typer.testing import CliRunner
 
-from life_analytics import cli
+from life_analytics.cli.app import app
 from life_analytics.logic import database
 
 
@@ -14,7 +14,7 @@ def test_activities_cli_command_creates_database_entry(tmp_path: Path) -> None:
     cli_runner = CliRunner()
 
     result = cli_runner.invoke(
-        cli.app,
+        app,
         [
             "-db",
             str(test_database_path),
@@ -54,7 +54,7 @@ def test_activities_cli_command_updates_record(tmp_path: Path) -> None:
     cli_runner = CliRunner()
 
     result1 = cli_runner.invoke(
-        cli.app,
+        app,
         [
             "-db",
             str(test_database_path),
@@ -80,7 +80,7 @@ def test_activities_cli_command_updates_record(tmp_path: Path) -> None:
     assert result1.exit_code == 0
 
     result2 = cli_runner.invoke(
-        cli.app,
+        app,
         [
             "-db",
             str(test_database_path),
@@ -114,10 +114,10 @@ def test_activity_cli_command_handles_invalid_data(
 
     cli_runner = CliRunner()
 
-    display_error_mock = mocker.patch("life_analytics.logic.display.display_error")
+    display_error_mock = mocker.patch("life_analytics.cli.display.display_error")
 
     result = cli_runner.invoke(
-        cli.app,
+        app,
         [
             "-db",
             str(test_database_path),
@@ -152,7 +152,7 @@ def test_activity_cli_command_edit_detailed_flag_works(tmp_path: Path) -> None:
     cli_runner = CliRunner()
 
     result1 = cli_runner.invoke(
-        cli.app,
+        app,
         [
             "-db",
             str(test_database_path),
@@ -178,7 +178,7 @@ def test_activity_cli_command_edit_detailed_flag_works(tmp_path: Path) -> None:
     assert result1.exit_code == 0
 
     result2 = cli_runner.invoke(
-        cli.app,
+        app,
         [
             "-db",
             str(test_database_path),
