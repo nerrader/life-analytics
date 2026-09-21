@@ -49,7 +49,7 @@ def validate_input_category(
             display.display_error(
                 diagnostics.CLIErrorDiagnostic(
                     message=f"category not in valid categories: {value}",
-                    help=f"use `config list` to view current categories, or use `config category add` to add {value} as category",
+                    help=f"use `config list` to view current categories, or use `config category add` to add {value} as category.",
                     source=user_commands,
                     source_highlight=source_highlight,
                 )
@@ -75,7 +75,7 @@ def validate_input_rating(short_flag: str, long_flag: str, value: float | None) 
 
         display.display_error(
             diagnostics.CLIErrorDiagnostic(
-                message=f"inputted rating is not valid: {value:g}.",
+                message=f"inputted rating is not valid: {value:g}",
                 source=source,
                 source_highlight=source_highlight,
                 help="change value value to be 1-5.",
@@ -93,10 +93,10 @@ def validate_input_datetime(short_flag: str, long_flag: str, value: str | None) 
 
         display.display_error(
             diagnostics.CLIErrorDiagnostic(
-                message=f"inputted datetime is not valid: {value}.",
+                message=f"inputted datetime is not valid: {value}",
                 source=source,
                 source_highlight=source_highlight,
-                help="ensure value follows the YYYY-MM-DD HH:MM format",
+                help="ensure value follows the YYYY-MM-DD HH:MM format.",
             )
         )
         return False
@@ -111,10 +111,10 @@ def validate_input_time(short_flag: str, long_flag: str, value: str | None) -> b
 
         display.display_error(
             diagnostics.CLIErrorDiagnostic(
-                message=f"inputted time is not valid: {value}.",
+                message=f"inputted time is not valid: {value}",
                 source=source,
                 source_highlight=source_highlight,
-                help="ensure value follows the HH:MM format",
+                help="ensure value follows the HH:MM format.",
             )
         )
         return False
@@ -196,10 +196,11 @@ def add_daily_summary(
     configuration: config.Config = context.obj["config"]
     database_path = configuration.database_path
 
+    validate_input_rating("m", "mood", mood)
+    validate_input_rating("p", "productivity", productivity)
+    validate_input_rating("s", "stress", stress)
+
     if edit:
-        validate_input_rating("m", "mood", mood)
-        validate_input_rating("p", "productivity", productivity)
-        validate_input_rating("s", "stress", stress)
         try:
             database.update_daily_summary_record(
                 database_path,
@@ -210,7 +211,7 @@ def add_daily_summary(
         except errors.NoUpdateFieldsError as error:
             display.display_error(
                 errors.ErrorDiagnostic(
-                    message=error.diagnostic.message, help="check your command options"
+                    message=error.diagnostic.message, help="check your command options."
                 )
             )
 
@@ -224,15 +225,6 @@ def add_daily_summary(
                 )
             )
             return
-
-        except sqlite3.IntegrityError as error:
-            console.print(
-                f"""ERROR: Failed to update record: Invalid values were passed to the database.
-
-Full Error Message:
-{error}"""
-            )
-        return
 
     date = datetime.now().date().isoformat()
 
@@ -339,6 +331,7 @@ def add_activity(
     if configuration.force_detailed_mode:
         detailed = True
 
+    # all just validation of cli flags and options
     if (
         validate_input_category(
             "c", "category", category_input, configuration.valid_categories
@@ -435,7 +428,7 @@ def add_activity(
             )
         except errors.NoUpdateFieldsError as error:
             new_diagnostics = errors.ErrorDiagnostic(
-                message=error.diagnostic.message, help="check your command options"
+                message=error.diagnostic.message, help="check your command options."
             )
             display.display_error(new_diagnostics)
 
@@ -647,7 +640,7 @@ def add_sleep(
 
         except errors.NoUpdateFieldsError as error:
             new_diagnostics = errors.ErrorDiagnostic(
-                message=error.diagnostic.message, help="check your command options"
+                message=error.diagnostic.message, help="check your command options."
             )
             display.display_error(new_diagnostics)
 
@@ -720,8 +713,20 @@ def list_records(
     if table_types is None:
         table_types = ["summary", "activity", "sleep"]
     else:
-        if any(table_type not in VALID_TABLE_TYPES for table_type in table_types):
-            raise typer.BadParameter("Invalid table types.")
+        for table_type in table_types:
+            if table_type not in VALID_TABLE_TYPES:
+                source, source_highlight = diagnostics.get_flag_source(
+                    "t", "table", table_type
+                )
+
+                display.display_error(
+                    diagnostics.CLIErrorDiagnostic(
+                        message=f"invalid table type: {table_type}",
+                        source=source,
+                        source_highlight=source_highlight,
+                        help="use 'summary', 'activity' or 'sleep'.",
+                    )
+                )
 
     table_name_map: dict[str, const.TableName] = {
         "summary": "daily_summaries",
@@ -823,10 +828,7 @@ def clear_all_data(
 
     if clear_data_confirm:
         database.clear_database(database_path)
-        print("Successfully cleared data.")
         return
-
-    print("Aborting clear command.")
 
 
 @app.command("start")
@@ -893,7 +895,7 @@ def end_activity_time(
     if not activity_start_path.exists():
         display.display_error(
             errors.ErrorDiagnostic(
-                message="started activity not found.",
+                message="started activity not found",
                 help="use `start` to start an activity first.",
             )
         )
@@ -992,7 +994,7 @@ def set_config(
                 message=error.diagnostic.message,
                 source=diagnostics.get_user_commands(),
                 source_highlight=name,
-                help="use `config list` to display available config names",
+                help="use `config list` to display available config names.",
             )
         )
 

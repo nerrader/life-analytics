@@ -125,7 +125,7 @@ def _update_record(
     if not fields_to_update:
         raise NoUpdateFieldsError(
             ErrorDiagnostic(
-                message="no fields to update.",
+                message="no fields to update",
             )
         )
 
@@ -139,7 +139,7 @@ def _update_record(
     try:
         results = connection.execute(query, (*fields_to_update.values(), primary_key))
         if results.rowcount == 0:
-            raise NoUpdateRecordsError(ErrorDiagnostic(message="no records to update."))
+            raise NoUpdateRecordsError(ErrorDiagnostic(message="no records to update"))
         connection.commit()
     finally:
         connection.close()
