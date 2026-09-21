@@ -22,7 +22,11 @@ def ask_rating_question(prompt: str) -> float:
         if not value.strip():
             return "Rating cannot be empty"
 
-        is_valid_rating = validation.is_valid_rating(float(value))
+        try:
+            is_valid_rating = validation.is_valid_rating(float(value))
+        except ValueError:
+            is_valid_rating = False
+
         return (
             True if is_valid_rating is True else "Please enter a value between 1 and 5."
         )
