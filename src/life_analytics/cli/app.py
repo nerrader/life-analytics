@@ -1027,7 +1027,7 @@ def config_set_defaults(
         typer.Option("--skip", "-s", help="To skip the confirmation prompt"),
     ] = None,
 ) -> None:
-    """Clears the categories in valid_categories."""
+    """Sets all configs to default."""
     configuration: config.Config = context.obj["config"]
 
     confirmation = prompts.ask_for_confirmation(
