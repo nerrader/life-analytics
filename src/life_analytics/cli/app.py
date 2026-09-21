@@ -224,7 +224,7 @@ def add_daily_summary(
                     source_highlight=f"--edit {edit}",
                 )
             )
-            return
+        return
 
     date = datetime.now().date().isoformat()
 

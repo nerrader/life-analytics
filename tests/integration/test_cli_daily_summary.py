@@ -1,6 +1,7 @@
 from datetime import datetime
 from pathlib import Path
 
+from pytest_mock import MockerFixture
 from typer.testing import CliRunner
 
 from life_analytics.cli.app import app
@@ -85,8 +86,11 @@ def test_daily_summary_cli_command_updates_record(tmp_path: Path) -> None:
     assert summary_record.stress == 3
 
 
-def test_daily_summary_cli_command_handles_invalid_data(tmp_path: Path) -> None:
+def test_daily_summary_cli_command_handles_invalid_data(
+    tmp_path: Path, mocker: MockerFixture
+) -> None:
     test_database_path = tmp_path / "test.db"
+    display_error_mock = mocker.patch("life_analytics.cli.display.display_error")
 
     database.create_database(test_database_path)
     cli_runner = CliRunner()
@@ -107,4 +111,4 @@ def test_daily_summary_cli_command_handles_invalid_data(tmp_path: Path) -> None:
     )
 
     assert result.exit_code == 0
-    assert "ERROR:" in result.stdout
+    display_error_mock.assert_called_once()
