@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Nothing added yet!
+
+## [2.0.0]
+
 - Added `start` and `stop` commands.
 - Added `--detailed` flag for `activity` and `sleep` commands.
 - Added configs/settings using the `config` command.
@@ -31,5 +35,6 @@ to make data entry more straightforward.
 - `clear` command to clear all your data.
 - A help menu accessible with `--help`.
 
-[Unreleased]: https://github.com/nerrader/life-analytics/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/nerrader/life-analytics/compare/v2.0.0...HEAD
 [1.0.0]: https://github.com/nerrader/life-analytics/releases/tag/v1.0.0
+[2.0.0]: https://github.com/nerrader/life-analytics/compare/v1.0.0...v2.0.0
