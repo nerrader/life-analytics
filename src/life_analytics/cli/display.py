@@ -2,6 +2,7 @@ from collections.abc import Sequence
 from typing import Any
 
 from rich.console import Console
+from rich.markdown import Markdown
 from rich.table import Table
 
 from life_analytics.cli.diagnostics import CLIErrorDiagnostic
@@ -77,3 +78,7 @@ def display_error(diagnostic: ErrorDiagnostic | CLIErrorDiagnostic) -> None:
 
     if diagnostic.help:
         console.print(f"help: {diagnostic.help}", style="green")
+
+
+def display_guide(guide: str) -> None:
+    console.print(Markdown(guide))

@@ -1,4 +1,3 @@
-import sqlite3
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Annotated, Final
@@ -8,6 +7,7 @@ from rich.console import Console
 
 from life_analytics import __version__, config
 from life_analytics.cli import diagnostics, display, prompts
+from life_analytics.cli.guide import GUIDE
 from life_analytics.domain import constants as const
 from life_analytics.domain import errors, validation
 from life_analytics.logic import (
@@ -17,14 +17,14 @@ from life_analytics.logic import (
 )
 from life_analytics.utils import time_utils
 
+console = Console()
+
 app = typer.Typer()
 config_app = typer.Typer(help="A subcommand to manage configs")
 categories_app = typer.Typer(help="A subcommand to manage valid_categories.")
 
 app.add_typer(config_app, name="config")
 config_app.add_typer(categories_app, name="category")
-
-console = Console()
 
 VALID_TABLE_TYPES: Final[tuple[str, ...]] = ("summary", "activity", "sleep")
 
@@ -169,6 +169,12 @@ def main(
         migrations.migrate_database(configuration.database_path)
 
 
+@app.command("guide")
+def display_guide() -> None:
+    """Displays a guide to using the life tracker."""
+    display.display_guide(GUIDE)
+
+
 @app.command("summary")
 def add_daily_summary(
     context: typer.Context,
@@ -196,9 +202,12 @@ def add_daily_summary(
     configuration: config.Config = context.obj["config"]
     database_path = configuration.database_path
 
-    validate_input_rating("m", "mood", mood)
-    validate_input_rating("p", "productivity", productivity)
-    validate_input_rating("s", "stress", stress)
+    if validate_input_rating("m", "mood", mood) is False:
+        return
+    if validate_input_rating("p", "productivity", productivity) is False:
+        return
+    if validate_input_rating("s", "stress", stress) is False:
+        return
 
     if edit:
         try:
@@ -234,26 +243,15 @@ def add_daily_summary(
     )
     stress = stress or prompts.ask_rating_question("How stressed were you today (1-5)?")
 
-    try:
-        database.add_daily_summary(
-            database_path,
-            {
-                "summary_date": date,
-                "mood": mood,
-                "productivity": productivity,
-                "stress": stress,
-            },
-        )
-    except sqlite3.IntegrityError as error:
-        console.print(
-            f"""ERROR: Invalid values were provided.
-
-This is usually caused by your flag's values not being in the 1-5 constraint.
-Please check your values and try again.
-
-Full Error Message: {error}""",
-            style="red",
-        )
+    database.add_daily_summary(
+        database_path,
+        {
+            "summary_date": date,
+            "mood": mood,
+            "productivity": productivity,
+            "stress": stress,
+        },
+    )
 
 
 @app.command("activity")

@@ -47,7 +47,11 @@ directory containing the .exe, you should add its folder to your system's PATH.
 
 ## Usage
 
-For more information about the life tracker's CLI commands, use the `--help` menu.
+For more information about the life tracker's CLI commands, use the `guide` command and the `--help` menu.
+
+```bash
+life guide
+```
 
 ```bash
 life activity --help
@@ -60,45 +64,6 @@ life activity --help
 >
 > So instead of `life stats`, its `lf stats`.
 > Though for the examples, I will be using `life` as the master command.
-
-### Using Command Options
-
-Command options allow you to provide values directly instead of entering them
-through interactive mode prompts. This can make data entry faster, and also
-allows commands to be automated or scripted.
-
-You also need to use command options/flags for editing, which we will cover
-in the next section.
-
-Again, the easiest way to see the available options/flags for each command
-is to use its `--help` flag.
-
-### Editing Records
-
-The `--edit` option is used to edit records through their respective commands.
-
-> [!IMPORTANT]
-> Editing currently does not have an interactive mode, so you'll need to provide
-> the values using command flags.
-
-For example, I overestimated my mood on 2026-08-23 daily summary record,
-I think my mood then was neutral and didn't deserve the high number I gave it, so:
-
-```bash
-life summary --edit 2026-08-23 --mood 3
-```
-
-For `life activity` and `life sleep`, you instead pass in the ID for `--edit`.
-
-```bash
-life sleep --edit 3 -s 21:00
-```
-
-You can also pass in multiple values to update, like this:
-
-```bash
-life activity --edit 5 --category SOCIAL --energy-before 2 --energy-after 5
-```
 
 ## Tech Stack
 
