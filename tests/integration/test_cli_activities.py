@@ -209,3 +209,41 @@ def test_activity_cli_command_edit_detailed_flag_works(tmp_path: Path) -> None:
     assert activity_record.energy_before == 5
     assert activity_record.energy_after == 3
     assert activity_record.category == "DEV"
+
+
+def test_activity_cli_command_edit_detailed_flag_gives_error_if_value_is_invalid(
+    tmp_path: Path, mocker: MockerFixture
+) -> None:
+    test_database_path = tmp_path / "test.db"
+
+    database.create_database(test_database_path)
+    cli_runner = CliRunner()
+
+    display_error_mock = mocker.patch("life_analytics.cli.display.display_error")
+    result = cli_runner.invoke(
+        app,
+        [
+            "-db",
+            str(test_database_path),
+            "activity",
+            "--detailed",
+            "--category",
+            "TESTING",
+            "--description",
+            "integration testing",
+            "--start",
+            "2026-09-15 20:59",
+            "--end",
+            "2026-09-15 25:00",
+            "--effort",
+            "5",
+            "--enjoyability",
+            "5",
+            "--energy-before",
+            "1",
+            "--energy-after",
+            "3",
+        ],
+    )
+    assert result.exit_code == 0
+    display_error_mock.assert_called_once()

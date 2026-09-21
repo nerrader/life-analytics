@@ -158,3 +158,33 @@ def test_sleep_cli_command_edit_detailed_flag_works(tmp_path: Path) -> None:
     assert sleep_record.start_at == "2026-09-15T20:59"
     assert sleep_record.end_at == "2026-09-15T21:00"
     assert sleep_record.quality == 1
+
+
+def test_sleep_cli_command_detailed_flag_is_invalid_value_displays_error_diagnostics(
+    tmp_path: Path,
+    mocker: MockerFixture,
+) -> None:
+    test_database_path = tmp_path / "test.db"
+
+    database.create_database(test_database_path)
+    cli_runner = CliRunner()
+
+    display_error_mock = mocker.patch("life_analytics.cli.display.display_error")
+
+    result = cli_runner.invoke(
+        app,
+        [
+            "-db",
+            str(test_database_path),
+            "sleep",
+            "--detailed",
+            "--start",
+            "2026-09-15 20:59",
+            "--end",
+            "2026-200-15 21:00",
+            "--quality",
+            "5",
+        ],
+    )
+    assert result.exit_code == 0
+    display_error_mock.assert_called_once()
