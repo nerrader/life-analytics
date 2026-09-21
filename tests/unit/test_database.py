@@ -151,3 +151,24 @@ def test_add_sleep_with_invalid_data(tmp_path: Path) -> None:
                 "sleep_type": "sleep",
             },
         )
+
+
+def test_clear_database(tmp_path: Path) -> None:
+    database.create_database(tmp_path / "test.db")
+
+    database.add_sleep(
+        tmp_path / "test.db",
+        {
+            "start_at": "2026-04-08T17:37",
+            "end_at": "2026-04-09T06:56",
+            "quality": 5,
+            "sleep_type": "sleep",
+        },
+    )
+    record = database.fetch_sleep_record(tmp_path / "test.db", 1)
+    assert record is not None
+    assert record.end_at == "2026-04-09T06:56"
+
+    database.clear_database(tmp_path / "test.db")
+
+    assert database.fetch_sleep_record(tmp_path / "test.db", 1) is None

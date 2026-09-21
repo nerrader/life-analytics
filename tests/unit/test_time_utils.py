@@ -1,5 +1,7 @@
 from datetime import date, datetime, time
 
+import pytest
+
 from life_analytics.utils import time_utils
 
 
@@ -36,3 +38,14 @@ def test_validate_datetime() -> None:
     assert time_utils.validate_datetime("2026-13-15 18:30") is False
     assert time_utils.validate_datetime("2026-09-15 25:30") is False
     assert time_utils.validate_datetime("2026-09-15") is False
+
+
+def test_datetime_string_to_iso() -> None:
+    assert time_utils.datetime_string_to_iso("2026-09-15 8:30") == "2026-09-15T08:30"
+
+    with pytest.raises(ValueError):
+        time_utils.datetime_string_to_iso("2026-13-15 18:30")
+    with pytest.raises(ValueError):
+        time_utils.datetime_string_to_iso("2026-09-15 25:30")
+    with pytest.raises(ValueError):
+        time_utils.datetime_string_to_iso("2026-09-15")

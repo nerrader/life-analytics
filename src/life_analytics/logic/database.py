@@ -56,14 +56,15 @@ def create_database(database_path: Path) -> None:
 
 
 def clear_database(database_path: Path) -> None:
-    with sqlite3.connect(database_path) as connection:
-        try:
-            connection.executescript((sql_dir / "clear_database.sql").read_text())
-        except sqlite3.OperationalError as error:
-            connection.rollback()
-            print(f"Clearing database was not successful: {error!s}")
-        finally:
-            connection.close()
+    connection = sqlite3.connect(database_path)
+
+    try:
+        connection.executescript((sql_dir / "clear_database.sql").read_text())
+    except sqlite3.OperationalError as error:
+        connection.rollback()
+        print(f"Clearing database was not successful: {error!s}")
+    finally:
+        connection.close()
 
 
 def _add_record(
@@ -215,7 +216,8 @@ def fetch_activity_record(database_path: Path, id: int) -> ActivityRecord | None
     try:
         cursor = connection.cursor()
         cursor.execute("SELECT * FROM activities WHERE id = ?", (id,))
-        return ActivityRecord(*cursor.fetchone())
+        result = cursor.fetchone()
+        return ActivityRecord(*result) if result is not None else None
     finally:
         connection.close()
 
@@ -225,7 +227,8 @@ def fetch_sleep_record(database_path: Path, id: int) -> SleepRecord | None:
     try:
         cursor = connection.cursor()
         cursor.execute("SELECT * FROM sleep WHERE id = ?", (id,))
-        return SleepRecord(*cursor.fetchone())
+        result = cursor.fetchone()
+        return SleepRecord(*result) if result is not None else None
     finally:
         connection.close()
 
