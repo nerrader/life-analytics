@@ -116,7 +116,7 @@ def ask_datetime_question(prompt: str, skip_value: str | None) -> str:
         Returns:
             bool | str: Returns True if the value is valid, otherwise returns a string with an error message.
         """
-        is_valid_datetime = validate_datetime(value)
+        is_valid_datetime = validation.is_valid_datetime(value)
         if not is_valid_datetime:
             return "Please enter a valid time in HH:MM format."
         return True
