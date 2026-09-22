@@ -648,12 +648,10 @@ def add_sleep(
         sleep_start_datetime: str = prompts.ask_datetime_question(
             "When did you start sleeping (YYYY-MM-DD HH:MM)?", sleep_start_input
         )
-        sleep_start_datetime = time_utils.datetime_string_to_iso(sleep_start_datetime)
 
         sleep_end_datetime: str = prompts.ask_datetime_question(
             "When did you wake up (YYYY-MM-DD HH:MM)?", sleep_end_input
         )
-        sleep_end_datetime = time_utils.datetime_string_to_iso(sleep_end_datetime)
 
     else:
         start_sleep_time: str = prompts.ask_time_question(

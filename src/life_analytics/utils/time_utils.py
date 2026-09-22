@@ -19,15 +19,6 @@ def combine_date_and_time(date: date, time: str | dt_time) -> datetime:
     )
 
 
-def normalize_datetime(isostring: str) -> str:
-    """This makes sure the time part of the datetime isostring is valid.
-    Example: 2026-12-25T6:30 -> 2026-12-25T06:30"""
-    date, time = isostring.split("T", 1)
-    hour, minutes = time.split(":", 1)
-
-    return f"{date}T{hour.zfill(2)}:{minutes}"
-
-
 def validate_time(time: str | None) -> bool:
     """Validates the time string. Returns True if time is valid, and vice versa."""
     try:

@@ -1,5 +1,9 @@
 # run this from the project root
 # all the other configs are in the project root
+
+# to clean up all the previous builds maybe
+Remove-Item dist/ -Recurse -Force
+
 uv run nuitka `
     --mode=onefile `
     --include-data-files="src/life_analytics/sql/*.sql=life_analytics/sql/" `

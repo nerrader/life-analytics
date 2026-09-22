@@ -6,7 +6,7 @@ import questionary
 
 from life_analytics.domain import validation
 from life_analytics.domain.errors import ErrorDiagnostic, RequiredQuestionCancelledError
-from life_analytics.utils.time_utils import normalize_datetime
+from life_analytics.utils.time_utils import datetime_string_to_iso
 
 
 def ask_rating_question(prompt: str) -> float:
@@ -137,7 +137,7 @@ def ask_datetime_question(prompt: str, skip_value: str | None) -> str:
             )
         )
 
-    return normalize_datetime(datetime_value)
+    return datetime_string_to_iso(datetime_value)
 
 
 def ask_activity_category(

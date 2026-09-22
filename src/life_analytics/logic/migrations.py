@@ -5,7 +5,7 @@ from importlib.resources.abc import Traversable
 from pathlib import Path
 from shutil import copy2
 
-from life_analytics.utils.time_utils import normalize_datetime
+from life_analytics.utils.time_utils import datetime_string_to_iso
 
 MIGRATIONS_DIR: Traversable = files("life_analytics.sql.migrations")
 
@@ -20,7 +20,7 @@ def migrate_database(database_path: Path) -> None:
                 make_backup(database_path)
                 print(f"Made a backup at {database_path}.backup if something breaks.")
                 connection.executescript((MIGRATIONS_DIR / "v0_to_v1.sql").read_text())
-            update_datetimes(connection)
+                update_datetimes(connection)
     finally:
         connection.close()
 
@@ -43,13 +43,12 @@ def update_datetimes(connection: sqlite3.Connection) -> None:
             WHERE id = ?
             """,
             (
-                normalize_datetime(start_at),
-                normalize_datetime(end_at),
+                datetime_string_to_iso(start_at),
+                datetime_string_to_iso(end_at),
                 activity_id,
             ),
         )
 
-    # Sleep
     sleep_records = connection.execute(
         "SELECT id, start_at, end_at FROM sleep"
     ).fetchall()
@@ -62,8 +61,8 @@ def update_datetimes(connection: sqlite3.Connection) -> None:
             WHERE id = ?
             """,
             (
-                normalize_datetime(start_at),
-                normalize_datetime(end_at),
+                datetime_string_to_iso(start_at),
+                datetime_string_to_iso(end_at),
                 sleep_id,
             ),
         )
