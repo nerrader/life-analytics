@@ -670,19 +670,19 @@ def add_sleep(
             today_date, end_sleep_time
         ).isoformat(timespec="minutes")
 
-        sleep_quality = sleep_quality or prompts.ask_rating_question(
-            "How was your sleep quality? (1-5)"
-        )
+    sleep_quality = sleep_quality or prompts.ask_rating_question(
+        "How was your sleep quality? (1-5)"
+    )
 
-        database.add_sleep(
-            database_path,
-            {
-                "start_at": sleep_start_datetime,
-                "end_at": sleep_end_datetime,
-                "quality": sleep_quality,
-                "sleep_type": sleep_type,
-            },
-        )
+    database.add_sleep(
+        database_path,
+        {
+            "start_at": sleep_start_datetime,
+            "end_at": sleep_end_datetime,
+            "quality": sleep_quality,
+            "sleep_type": sleep_type,
+        },
+    )
 
 
 @app.command("ls", hidden=True)
