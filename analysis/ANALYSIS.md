@@ -9,9 +9,9 @@ NOTE: This analysis only applies to me and me only. Please don't use the observe
 This section will be removed once the data analysis is fully finished.
 
 Start Date: 2026-08-23
-Current Phase: Phase 1
+Current Phase: Phase 2
 
-Phase 2 is expected to start on 2026-9-24.
+Phase 3 will start whenever I feel ready.
 
 ## Methodology
 

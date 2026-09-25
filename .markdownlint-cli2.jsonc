@@ -1,3 +1,4 @@
+// this exists just for nvim
 {
   "config": {
     "MD013": false
