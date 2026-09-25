@@ -25,13 +25,24 @@ The goal for this phase is just to collect enough data to move on to the next ph
 
 ### Phase 2
 
-This phase will be about exploring the collected data in the first phase and finding interesting topics or relationships in the data that I could potentially add in my questions list to further investigate later on in either phase 3 or 4.
+This phase will focus on exploring the data collected during the first phase. I will perform descriptive analyses to answer existing questions where possible and look for interesting patterns, relationships, or unexpected results.
+
+The purpose of this phase is primarily just to discover interesting observations in the data, rather than to establish strong conclusions.
+
+Findings from this phase may:
+
+- Answer simple descriptive questions.
+- Provide preliminary answers to existing questions.
+- Reveal relationships worth investigating further.
+- Generate new questions for Phase 3 or Phase 4.
 
 ### Phase 3
 
-This phase will be about answering questions that can be answered using observational data, like questions that ask about correlations.
+This phase will be about investigating and answering questions identified in the questions list, whether from initial curiosity or from the second phase.
 
-Then, I will draw conclusions when there is enough data to support the finding. These will only show associations, not causations.
+I will primarily investigate questions that only require observational data to answer, such as questions about correlations and associations.
+
+When there is enough evidence, I may draw conclusions about associations, but these conclusions will not establish causation.
 
 ### Phase 4
 
