@@ -252,6 +252,7 @@ def add_daily_summary(
             "stress": stress,
         },
     )
+    console.print("successfully added daily summary to database", style="green")
 
 
 @app.command("activity")
@@ -497,6 +498,7 @@ def add_activity(
             "energy_after": energy_after,
         },
     )
+    console.print("successfully added activity to database", style="green")
 
 
 @app.command("sleep")
@@ -683,6 +685,7 @@ def add_sleep(
             "sleep_type": sleep_type,
         },
     )
+    console.print("successfully added sleep record to database.", style="green")
 
 
 @app.command("ls", hidden=True)
@@ -824,6 +827,7 @@ def clear_all_data(
 
     if clear_data_confirm:
         database.clear_database(database_path)
+        console.print("successfully cleared database", style="green")
         return
 
 
@@ -840,7 +844,7 @@ def start_activity_time(context: typer.Context) -> None:
             return
 
     date_time: str = datetime.now().isoformat(timespec="minutes")
-    print(f"Activity started: {date_time.replace('T', ' ')}")
+    print(f"activity started: {date_time.replace('T', ' ')}")
 
     activity_start_path.write_text(date_time)
 
@@ -961,6 +965,7 @@ def end_activity_time(
             "energy_after": energy_after,
         },
     )
+    console.print("successfully added activity to database", style="green")
 
 
 @config_app.command("set")
@@ -974,6 +979,7 @@ def set_config(
     try:
         configuration.set_value(name, value)
         config.save_configs(const.CONFIG_PATH, configuration)
+        console.print("successfully set new configs", style="green")
 
     except errors.InvalidForceDetailModeConfigError as error:
         display.display_error(
@@ -1032,17 +1038,19 @@ def config_set_defaults(
     if confirmation:
         configuration = config.Config()
         config.save_configs(const.CONFIG_PATH, configuration)
+        console.print("successfully reset settings to default", style="green")
 
 
 @categories_app.command("add")
 def add_category(
     context: typer.Context,
-    category_name: Annotated[str, typer.Argument(help="The category to add")],
+    category: Annotated[str, typer.Argument(help="The category to add")],
 ) -> None:
     """Adds a category to the valid_categories config."""
     configuration: config.Config = context.obj["config"]
-    configuration.add_valid_category(category_name)
+    configuration.add_valid_category(category)
     config.save_configs(const.CONFIG_PATH, configuration)
+    console.print(f"successfully add category '{category}'", style="green")
 
 
 @categories_app.command("del", hidden=True)
@@ -1058,6 +1066,7 @@ def delete_category(
     try:
         configuration.delete_valid_category(category)
         config.save_configs(const.CONFIG_PATH, configuration)
+        console.print(f"successfully deleted category '{category}'")
 
     except errors.NoCategoriesError as error:
         display.display_error(errors.ErrorDiagnostic(message=error.diagnostic.message))
@@ -1089,3 +1098,4 @@ def clear_category(
     if confirmation:
         configuration.clear_valid_categories()
         config.save_configs(const.CONFIG_PATH, configuration)
+        console.print("successfully clear valid_categories.", style="green")
