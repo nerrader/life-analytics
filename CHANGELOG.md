@@ -7,7 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-- Nothing added yet!
+- Added success messages
+- Improved the guide for the "USING COMMAND OPTIONS" section.
+- Fixed a bug regarding `sleep --detailed` commands not producing a record.
 
 ## [2.0.1]
 
