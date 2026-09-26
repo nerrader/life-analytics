@@ -56,23 +56,34 @@ This phase aims to conclude all the previous answers, and convert them into acti
 
 ---
 
+## Questions List
+
 Though while I did say I was going to turn data into questions later, I would like to set up some questions I want to answer now, like, an initial questions list that I will modify in the second phase let's say:
 
 - Is mood positively or negatively associated to productivity?
-- Does taking a nap seem to affect that day's mood or productivity in a positive way?
-- Does sleep duration correlate with sleep quality?
-- Does sleep quality tend increase on the weekends?
-- Does my perceived productivity increase on the weekends?
-- Does sleep quality seem to affect the day's mood, productivity, or even stress?
 - Does my energy seem to affect productivity or mood?
 - Does energy increase correlate with higher activity enjoyment, and vice versa?
 - Why are MAINT activities associated with a positive energy delta, while IDLE has a neutral change?
 - Why are SOCIAL activities associated with a negative energy delta, despite having a high average enjoyability?
+- Are the observed differences from weekends and weekdays consistent enough to be investigated further?
+- Is a higher sleep quality really associated with overall higher performance on daily summary metrics?
 
 And here are the lists of questions I want to test in the 4th phase:
 
 - Does intentionally taking more breaks improve my productivity, mood, or stress?
 - Does getting a more consistent amount of sleep improve my mood, productivity, or stress?
 - Does reducing time spent idle actually increase my productivity?
+- Does taking a nap seem to affect that day's mood or productivity in a positive way?
 
 Though this list may change later on depending on the second phase's data exploration findings.
+
+### Answered questions
+
+- Does sleep duration correlate with sleep quality?
+- What activities tend to increase or decrease my energy?
+
+### Discarded Questions
+
+- Does sleep quality tend increase on the weekends? (Replaced)
+- Does sleep quality seem to affect the day's mood, productivity, or even stress? (Replaced)
+- Does my perceived productivity increase on the weekends? (Replaced)
