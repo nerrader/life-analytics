@@ -28,7 +28,7 @@ And another observation is that the SOCIAL category apparently tends to decrease
 
 > Average enjoyability rate produced by query: `sql/average-social-enjoyability`
 
-These observations lead to two new questions:
+These observations led to two new questions, that I will be adding in the unanswered questions list:
 
 - Why are MAINT activities associated with a positive energy delta, while IDLE has a neutral change?
 - Why are SOCIAL activities associated with a negative energy delta, despite having a high average enjoyability?

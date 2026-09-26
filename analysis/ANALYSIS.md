@@ -54,6 +54,8 @@ Remember kids: **correlation does not equal causation**.
 
 This phase aims to conclude all the previous answers, and convert them into actionable insights on what I could do to improve my life.
 
+---
+
 Though while I did say I was going to turn data into questions later, I would like to set up some questions I want to answer now, like, an initial questions list that I will modify in the second phase let's say:
 
 - Is mood positively or negatively associated to productivity?
@@ -63,8 +65,9 @@ Though while I did say I was going to turn data into questions later, I would li
 - Does my perceived productivity increase on the weekends?
 - Does sleep quality seem to affect the day's mood, productivity, or even stress?
 - Does my energy seem to affect productivity or mood?
-- What activities tend to increase or decrease my energy?
 - Does energy increase correlate with higher activity enjoyment, and vice versa?
+- Why are MAINT activities associated with a positive energy delta, while IDLE has a neutral change?
+- Why are SOCIAL activities associated with a negative energy delta, despite having a high average enjoyability?
 
 And here are the lists of questions I want to test in the 4th phase:
 
