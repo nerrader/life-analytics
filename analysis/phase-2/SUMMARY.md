@@ -17,14 +17,15 @@ I decided to first investigate if different categories had varying energy deltas
 
 > Result produced by [sql/category-energy-deltas.sql](sql/category-energy-deltas.sql)
 
-- SPORTS and MAINT activities are associated with positive energy deltas.
-- IDLE and DEV have energy deltas close to zero.
-- SOCIAL and SCHOOL activities are associated with negative energy deltas.
+- `SPORTS` and `MAINT` activities are associated with positive energy deltas.
+- `IDLE` and `DEV` have energy deltas close to zero.
+- `SOCIAL` and `SCHOOL` activities are associated with negative energy deltas.
 
-I find it interesting that the MAINT category increases my energy, while IDLE does not.
+I find it interesting that `MAINT` activities are associated with increasing energy, while `IDLE` activities don't.
+
 You would think that taking a break or resting would potentially increase energy later on, but apparently not?
 
-And another observation is that the SOCIAL category apparently tends to decrease my energy, despite having a relatively high average enjoyability rate of 3.84/5.
+And another observation is that the `SOCIAL` category apparently tends to decrease my energy, despite having a relatively high average enjoyability rate of 3.84/5.
 
 > Average enjoyability rate produced by [sql/average-social-enjoyability](sql/average-social-enjoyability.sql)
 
@@ -32,6 +33,25 @@ These observations led to two new questions, that I will be adding in the unansw
 
 - Why are MAINT activities associated with a positive energy delta, while IDLE has a neutral change?
 - Why are SOCIAL activities associated with a negative energy delta, despite having a high average enjoyability?
+
+I also tried to investigate whether enjoyability and energy delta are typically associated with each other.
+
+| Enjoyability | Energy Delta | n |
+| ---: | ---: | ---: |
+| 5.0 | +0.735 | 17 |
+| 4.5 | +0.125 | 16 |
+| 4.0 | +0.217 | 84 |
+| 3.5 | +0.009 | 86 |
+| 3.25 | 0.000 | 3 |
+| 3.0 | -0.071 | 190 |
+| 2.5 | -0.273 | 11 |
+| 2.0 | -0.360 | 25 |
+| 1.5 | 0.000 | 1 |
+| 1.0 | -1.000 | 4 |
+
+Result produced by: [sql/enjoyability-energy-delta-association.sql](sql/enjoyability-energy-delta-association.sql)
+
+The results show a positive association between enjoyability and energy delta. Activities rated 5 had +0.735 energy increase on average, and activities which had a 1 enjoyment rating had a -1 energy decrease on average. However, since the number of observations varies substantially between enjoyment levels, especially at the extremes, this should be considered an initial observation rather than a strong conclusion.
 
 ## Things about Sleep
 

@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.16.9
+    rev: v0.16.10
     hooks:
       - id: ruff-check
         types_or: [python, pyproject]
@@ -9,7 +9,7 @@ repos:
         types_or: [python]
 
   - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.12.19
+    rev: 0.12.22
     hooks:
       - id: uv-lock
 
@@ -38,10 +38,12 @@ repos:
         pass_filenames: false
 
   - repo: https://github.com/sqlfluff/sqlfluff
-    rev: 4.3.0
+    rev: 4.4.0
     hooks:
       - id: sqlfluff-fix
+        args: [--dialect, sqlite]
       - id: sqlfluff-lint
+        args: [--dialect, sqlite]
 
   - repo: https://github.com/igorshubovych/markdownlint-cli
     rev: v0.49.1
@@ -49,7 +51,7 @@ repos:
       - id: markdownlint
 
   - repo: https://github.com/commit-check/commit-check
-    rev: v2.18.1
+    rev: v2.18.2
     hooks:
       - id: check-message
       - id: check-branch
