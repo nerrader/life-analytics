@@ -171,7 +171,7 @@ def main(
 
 @app.command("guide")
 def display_guide() -> None:
-    """Displays a guide to using the life tracker."""
+    """Displays a guide for more complex life tracker features."""
     display.display_guide(GUIDE)
 
 
