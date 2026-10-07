@@ -67,8 +67,12 @@ def validate_input_category(
     return True
 
 
-def validate_input_rating(short_flag: str, long_flag: str, value: float | None) -> bool:
-    if value is not None and not validation.is_valid_rating(value):
+def validate_input_rating(
+    short_flag: str, long_flag: str, value: float | None, range: tuple[float, float]
+) -> bool:
+    min_value = min(range)
+    max_value = max(range)
+    if value is not None and not (min_value <= value <= max_value):
         source, source_highlight = diagnostics.get_flag_source(
             short_flag, long_flag, f"{value:g}"
         )
@@ -78,7 +82,7 @@ def validate_input_rating(short_flag: str, long_flag: str, value: float | None) 
                 message=f"inputted rating is not valid: {value:g}",
                 source=source,
                 source_highlight=source_highlight,
-                help="change value value to be 1-5.",
+                help=f"change value value to be between {min_value} and {max_value}.",
             )
         )
         return False
@@ -202,11 +206,22 @@ def add_daily_summary(
     configuration: config.Config = context.obj["config"]
     database_path = configuration.database_path
 
-    if validate_input_rating("m", "mood", mood) is False:
+    if (
+        validate_input_rating("m", "mood", mood, configuration.get_rating_range())
+        is False
+    ):
         return
-    if validate_input_rating("p", "productivity", productivity) is False:
+    if (
+        validate_input_rating(
+            "p", "productivity", productivity, configuration.get_rating_range()
+        )
+        is False
+    ):
         return
-    if validate_input_rating("s", "stress", stress) is False:
+    if (
+        validate_input_rating("s", "stress", stress, configuration.get_rating_range())
+        is False
+    ):
         return
 
     if edit:
@@ -237,11 +252,15 @@ def add_daily_summary(
 
     date = datetime.now().date().isoformat()
 
-    mood = mood or prompts.ask_rating_question("How was your mood today? (1-5)")
-    productivity = productivity or prompts.ask_rating_question(
-        "How was your productivity today? (1-5)"
+    mood = mood or prompts.ask_rating_question(
+        "How was your mood today? (1-5)", configuration.get_rating_range()
     )
-    stress = stress or prompts.ask_rating_question("How stressed were you today (1-5)?")
+    productivity = productivity or prompts.ask_rating_question(
+        "How was your productivity today? (1-5)", configuration.get_rating_range()
+    )
+    stress = stress or prompts.ask_rating_question(
+        "How stressed were you today (1-5)?", configuration.get_rating_range()
+    )
 
     database.add_daily_summary(
         database_path,
@@ -339,16 +358,34 @@ def add_activity(
     ):
         return
 
-    if validate_input_rating("ef", "effort", effort) is False:
+    if (
+        validate_input_rating("ef", "effort", effort, configuration.get_rating_range())
+        is False
+    ):
         return
 
-    if validate_input_rating("en", "enjoyability", enjoyability) is False:
+    if (
+        validate_input_rating(
+            "en", "enjoyability", enjoyability, configuration.get_rating_range()
+        )
+        is False
+    ):
         return
 
-    if validate_input_rating("eb", "energy_before", energy_before) is False:
+    if (
+        validate_input_rating(
+            "eb", "energy_before", energy_before, configuration.get_rating_range()
+        )
+        is False
+    ):
         return
 
-    if validate_input_rating("ea", "energy_after", energy_after) is False:
+    if (
+        validate_input_rating(
+            "ea", "energy_after", energy_after, configuration.get_rating_range()
+        )
+        is False
+    ):
         return
 
     if detailed:
@@ -470,19 +507,22 @@ def add_activity(
         activity_end = f"{date}T{activity_end}"
 
     effort = effort or prompts.ask_rating_question(
-        "How much effort did you think this activity required? (1-5)"
+        "How much effort did you think this activity required? (1-5)",
+        configuration.get_rating_range(),
     )
 
     enjoyability = enjoyability or prompts.ask_rating_question(
-        "How much did you enjoy this activity? (1-5)"
+        "How much did you enjoy this activity? (1-5)", configuration.get_rating_range()
     )
 
     energy_before = energy_before or prompts.ask_rating_question(
-        "How much energy did you have before your activity? (1-5)"
+        "How much energy did you have before your activity? (1-5)",
+        configuration.get_rating_range(),
     )
 
     energy_after = energy_after or prompts.ask_rating_question(
-        "How much energy did you have after your activity? (1-5)"
+        "How much energy did you have after your activity? (1-5)",
+        configuration.get_rating_range(),
     )
 
     database.add_activity(
@@ -566,7 +606,12 @@ def add_sleep(
         if validate_input_time("e", "end", sleep_end_input) is False:
             return
 
-    if validate_input_rating("q", "quality", sleep_quality) is False:
+    if (
+        validate_input_rating(
+            "q", "quality", sleep_quality, configuration.get_rating_range()
+        )
+        is False
+    ):
         return
 
     if sleep_type is not None and sleep_type not in ["sleep", "nap"]:
@@ -673,7 +718,7 @@ def add_sleep(
         ).isoformat(timespec="minutes")
 
     sleep_quality = sleep_quality or prompts.ask_rating_question(
-        "How was your sleep quality? (1-5)"
+        "How was your sleep quality? (1-5)", configuration.get_rating_range()
     )
 
     database.add_sleep(
@@ -909,16 +954,34 @@ def end_activity_time(
     ):
         return
 
-    if validate_input_rating("ef", "effort", effort) is False:
+    if (
+        validate_input_rating("ef", "effort", effort, configuration.get_rating_range())
+        is False
+    ):
         return
 
-    if validate_input_rating("en", "enjoyability", enjoyability) is False:
+    if (
+        validate_input_rating(
+            "en", "enjoyability", enjoyability, configuration.get_rating_range()
+        )
+        is False
+    ):
         return
 
-    if validate_input_rating("eb", "energy_before", energy_before) is False:
+    if (
+        validate_input_rating(
+            "eb", "energy_before", energy_before, configuration.get_rating_range()
+        )
+        is False
+    ):
         return
 
-    if validate_input_rating("ea", "energy_after", energy_after) is False:
+    if (
+        validate_input_rating(
+            "ea", "energy_after", energy_after, configuration.get_rating_range()
+        )
+        is False
+    ):
         return
 
     start_activity_datetime = activity_start_path.read_text()
@@ -938,19 +1001,22 @@ def end_activity_time(
     )
 
     effort = effort or prompts.ask_rating_question(
-        "How much effort did you think this activity required? (1-5)"
+        "How much effort did you think this activity required? (1-5)",
+        configuration.get_rating_range(),
     )
 
     enjoyability = enjoyability or prompts.ask_rating_question(
-        "How much did you enjoy this activity? (1-5)"
+        "How much did you enjoy this activity? (1-5)", configuration.get_rating_range()
     )
 
     energy_before = energy_before or prompts.ask_rating_question(
-        "How much energy did you have before your activity? (1-5)"
+        "How much energy did you have before your activity? (1-5)",
+        configuration.get_rating_range(),
     )
 
     energy_after = energy_after or prompts.ask_rating_question(
-        "How much energy did you have after your activity? (1-5)"
+        "How much energy did you have after your activity? (1-5)",
+        configuration.get_rating_range(),
     )
     database.add_activity(
         database_path,
@@ -1007,6 +1073,15 @@ def set_config(
                 source=diagnostics.get_user_commands(),
                 source_highlight=name,
                 help="use `config category` instead.",
+            )
+        )
+
+    except errors.InvalidRatingRangeValueError as error:
+        display.display_error(
+            diagnostics.to_cli_diagnostic(
+                error.diagnostic,
+                source=diagnostics.get_user_commands(),
+                source_highlight=value,
             )
         )
 

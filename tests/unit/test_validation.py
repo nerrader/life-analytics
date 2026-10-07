@@ -1,13 +1,6 @@
 from life_analytics.domain import validation
 
 
-def test_valid_rating() -> None:
-    assert validation.is_valid_rating(100.0) is False
-    assert validation.is_valid_rating(0) is False
-    assert validation.is_valid_rating(1) is True
-    assert validation.is_valid_rating(4.9992) is True
-
-
 def test_valid_time() -> None:
     assert validation.is_valid_time("24:01") is False
     assert validation.is_valid_time("23:60") is False
