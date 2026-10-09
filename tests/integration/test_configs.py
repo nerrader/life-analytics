@@ -514,6 +514,7 @@ def test_set_rating_range(
     setup_config(tmp_path, mocker)
 
     result = runner.invoke(app, ["config", "set", "rating_range_end", "10.5"])
+    result = runner.invoke(app, ["config", "set", "rating_range_start", "0.1"])
     assert result.exit_code == 0
 
     activity_result = runner.invoke(
@@ -525,9 +526,9 @@ def test_set_rating_range(
             "--mood",
             "10.5",
             "--productivity",
-            "1",
+            "0.1",
             "--stress",
-            "5",
+            "0.1119",
         ],
     )
     assert activity_result.exit_code == 0
