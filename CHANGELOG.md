@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Nothing added yet!
 
+## [2.0.2]
+
+- Added success messages
+- Added `rating_range_start` and `rating_range_end` configs, allowing for custom rating ranges.
+- Removed the `CHECK` constraints for the newest schema version to accommodate for the new custom range feature.
+- Improved the guide for the "USING COMMAND OPTIONS" section
+- Updated the guide's list of configs in the "CONFIGURATION" section
+- Updated the `life` general help description.
+- Fixed a bug regarding `sleep --detailed` commands not producing a record.
+
 ## [2.0.1]
 
 - Fixed bugs regarding `--detailed`.
@@ -39,7 +49,8 @@ to make data entry more straightforward.
 - `clear` command to clear all your data.
 - A help menu accessible with `--help`.
 
-[Unreleased]: https://github.com/nerrader/life-analytics/compare/v2.0.1...HEAD
+[Unreleased]: https://github.com/nerrader/life-analytics/compare/v2.0.2...HEAD
+[2.0.2]: https://github.com/nerrader/life-analytics/compare/v2.0.1...v2.0.2
 [2.0.1]: https://github.com/nerrader/life-analytics/compare/v2.0.0...v2.0.1
 [2.0.0]: https://github.com/nerrader/life-analytics/compare/v1.0.0...v2.0.0
 [1.0.0]: https://github.com/nerrader/life-analytics/compare/c75a5e6...v1.0.0
