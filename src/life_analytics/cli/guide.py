@@ -13,6 +13,11 @@ The easiest way to see the available options for a command is with `--help`:
 life activity --help
 ```
 
+> [!IMPORTANT]
+>
+> For options that have multiple values (e.g. --description example description), use quotation marks:
+> `--description "test descripton"`
+
 ## EDITING RECORDS
 
 The `--edit` option lets you modify an existing record.
@@ -48,10 +53,12 @@ Use `life config list` to view your current configuration:
 life config list
 ```
 
-database_path:         Location of the database file.\n
-activity_start_path:   Location of the file used to track activity.\n
-force_detailed_mode:   Enabled --detailed on every activity or sleep command.\n
-valid_categories:      Categories available when recording actvities. Manage these with `life config category`.
+- database_path:         Location of the database file.\n
+- activity_start_path:   Location of the file used to track activity.\n
+- force_detailed_mode:   Enabled --detailed on every activity or sleep command.\n
+- valid_categories:      Categories available when recording actvities. Manage these with `life config category`.\n
+- rating_range_start:    Minimum value for rating questions/prompts. **Don't use negative numbers**.\n
+- rating_range_end:      Maximum value for rating questions/prompts. **Don't use negative numbers**.
 
 Configuration values can be changed with:
 
@@ -86,6 +93,13 @@ It requires you to provide the full datetime for both the start and end times:
 This is a little more inconvenient, but gives you full control over the
 datetimes when dealing with those weird edge cases.
 
+If you need to update a datetime value to have a different date, you also need to use `--detailed`.
+Heres an example:
+
+```bash
+life activity --edit 1 --detailed --start "2026-09-24 7:00" --end "2026-09-25 8:10"
+```
+
 ## FOR MORE HELP
 
 Every command has its own help menu:
@@ -97,5 +111,5 @@ life summary --help
 life config --help
 ```
 
-Use it, its incredibly helpful for knowing more about the specifics.\n
+Use it, its **incredibly helpful** for knowing more about the specifics.
 """

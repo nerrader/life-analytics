@@ -505,3 +505,56 @@ def test_category_clear_with_skip(
     saved_config = config.load_configs(config_path)
 
     assert saved_config.valid_categories is None
+
+
+def test_set_rating_range(
+    tmp_path: Path,
+    mocker: MockerFixture,
+) -> None:
+    setup_config(tmp_path, mocker)
+
+    result = runner.invoke(app, ["config", "set", "rating_range_end", "10.5"])
+    result = runner.invoke(app, ["config", "set", "rating_range_start", "0.1"])
+    assert result.exit_code == 0
+
+    activity_result = runner.invoke(
+        app,
+        [
+            "-db",
+            str(tmp_path / "test.db"),
+            "summary",
+            "--mood",
+            "10.5",
+            "--productivity",
+            "0.1",
+            "--stress",
+            "0.1119",
+        ],
+    )
+    assert activity_result.exit_code == 0
+
+
+def test_input_rating_not_in_range_displays_error(
+    tmp_path: Path,
+    mocker: MockerFixture,
+) -> None:
+    setup_config(tmp_path, mocker)
+
+    display_error_mock = mocker.patch("life_analytics.cli.display.display_error")
+
+    result = runner.invoke(
+        app,
+        [
+            "-db",
+            str(tmp_path / "test.db"),
+            "summary",
+            "--mood",
+            "10.5",
+            "--productivity",
+            "1",
+            "--stress",
+            "5",
+        ],
+    )
+    assert result.exit_code == 0
+    display_error_mock.assert_called_once()
