@@ -148,8 +148,7 @@ def main(
         bool, typer.Option("--version", "-v", help="Displays the version")
     ] = False,
 ) -> None:
-    """For more information on advanced usage, like using command options and editing,
-    refer to the 'How to Use' section in the life analytics GitHub README."""
+    """For more information on advanced usage, like using command options and editing, use the `guide` command."""
     # this is so every command function can access the db path
     try:
         configuration = config.load_configs(const.CONFIG_PATH)
