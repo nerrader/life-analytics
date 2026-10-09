@@ -16,11 +16,17 @@ def migrate_database(database_path: Path) -> None:
         with connection:
             schema_version = connection.execute("PRAGMA user_version;").fetchone()[0]
             if schema_version == 0:
-                print("New schema version, upgrading database from v0 to v1.")
+                print("upgrading database schema from v0 to v1.")
                 make_backup(database_path)
-                print(f"Made a backup at {database_path}.backup if something breaks.")
+                print(f"made a backup at {database_path}.backup if something breaks.")
                 connection.executescript((MIGRATIONS_DIR / "v0_to_v1.sql").read_text())
                 update_datetimes(connection)
+
+            if schema_version == 1:
+                print("upgrading database schema from v1 to v2.")
+                make_backup(database_path)
+                print(f"made a backup at {database_path}.backup if something breaks.")
+                connection.executescript((MIGRATIONS_DIR / "v1_to_v2.sql").read_text())
     finally:
         connection.close()
 
