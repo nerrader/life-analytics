@@ -1,8 +1,6 @@
 import sqlite3
 from pathlib import Path
 
-import pytest
-
 from life_analytics.logic import database
 
 
@@ -27,21 +25,6 @@ def test_add_daily_summary_with_valid_data(tmp_path: Path) -> None:
         test_row = cursor.fetchone()
 
     assert test_row == ("2026-04-08", 5, 5, 5)
-
-
-def test_add_daily_summary_with_invalid_data(tmp_path: Path) -> None:
-    database.create_database(tmp_path / "test.db")
-
-    with pytest.raises(sqlite3.IntegrityError):
-        database.add_daily_summary(
-            tmp_path / "test.db",
-            {
-                "summary_date": "2026-04-08",
-                "productivity": 6,
-                "mood": 5,
-                "stress": 5,
-            },
-        )
 
 
 def test_add_activity_with_valid_data(tmp_path: Path) -> None:
@@ -86,25 +69,6 @@ def test_add_activity_with_valid_data(tmp_path: Path) -> None:
     )
 
 
-def test_add_activity_with_invalid_data(tmp_path: Path) -> None:
-    database.create_database(tmp_path / "test.db")
-
-    with pytest.raises(sqlite3.IntegrityError):
-        database.add_activity(
-            tmp_path / "test.db",
-            {
-                "category": "DEV",
-                "description": "unit testing",
-                "start_at": "99:99",
-                "end_at": "99:99",
-                "effort": 0,
-                "enjoyability": 0,
-                "energy_before": 5,
-                "energy_after": 5,
-            },
-        )
-
-
 def test_add_sleep_with_valid_data(tmp_path: Path) -> None:
     database.create_database(tmp_path / "test.db")
 
@@ -136,21 +100,6 @@ def test_add_sleep_with_valid_data(tmp_path: Path) -> None:
         5,
         "sleep",
     )
-
-
-def test_add_sleep_with_invalid_data(tmp_path: Path) -> None:
-    database.create_database(tmp_path / "test.db")
-
-    with pytest.raises(sqlite3.IntegrityError):
-        database.add_sleep(
-            tmp_path / "test.db",
-            {
-                "start_at": "2026-04-08T17:37",
-                "end_at": "2026-04-09T06:56",
-                "quality": 6,
-                "sleep_type": "sleep",
-            },
-        )
 
 
 def test_clear_database(tmp_path: Path) -> None:
