@@ -6,22 +6,23 @@ This file will be focused on documenting my findings for the second phase, the E
 
 I decided to first investigate if different categories had varying energy deltas, and sure enough, while these were minor changes, there was.
 
-| Category | Energy Delta | Count |
-| --- | ---: | ---: |
-| SPORTS | +0.694 | 18 |
-| MAINT | +0.276 | 106 |
-| IDLE | -0.020 | 76 |
-| DEV | -0.051 | 79 |
-| SOCIAL | -0.145 | 19 |
-| SCHOOL | -0.392 | 60 |
+| Category | Mean  | Median | Q1  | Q3 | IQR | SD   | n   |
+|----------|-------|--------|-----|----|-----|------|-----|
+| SPORTS   | 0.61  | 0.5    | 0   | 1  | 1   | 0.79 | 23  |
+| MAINT    | 0.3   | 0.0    | 0   | 0.5| 0.5 | 0.56 | 141 |
+| IDLE     | -0.03 | 0.0    | 0   | 0  | 0   | 0.5  | 108 |
+| DEV      | -0.06 | 0.0    | 0   | 0  | 0   | 0.5  | 103 |
+| SOCIAL   | -0.09 | 0.0    | 0   | 0  | 0   | 0.68 | 25  |
+| SCHOOL   | -0.46 | 0.0    | -1  | 0  | 1   | 0.72 | 72  |
 
 > Result produced by [sql/category-energy-deltas.sql](sql/category-energy-deltas.sql)
 
-- `SPORTS` and `MAINT` activities are associated with positive energy deltas.
-- `IDLE` and `DEV` have energy deltas close to zero.
-- `SOCIAL` and `SCHOOL` activities are associated with negative energy deltas.
+- `SPORTS` activities show the strongest energy delta, with `mean` = 0.61, `Q3` and `IQR` = 1.
+- `MAINT` activities are mostly energy neutral, however leaning toward the positive side, as `Q3` = 0.5
+- `IDLE`, `DEV`, and `SOCIAL` activities are usually energy neutral, with `IQR` = 0, though somewhat leaning towards the negative side.
+- `SCHOOL` activities are usually neutral, as `Median` = 0, though sometimes it can be energy-draining, as `Q1` = -1
 
-I find it interesting that `MAINT` activities are associated with increasing energy, while `IDLE` activities don't.
+I find it interesting that `MAINT` activities show a stronger association of positive energy delta, while `IDLE` activities don't.
 
 You would think that taking a break or resting would potentially increase energy later on, but apparently not?
 
@@ -50,7 +51,6 @@ I also tried to investigate whether enjoyability and energy delta are typically 
 | 1.0 | -1.000 | 4 |
 
 Result produced by: [sql/enjoyability-energy-delta-association.sql](sql/enjoyability-energy-delta-association.sql)
-
 The results show a positive association between enjoyability and energy delta. Activities rated 5 had +0.735 energy increase on average, and activities which had a 1 enjoyment rating had a -1 energy decrease on average. However, since the number of observations varies substantially between enjoyment levels, especially at the extremes, this should be considered an initial observation rather than a strong conclusion.
 
 ## Things about Sleep
