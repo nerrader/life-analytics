@@ -1,12 +1,12 @@
 SELECT
-    sleep.quality,
-    AVG(summary.mood),
-    AVG(summary.productivity),
-    AVG(summary.stress),
-    COUNT(*) as n
+    sleep.quality AS sleep_quality,
+    AVG(summary.mood) AS mood,
+    AVG(summary.productivity) AS productivity,
+    AVG(summary.stress) AS stress,
+    COUNT(*) AS n
 FROM
     sleep
-    JOIN daily_summaries as summary
+INNER JOIN daily_summaries AS summary
     ON DATE(sleep.end_at) = summary.summary_date
 GROUP BY sleep.quality
 ORDER BY sleep.quality ASC;

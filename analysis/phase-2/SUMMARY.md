@@ -37,21 +37,26 @@ These observations led to two new questions, that I will be adding in the unansw
 
 I also tried to investigate whether enjoyability and energy delta are typically associated with each other.
 
-| Enjoyability | Energy Delta | n |
-| ---: | ---: | ---: |
-| 5.0 | +0.735 | 17 |
-| 4.5 | +0.125 | 16 |
-| 4.0 | +0.217 | 84 |
-| 3.5 | +0.009 | 86 |
-| 3.25 | 0.000 | 3 |
-| 3.0 | -0.071 | 190 |
-| 2.5 | -0.273 | 11 |
-| 2.0 | -0.360 | 25 |
-| 1.5 | 0.000 | 1 |
-| 1.0 | -1.000 | 4 |
+| Enjoyability | Mean  | Median | Q1   | Q3  | IQR | SD   | n   |
+|--------------|-------|--------|------|-----|-----|------|-----|
+| 5            | 0.72  | 0.5    | 0    | 1   | 1   | 0.79 | 18  |
+| 4.5          | 0.28  | 0.0    | 0    | 0.5 | 0.5 | 0.89 | 23  |
+| 4            | 0.25  | 0.0    | 0    | 1   | 1   | 0.77 | 97  |
+| 3.5          | -0.02 | 0.0    | 0    | 0   | 0   | 0.62 | 93  |
+| 3            | -0.1  | 0.0    | 0    | 0   | 0   | 0.49 | 213 |
+| 2.5          | -0.23 | 0.0    | 0    | 0   | 0   | 0.42 | 13  |
+| 2            | -0.36 | 0.0    | -0.5 | 0   | 0.5 | 0.46 | 25  |
+| 1.5          | 0.0   | 0.0    | 0    | 0   | 0   | 0.0  | 1   |
+| 1            | -1.0  | -1.0   | -2   | -1  | 1   | 0.71 | 4   |
 
 Result produced by: [sql/enjoyability-energy-delta-association.sql](sql/enjoyability-energy-delta-association.sql)
-The results show a positive association between enjoyability and energy delta. Activities rated 5 had +0.735 energy increase on average, and activities which had a 1 enjoyment rating had a -1 energy decrease on average. However, since the number of observations varies substantially between enjoyment levels, especially at the extremes, this should be considered an initial observation rather than a strong conclusion.
+The results show a positive association between enjoyability and energy delta.
+
+- Activities that had an enjoyability rating of >=4 were associated with a positive energy delta, as `Q3` = 0.5 or 1.
+- Activities that had an enjoyability rating of <= 2 are associated with a negative energy delta. With `Q1` = -0.5 or -2.
+- However, activities in the middle were associated with a neutral energy delta, as `Median`, and `IQR` are both 0.
+
+However, since the number of observations varies substantially between enjoyment levels, especially at the extremes, this should be considered an initial observation rather than a strong conclusion.
 
 ## Things about Sleep
 
