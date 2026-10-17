@@ -48,3 +48,6 @@ venv = ".venv"
 
 [tool.ruff.lint]
 ignore = ["DTZ007", "DTZ005"]
+
+[tool.sqlfluff]
+dialect = "sqlite"
