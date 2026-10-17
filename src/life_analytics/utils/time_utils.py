@@ -10,7 +10,7 @@ def combine_date_and_time(date: date, time: str | dt_time) -> datetime:
         time_object = time
 
     # so we can use it to replace the hour and minute of the generated yesterdays date
-    return datetime(  # noqa: DTZ001
+    return datetime(
         year=date.year,
         month=date.month,
         day=date.day,

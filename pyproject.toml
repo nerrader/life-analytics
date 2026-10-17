@@ -47,7 +47,7 @@ venvPath = "."
 venv = ".venv"
 
 [tool.ruff.lint]
-ignore = ["DTZ007", "DTZ005"]
+ignore = ["DTZ001", "DTZ005", "DTZ007"]
 
 [tool.sqlfluff]
 dialect = "sqlite"

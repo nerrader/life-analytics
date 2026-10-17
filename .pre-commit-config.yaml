@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.16.10
+    rev: v0.17.1
     hooks:
       - id: ruff-check
         types_or: [python, pyproject]
@@ -9,7 +9,7 @@ repos:
         types_or: [python]
 
   - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.12.24
+    rev: 0.13.1
     hooks:
       - id: uv-lock
 
@@ -51,7 +51,7 @@ repos:
       - id: markdownlint
 
   - repo: https://github.com/commit-check/commit-check
-    rev: v2.18.3
+    rev: v2.19.1
     hooks:
       - id: check-message
       - id: check-branch
