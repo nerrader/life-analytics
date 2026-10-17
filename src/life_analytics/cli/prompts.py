@@ -9,8 +9,8 @@ from life_analytics.domain.errors import ErrorDiagnostic, RequiredQuestionCancel
 from life_analytics.utils.time_utils import datetime_string_to_iso
 
 
-def ask_rating_question(prompt: str) -> float:
-    def validate_rating(value: str) -> Literal[True] | str:
+def ask_rating_question(prompt: str, range: tuple[float, float]) -> float:
+    def validate_rating(value: str, range: tuple[float, float]) -> Literal[True] | str:
         """To be passed into questionary validate keyword to validate rating questions.
 
         Args:
@@ -22,13 +22,17 @@ def ask_rating_question(prompt: str) -> float:
         if not value.strip():
             return "Rating cannot be empty"
 
+        min_value = min(range)
+        max_value = max(range)
         try:
-            is_valid_rating = validation.is_valid_rating(float(value))
+            is_valid_rating = min_value <= float(value) <= max_value
         except ValueError:
             is_valid_rating = False
 
         return (
-            True if is_valid_rating is True else "Please enter a value between 1 and 5."
+            True
+            if is_valid_rating is True
+            else f"Please enter a value between {min_value} and {max_value}."
         )
 
     """The helper function to ask questions requiring rating in 1-5.
@@ -41,7 +45,7 @@ def ask_rating_question(prompt: str) -> float:
     """
     rating: float | None = questionary.text(
         prompt,
-        validate=validate_rating,
+        validate=lambda value: validate_rating(value, range),
     ).ask()
 
     if rating is None:

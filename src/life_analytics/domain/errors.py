@@ -63,7 +63,15 @@ class NoUpdateFieldsError(Exception):
 
 
 class NoUpdateRecordsError(Exception):
-    """This error is raised when no valid fields are found."""
+    """This error is raised when no records are found."""
+
+    def __init__(self, diagnostic: ErrorDiagnostic) -> None:
+        super().__init__(diagnostic.message)
+        self.diagnostic = diagnostic
+
+
+class InvalidRatingRangeValueError(Exception):
+    """This error is raised when the rating value given is not an integer."""
 
     def __init__(self, diagnostic: ErrorDiagnostic) -> None:
         super().__init__(diagnostic.message)

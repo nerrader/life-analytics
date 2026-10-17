@@ -67,8 +67,12 @@ def validate_input_category(
     return True
 
 
-def validate_input_rating(short_flag: str, long_flag: str, value: float | None) -> bool:
-    if value is not None and not validation.is_valid_rating(value):
+def validate_input_rating(
+    short_flag: str, long_flag: str, value: float | None, range: tuple[float, float]
+) -> bool:
+    min_value = min(range)
+    max_value = max(range)
+    if value is not None and not (min_value <= value <= max_value):
         source, source_highlight = diagnostics.get_flag_source(
             short_flag, long_flag, f"{value:g}"
         )
@@ -78,7 +82,7 @@ def validate_input_rating(short_flag: str, long_flag: str, value: float | None) 
                 message=f"inputted rating is not valid: {value:g}",
                 source=source,
                 source_highlight=source_highlight,
-                help="change value value to be 1-5.",
+                help=f"change value value to be between {min_value} and {max_value}.",
             )
         )
         return False
@@ -144,8 +148,7 @@ def main(
         bool, typer.Option("--version", "-v", help="Displays the version")
     ] = False,
 ) -> None:
-    """For more information on advanced usage, like using command options and editing,
-    refer to the 'How to Use' section in the life analytics GitHub README."""
+    """For more information on advanced usage, like using command options and editing, use the `guide` command."""
     # this is so every command function can access the db path
     try:
         configuration = config.load_configs(const.CONFIG_PATH)
@@ -171,7 +174,7 @@ def main(
 
 @app.command("guide")
 def display_guide() -> None:
-    """Displays a guide to using the life tracker."""
+    """Displays a guide for more complex life tracker features."""
     display.display_guide(GUIDE)
 
 
@@ -202,11 +205,22 @@ def add_daily_summary(
     configuration: config.Config = context.obj["config"]
     database_path = configuration.database_path
 
-    if validate_input_rating("m", "mood", mood) is False:
+    if (
+        validate_input_rating("m", "mood", mood, configuration.get_rating_range())
+        is False
+    ):
         return
-    if validate_input_rating("p", "productivity", productivity) is False:
+    if (
+        validate_input_rating(
+            "p", "productivity", productivity, configuration.get_rating_range()
+        )
+        is False
+    ):
         return
-    if validate_input_rating("s", "stress", stress) is False:
+    if (
+        validate_input_rating("s", "stress", stress, configuration.get_rating_range())
+        is False
+    ):
         return
 
     if edit:
@@ -237,11 +251,15 @@ def add_daily_summary(
 
     date = datetime.now().date().isoformat()
 
-    mood = mood or prompts.ask_rating_question("How was your mood today? (1-5)")
-    productivity = productivity or prompts.ask_rating_question(
-        "How was your productivity today? (1-5)"
+    mood = mood or prompts.ask_rating_question(
+        "How was your mood today? (1-5)", configuration.get_rating_range()
     )
-    stress = stress or prompts.ask_rating_question("How stressed were you today (1-5)?")
+    productivity = productivity or prompts.ask_rating_question(
+        "How was your productivity today? (1-5)", configuration.get_rating_range()
+    )
+    stress = stress or prompts.ask_rating_question(
+        "How stressed were you today (1-5)?", configuration.get_rating_range()
+    )
 
     database.add_daily_summary(
         database_path,
@@ -252,6 +270,7 @@ def add_daily_summary(
             "stress": stress,
         },
     )
+    console.print("successfully added daily summary to database", style="green")
 
 
 @app.command("activity")
@@ -338,16 +357,34 @@ def add_activity(
     ):
         return
 
-    if validate_input_rating("ef", "effort", effort) is False:
+    if (
+        validate_input_rating("ef", "effort", effort, configuration.get_rating_range())
+        is False
+    ):
         return
 
-    if validate_input_rating("en", "enjoyability", enjoyability) is False:
+    if (
+        validate_input_rating(
+            "en", "enjoyability", enjoyability, configuration.get_rating_range()
+        )
+        is False
+    ):
         return
 
-    if validate_input_rating("eb", "energy_before", energy_before) is False:
+    if (
+        validate_input_rating(
+            "eb", "energy_before", energy_before, configuration.get_rating_range()
+        )
+        is False
+    ):
         return
 
-    if validate_input_rating("ea", "energy_after", energy_after) is False:
+    if (
+        validate_input_rating(
+            "ea", "energy_after", energy_after, configuration.get_rating_range()
+        )
+        is False
+    ):
         return
 
     if detailed:
@@ -469,19 +506,22 @@ def add_activity(
         activity_end = f"{date}T{activity_end}"
 
     effort = effort or prompts.ask_rating_question(
-        "How much effort did you think this activity required? (1-5)"
+        "How much effort did you think this activity required? (1-5)",
+        configuration.get_rating_range(),
     )
 
     enjoyability = enjoyability or prompts.ask_rating_question(
-        "How much did you enjoy this activity? (1-5)"
+        "How much did you enjoy this activity? (1-5)", configuration.get_rating_range()
     )
 
     energy_before = energy_before or prompts.ask_rating_question(
-        "How much energy did you have before your activity? (1-5)"
+        "How much energy did you have before your activity? (1-5)",
+        configuration.get_rating_range(),
     )
 
     energy_after = energy_after or prompts.ask_rating_question(
-        "How much energy did you have after your activity? (1-5)"
+        "How much energy did you have after your activity? (1-5)",
+        configuration.get_rating_range(),
     )
 
     database.add_activity(
@@ -497,6 +537,7 @@ def add_activity(
             "energy_after": energy_after,
         },
     )
+    console.print("successfully added activity to database", style="green")
 
 
 @app.command("sleep")
@@ -564,7 +605,12 @@ def add_sleep(
         if validate_input_time("e", "end", sleep_end_input) is False:
             return
 
-    if validate_input_rating("q", "quality", sleep_quality) is False:
+    if (
+        validate_input_rating(
+            "q", "quality", sleep_quality, configuration.get_rating_range()
+        )
+        is False
+    ):
         return
 
     if sleep_type is not None and sleep_type not in ["sleep", "nap"]:
@@ -670,19 +716,20 @@ def add_sleep(
             today_date, end_sleep_time
         ).isoformat(timespec="minutes")
 
-        sleep_quality = sleep_quality or prompts.ask_rating_question(
-            "How was your sleep quality? (1-5)"
-        )
+    sleep_quality = sleep_quality or prompts.ask_rating_question(
+        "How was your sleep quality? (1-5)", configuration.get_rating_range()
+    )
 
-        database.add_sleep(
-            database_path,
-            {
-                "start_at": sleep_start_datetime,
-                "end_at": sleep_end_datetime,
-                "quality": sleep_quality,
-                "sleep_type": sleep_type,
-            },
-        )
+    database.add_sleep(
+        database_path,
+        {
+            "start_at": sleep_start_datetime,
+            "end_at": sleep_end_datetime,
+            "quality": sleep_quality,
+            "sleep_type": sleep_type,
+        },
+    )
+    console.print("successfully added sleep record to database.", style="green")
 
 
 @app.command("ls", hidden=True)
@@ -824,6 +871,7 @@ def clear_all_data(
 
     if clear_data_confirm:
         database.clear_database(database_path)
+        console.print("successfully cleared database", style="green")
         return
 
 
@@ -840,7 +888,7 @@ def start_activity_time(context: typer.Context) -> None:
             return
 
     date_time: str = datetime.now().isoformat(timespec="minutes")
-    print(f"Activity started: {date_time.replace('T', ' ')}")
+    print(f"activity started: {date_time.replace('T', ' ')}")
 
     activity_start_path.write_text(date_time)
 
@@ -905,16 +953,34 @@ def end_activity_time(
     ):
         return
 
-    if validate_input_rating("ef", "effort", effort) is False:
+    if (
+        validate_input_rating("ef", "effort", effort, configuration.get_rating_range())
+        is False
+    ):
         return
 
-    if validate_input_rating("en", "enjoyability", enjoyability) is False:
+    if (
+        validate_input_rating(
+            "en", "enjoyability", enjoyability, configuration.get_rating_range()
+        )
+        is False
+    ):
         return
 
-    if validate_input_rating("eb", "energy_before", energy_before) is False:
+    if (
+        validate_input_rating(
+            "eb", "energy_before", energy_before, configuration.get_rating_range()
+        )
+        is False
+    ):
         return
 
-    if validate_input_rating("ea", "energy_after", energy_after) is False:
+    if (
+        validate_input_rating(
+            "ea", "energy_after", energy_after, configuration.get_rating_range()
+        )
+        is False
+    ):
         return
 
     start_activity_datetime = activity_start_path.read_text()
@@ -934,19 +1000,22 @@ def end_activity_time(
     )
 
     effort = effort or prompts.ask_rating_question(
-        "How much effort did you think this activity required? (1-5)"
+        "How much effort did you think this activity required? (1-5)",
+        configuration.get_rating_range(),
     )
 
     enjoyability = enjoyability or prompts.ask_rating_question(
-        "How much did you enjoy this activity? (1-5)"
+        "How much did you enjoy this activity? (1-5)", configuration.get_rating_range()
     )
 
     energy_before = energy_before or prompts.ask_rating_question(
-        "How much energy did you have before your activity? (1-5)"
+        "How much energy did you have before your activity? (1-5)",
+        configuration.get_rating_range(),
     )
 
     energy_after = energy_after or prompts.ask_rating_question(
-        "How much energy did you have after your activity? (1-5)"
+        "How much energy did you have after your activity? (1-5)",
+        configuration.get_rating_range(),
     )
     database.add_activity(
         database_path,
@@ -961,6 +1030,7 @@ def end_activity_time(
             "energy_after": energy_after,
         },
     )
+    console.print("successfully added activity to database", style="green")
 
 
 @config_app.command("set")
@@ -974,6 +1044,7 @@ def set_config(
     try:
         configuration.set_value(name, value)
         config.save_configs(const.CONFIG_PATH, configuration)
+        console.print("successfully set new configs", style="green")
 
     except errors.InvalidForceDetailModeConfigError as error:
         display.display_error(
@@ -1001,6 +1072,15 @@ def set_config(
                 source=diagnostics.get_user_commands(),
                 source_highlight=name,
                 help="use `config category` instead.",
+            )
+        )
+
+    except errors.InvalidRatingRangeValueError as error:
+        display.display_error(
+            diagnostics.to_cli_diagnostic(
+                error.diagnostic,
+                source=diagnostics.get_user_commands(),
+                source_highlight=value,
             )
         )
 
@@ -1032,17 +1112,19 @@ def config_set_defaults(
     if confirmation:
         configuration = config.Config()
         config.save_configs(const.CONFIG_PATH, configuration)
+        console.print("successfully reset settings to default", style="green")
 
 
 @categories_app.command("add")
 def add_category(
     context: typer.Context,
-    category_name: Annotated[str, typer.Argument(help="The category to add")],
+    category: Annotated[str, typer.Argument(help="The category to add")],
 ) -> None:
     """Adds a category to the valid_categories config."""
     configuration: config.Config = context.obj["config"]
-    configuration.add_valid_category(category_name)
+    configuration.add_valid_category(category)
     config.save_configs(const.CONFIG_PATH, configuration)
+    console.print(f"successfully add category '{category}'", style="green")
 
 
 @categories_app.command("del", hidden=True)
@@ -1058,6 +1140,7 @@ def delete_category(
     try:
         configuration.delete_valid_category(category)
         config.save_configs(const.CONFIG_PATH, configuration)
+        console.print(f"successfully deleted category '{category}'")
 
     except errors.NoCategoriesError as error:
         display.display_error(errors.ErrorDiagnostic(message=error.diagnostic.message))
@@ -1089,3 +1172,4 @@ def clear_category(
     if confirmation:
         configuration.clear_valid_categories()
         config.save_configs(const.CONFIG_PATH, configuration)
+        console.print("successfully clear valid_categories.", style="green")

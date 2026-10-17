@@ -1,10 +1,6 @@
 from datetime import datetime
 
 
-def is_valid_rating(rating: float) -> bool:
-    return 1 <= rating <= 5
-
-
 def is_valid_category(category: str, valid_categories: set[str] | None = None) -> bool:
     if not category.strip():
         return False

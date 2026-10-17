@@ -13,7 +13,7 @@ def test_rating_prompt_cancelled_raises_runtime_error(mocker: MockerFixture) -> 
 
     with pytest.raises(RequiredQuestionCancelledError):
         prompts.ask_rating_question(
-            "If my code is correct, this should raise a RuntimeError"
+            "If my code is correct, this should raise an error", (1, 5)
         )
 
 
@@ -22,7 +22,10 @@ def test_rating_prompt_returns_correct_value(mocker: MockerFixture) -> None:
     mock_rating_prompt.return_value.ask.return_value = 5
 
     assert (
-        prompts.ask_rating_question("If my code is correct, this should return 5.") == 5
+        prompts.ask_rating_question(
+            "If my code is correct, this should return 5.", (1, 5)
+        )
+        == 5
     )
 
 
@@ -33,9 +36,7 @@ def test_datetime_prompt_cancelled_raises_runtime_error(mocker: MockerFixture) -
     mock_rating_prompt.return_value.ask.return_value = None
 
     with pytest.raises(RequiredQuestionCancelledError):
-        prompts.ask_time_question(
-            "If my code is correct, this should raise a RuntimeError"
-        )
+        prompts.ask_time_question("If my code is correct, this should raise an error")
 
 
 def test_datetime_prompt_returns_correct_value(mocker: MockerFixture) -> None:
@@ -72,7 +73,7 @@ def test_activity_category_prompt_cancelled_raises_runtime_error(
 
     with pytest.raises(RequiredQuestionCancelledError):
         prompts.ask_activity_category(
-            "If my code is correct, this should raise a RuntimeError"
+            "If my code is correct, this should raise an error"
         )
 
 

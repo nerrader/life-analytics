@@ -174,6 +174,7 @@ def test_activity_cli_command_edit_detailed_flag_works(tmp_path: Path) -> None:
             "--energy-after",
             "3",
         ],
+        catch_exceptions=False,
     )
     assert result1.exit_code == 0
 
@@ -199,6 +200,7 @@ def test_activity_cli_command_edit_detailed_flag_works(tmp_path: Path) -> None:
             "--category",
             "DEV",
         ],
+        catch_exceptions=False,
     )
     assert result2.exit_code == 0
 
@@ -244,6 +246,7 @@ def test_activity_cli_command_edit_detailed_flag_gives_error_if_value_is_invalid
             "--energy-after",
             "3",
         ],
+        catch_exceptions=False,
     )
     assert result.exit_code == 0
     display_error_mock.assert_called_once()

@@ -9,6 +9,7 @@ from life_analytics.domain.errors import (
     ErrorDiagnostic,
     InvalidConfigNameError,
     InvalidForceDetailModeConfigError,
+    InvalidRatingRangeValueError,
     NoCategoriesError,
     ValidCategoriesNotSettableError,
 )
@@ -19,6 +20,8 @@ class Config:
     database_path: Path = const.DEFAULT_DATABASE_PATH
     activity_start_path: Path = const.ACTIVITY_START_TEXT_PATH
     force_detailed_mode: bool = False
+    rating_range_start: float = 1.0
+    rating_range_end: float = 5.0
     _valid_categories: set[str] | None = None
 
     @property
@@ -43,6 +46,44 @@ class Config:
                             help="use 'true' or '1' to enable, and 'false' '0' to disable.",
                         )
                     )
+            case "rating_range_start":
+                try:
+                    rating_value = float(value)
+                except ValueError:
+                    raise InvalidRatingRangeValueError(
+                        ErrorDiagnostic(
+                            message=f"invalid rating range: {value}",
+                            help="change value to be a valid number/decimal",
+                        )
+                    )
+                if rating_value > self.rating_range_end:
+                    raise InvalidRatingRangeValueError(
+                        ErrorDiagnostic(
+                            message="inputted start_range_value is greater than current end_range_value",
+                            help="change value to be smaller than rating_range_end",
+                        )
+                    )
+
+                self.rating_range_start = rating_value
+            case "rating_range_end":
+                try:
+                    rating_value = float(value)
+                except ValueError:
+                    raise InvalidRatingRangeValueError(
+                        ErrorDiagnostic(
+                            message=f"invalid rating range: {value}",
+                            help="change value to be a valid number/decimal",
+                        )
+                    )
+                if rating_value < self.rating_range_start:
+                    raise InvalidRatingRangeValueError(
+                        ErrorDiagnostic(
+                            message="inputted end_range_value is less than current start_range_value",
+                            help="change value to be greater than rating_range_start",
+                        )
+                    )
+
+                self.rating_range_end = rating_value
             case "valid_categories":
                 raise ValidCategoriesNotSettableError(
                     ErrorDiagnostic(
@@ -89,7 +130,12 @@ class Config:
             "activity_start_path": self.activity_start_path,
             "force_detailed_mode": self.force_detailed_mode,
             "valid_categories": self.valid_categories,
+            "rating_range_start": self.rating_range_start,
+            "rating_range_end": self.rating_range_end,
         }
+
+    def get_rating_range(self) -> tuple[float, float]:
+        return (self.rating_range_start, self.rating_range_end)
 
 
 def save_configs(config_path: Path, config: Config) -> None:
@@ -100,6 +146,8 @@ def save_configs(config_path: Path, config: Config) -> None:
         "valid_categories": list(config.valid_categories)
         if config.valid_categories is not None
         else None,
+        "rating_range_start": config.rating_range_start,
+        "rating_range_end": config.rating_range_end,
     }
 
     with open(config_path, "w", encoding="utf-8") as file:
@@ -117,4 +165,6 @@ def load_configs(config_path: Path) -> Config:
         _valid_categories=set(data["valid_categories"])
         if data["valid_categories"] is not None
         else None,
+        rating_range_start=data["rating_range_start"],
+        rating_range_end=data["rating_range_end"],
     )
