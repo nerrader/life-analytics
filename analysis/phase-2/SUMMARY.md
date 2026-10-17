@@ -26,7 +26,7 @@ I find it interesting that `MAINT` activities show a stronger association of pos
 
 You would think that taking a break or resting would potentially increase energy later on, but apparently not?
 
-And another observation is that the `SOCIAL` category apparently tends to decrease my energy, despite having a relatively high average enjoyability rate of 3.84/5.
+And another observation is that the `SOCIAL` category apparently tends to decrease my energy, despite having a relatively high average enjoyability rate of 3.71/5.
 
 > Average enjoyability rate produced by [sql/average-social-enjoyability](sql/average-social-enjoyability.sql)
 
@@ -89,16 +89,16 @@ I also wanted to take a look at sleep quality during the weekends.
 
 | Day Type | Avg Sleep Quality | n |
 | ---: | ---: | ---: |
-| Weekday | 3.25 | 22 |
-| Weekend | 3.70 | 10 |
+| Weekday | 3.42 | 32 |
+| Weekend | 3.70 | 15 |
 
 Results produced by [sql/day-type-sleep-quality.sql](sql/day-type-sleep-quality.sql)
 Unsurprisingly, weekends are associated with a higher sleep quality than weekdays.
 
 | Day Type | Avg Mood | Avg Productivity | Avg Stress | n |
 | --- | ---: | ---: | ---: | ---: |
-| Weekday | 3.1364 | 3.3068 | 1.6591 | 22 |
-| Weekend | 3.6111 | 4.0000 | 1.4444 | 9 |
+| Weekday | 3.32 | 3.23 | 1.55 | 32 |
+| Weekend | 3.61 | 3.93 | 1.46 | 14 |
 
 And weekends are also associated with higher productivity and higher mood.
 
