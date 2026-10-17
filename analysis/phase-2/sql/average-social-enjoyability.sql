@@ -1,3 +1,3 @@
-SELECT AVG(enjoyability) AS avg_enjoyability
+SELECT ROUND(AVG(enjoyability), 2) AS avg_enjoyability
 FROM activities
 WHERE category = 'SOCIAL'
