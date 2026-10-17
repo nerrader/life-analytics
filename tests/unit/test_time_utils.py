@@ -6,7 +6,7 @@ from life_analytics.utils import time_utils
 
 
 def test_combine_date_and_time_with_valid_inputs() -> None:
-    test_datetime = datetime(year=2026, month=12, day=12, hour=19, minute=50)  # noqa: DTZ001
+    test_datetime = datetime(year=2026, month=12, day=12, hour=19, minute=50)
     test_time = time(hour=19, minute=50)
     test_date = date(year=2026, month=12, day=12)
 
@@ -26,7 +26,7 @@ def test_combine_date_and_time_with_time_being_string_input() -> None:
 
 
 def test_combine_date_and_time_at_midnight() -> None:
-    test_datetime = datetime(year=2026, month=12, day=12)  # noqa: DTZ001
+    test_datetime = datetime(year=2026, month=12, day=12)
     test_time = time()
     test_date = date(year=2026, month=12, day=12)
 
