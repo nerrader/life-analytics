@@ -1,0 +1,3 @@
+[branch]
+conventional_branch = true
+allow_branch_names = ["develop"]
