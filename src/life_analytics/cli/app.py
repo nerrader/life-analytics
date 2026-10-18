@@ -469,7 +469,7 @@ def add_activity(
 
         return
 
-    date = datetime.now().date().isoformat()
+    date = datetime.now().date()
     current_time = (
         datetime.now().time().isoformat(timespec="minutes")
     )  # for activity end default
@@ -496,14 +496,18 @@ def add_activity(
         activity_start = prompts.ask_time_question(
             "When did your activity start? (HH:MM)", activity_start_input
         )
-        activity_start = f"{date}T{activity_start}"
+        activity_start = time_utils.combine_date_and_time(
+            date, activity_start
+        ).isoformat(timespec="minutes")
 
         activity_end = prompts.ask_time_question(
             "When did your activity end? (HH:MM)",
             activity_end_input,
             default=current_time,
         )
-        activity_end = f"{date}T{activity_end}"
+        activity_end = time_utils.combine_date_and_time(date, activity_end).isoformat(
+            timespec="minutes"
+        )
 
     effort = effort or prompts.ask_rating_question(
         "How much effort did you think this activity required? (1-5)",

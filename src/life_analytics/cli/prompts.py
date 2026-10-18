@@ -90,7 +90,8 @@ def ask_time_question(
         )
 
     if isinstance(skip_value, str) and validation.is_valid_time(skip_value) is True:
-        return skip_value
+        # so 6:03 gets turned to 06:03
+        return datetime.strptime(skip_value, "%H:%M").strftime("%H:%M")
 
     time_value: str | None = questionary.text(
         prompt, validate=validate_time, default=default if default else ""
@@ -136,7 +137,7 @@ def ask_datetime_question(prompt: str, skip_value: str | None) -> str:
     if datetime_value is None:
         raise RequiredQuestionCancelledError(
             ErrorDiagnostic(
-                message="the datetime prompt was cancelled.",
+                message="the datetime prompt was cancelled",
                 description="required questions must be completed to add a record to the database.",
             )
         )
@@ -187,7 +188,7 @@ def ask_activity_category(
     if activity_category is None:
         raise RequiredQuestionCancelledError(
             ErrorDiagnostic(
-                message="the activity category prompt was cancelled.",
+                message="the activity category prompt was cancelled",
                 description="required questions must be completed to add a record to the database.",
             )
         )
