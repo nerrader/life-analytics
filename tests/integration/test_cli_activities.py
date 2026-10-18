@@ -24,9 +24,9 @@ def test_activities_cli_command_creates_database_entry(tmp_path: Path) -> None:
             "--description",
             "integration testing",
             "--start",
-            "20:24",
+            "9:3",
             "--end",
-            "20:24",
+            "20:4",
             "--effort",
             "5",
             "--enjoyability",
@@ -42,6 +42,8 @@ def test_activities_cli_command_creates_database_entry(tmp_path: Path) -> None:
     activity_record = database.fetch_activities_records(test_database_path)[0]
 
     assert activity_record.category == "DEV"
+    assert "T09:03" in activity_record.start_at
+    assert "T20:04" in activity_record.end_at
     assert activity_record.description == "integration testing"
     assert activity_record.effort == 5
     assert activity_record.energy_after == 5
@@ -188,7 +190,7 @@ def test_activity_cli_command_edit_detailed_flag_works(tmp_path: Path) -> None:
             "1",
             "--detailed",
             "--start",
-            "2026-09-15 20:59",
+            "2026-09-15 7:9",
             "--end",
             "2026-09-15 21:00",
             "--effort",
@@ -205,7 +207,7 @@ def test_activity_cli_command_edit_detailed_flag_works(tmp_path: Path) -> None:
     assert result2.exit_code == 0
 
     activity_record = database.fetch_activities_records(test_database_path)[0]
-    assert activity_record.start_at == "2026-09-15T20:59"
+    assert activity_record.start_at == "2026-09-15T07:09"
     assert activity_record.end_at == "2026-09-15T21:00"
     assert activity_record.effort == 1
     assert activity_record.energy_before == 5
