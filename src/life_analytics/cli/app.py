@@ -754,7 +754,7 @@ def list_records(
     ] = None,
 ) -> None:
     """Display all-time daily summaries, activities, and sleep. Aliases: 'ls'"""
-    configuration = context.obj["config"]
+    configuration: config.Config = context.obj["config"]
     database_path = configuration.database_path
 
     if table_types is None:
@@ -827,7 +827,7 @@ def list_records(
 @app.command("stats")
 def display_stats(context: typer.Context) -> None:
     """Displays overall statistics of collected data"""
-    configuration = context.obj["config"]
+    configuration: config.Config = context.obj["config"]
     database_path = configuration.database_path
 
     summary_records = database.fetch_daily_summaries_records(database_path)
@@ -866,7 +866,7 @@ def clear_all_data(
     ] = None,
 ) -> None:
     """Removes all tracking data from the database."""
-    configuration = context.obj["config"]
+    configuration: config.Config = context.obj["config"]
     database_path = configuration.database_path
 
     clear_data_confirm = prompts.ask_for_confirmation(
@@ -882,7 +882,8 @@ def clear_all_data(
 @app.command("start")
 def start_activity_time(context: typer.Context) -> None:
     """Start tracking an activity"""
-    activity_start_path: Path = context.obj["activity_start_path"]
+    configuration: config.Config = context.obj["config"]
+    activity_start_path = configuration.activity_start_path
 
     if activity_start_path.exists():
         confirm = prompts.ask_for_confirmation(
@@ -936,7 +937,7 @@ def end_activity_time(
     ] = None,
 ) -> None:
     """Stops the activity tracking, and prompts for activity details."""
-    configuration = context.obj["config"]
+    configuration: config.Config = context.obj["config"]
     database_path = configuration.database_path
     activity_start_path = configuration.activity_start_path
 

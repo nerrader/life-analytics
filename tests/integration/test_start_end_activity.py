@@ -7,6 +7,17 @@ from life_analytics.cli.app import app
 from life_analytics.logic import database
 
 
+def test_start_activity_no_activity_started(tmp_path: Path) -> None:
+    runner = CliRunner()
+    tmp_activity_start_path = tmp_path / "activity_start.txt"
+
+    result = runner.invoke(app, ["-ap", str(tmp_activity_start_path), "start"])
+    assert result.exit_code == 0
+
+    # kind of checks if datetime is real and is iso
+    assert "T" in tmp_activity_start_path.read_text()
+
+
 def test_end_activity_no_activity_started(tmp_path: Path) -> None:
     """Ending an activity without starting one should fail."""
 
