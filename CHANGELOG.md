@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Nothing added yet!
 
+## [2.1.2]
+
+- Fixed a bug regarding `start` command not starting an activity.
+
 ## [2.1.1]
 
 - Fixed a bug regarding `activity` time not being normalized when using command options
@@ -53,7 +57,8 @@ to make data entry more straightforward.
 - `clear` command to clear all your data.
 - A help menu accessible with `--help`.
 
-[Unreleased]: <https://github.com/nerrader/life-analytics/compare/v2.1.1...HEAD>
+[Unreleased]: <https://github.com/nerrader/life-analytics/compare/v2.1.2...HEAD>
+[2.1.2]: <https://github.com/nerrader/life-analytics/compare/v2.1.0...v2.1.2>
 [2.1.1]: <https://github.com/nerrader/life-analytics/compare/v2.1.0...v2.1.1>
 [2.1.0]: <https://github.com/nerrader/life-analytics/compare/v2.0.1...v2.1.0>
 [2.0.1]: <https://github.com/nerrader/life-analytics/compare/v2.0.0...v2.0.1>
